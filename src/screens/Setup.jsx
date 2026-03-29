@@ -12,7 +12,7 @@ function fmtDate(iso) {
   }
 }
 
-export default function Setup({ numTeams, setNumTeams, onStart, history, onClearHistory, defaultSettings }) {
+export default function Setup({ numTeams, setNumTeams, onStart, history, onClearHistory, defaultSettings, onOpenHistory }) {
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -151,11 +151,15 @@ export default function Setup({ numTeams, setNumTeams, onStart, history, onClear
         ) : (
           <div className="history-list">
             {history.slice(0, 5).map(entry => (
-              <div className="history-item" key={entry.id}>
+              <button
+                className="history-item history-btn"
+                key={entry.id}
+                onClick={() => onOpenHistory?.(entry)}
+              >
                 <div className="history-date">{fmtDate(entry.playedAt)}</div>
                 <div className="history-score">{entry.teams.map(team => `${team.name} ${team.score}`).join(' - ')}</div>
                 <div className="history-meta">{entry.teams.map(team => `${team.tirs} tirs`).join(' | ')}</div>
-              </div>
+              </button>
             ))}
           </div>
         )}

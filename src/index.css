@@ -346,6 +346,17 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   background: rgba(255, 255, 255, 0.01);
 }
 
+.history-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--bdr);
+  cursor: pointer;
+}
+
+.history-btn:hover {
+  background: rgba(124, 111, 255, 0.08);
+}
+
 .history-date {
   font-size: 11px;
   color: var(--dim);
@@ -441,6 +452,16 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   border-radius: 10px;
   padding: 10px;
   background: rgba(255, 255, 255, 0.01);
+}
+
+.hist-btn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hist-btn:hover {
+  background: rgba(124, 111, 255, 0.08);
 }
 
 .hist-top {

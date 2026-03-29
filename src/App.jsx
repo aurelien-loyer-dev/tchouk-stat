@@ -12,6 +12,45 @@ const DEFAULT_SETTINGS = {
   halfCount: 2,
 }
 
+function normalizeTeam(team) {
+  return {
+    name: team?.name || 'Equipe',
+    pos: Number(team?.pos) || 0,
+    tGagne: Number(team?.tGagne) || 0,
+    tDonne: Number(team?.tDonne) || 0,
+    tCatche: Number(team?.tCatche) || 0,
+    tFaute: Number(team?.tFaute) || 0,
+    pReussie: Number(team?.pReussie) || 0,
+    pRatee: Number(team?.pRatee) || 0,
+    fZone: Number(team?.fZone) || 0,
+    fMarche: Number(team?.fMarche) || 0,
+    fAutre: Number(team?.fAutre) || 0,
+    padv: Number(team?.padv) || 0,
+  }
+}
+
+function hydrateHistoryEntry(entry) {
+  const teamsRaw = Array.isArray(entry?.teamsSnapshot) && entry.teamsSnapshot.length > 0
+    ? entry.teamsSnapshot
+    : entry?.teams || []
+
+  const teams = teamsRaw.map(normalizeTeam)
+  return {
+    ...entry,
+    numTeams: Number(entry?.numTeams) || (teams.length === 2 ? 2 : 1),
+    teams,
+    timeline: Array.isArray(entry?.timeline) ? entry.timeline : [],
+    settings: {
+      ...DEFAULT_SETTINGS,
+      ...(entry?.settings || {}),
+      teamColors: [
+        entry?.settings?.teamColors?.[0] || DEFAULT_SETTINGS.teamColors[0],
+        entry?.settings?.teamColors?.[1] || DEFAULT_SETTINGS.teamColors[1],
+      ],
+    },
+  }
+}
+
 function loadHistory() {
   try {
     const raw = localStorage.getItem(HISTORY_KEY)
@@ -32,6 +71,8 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
     numTeams,
     shotEvents: timeline.filter(e => e.category === 'tirs').length,
     settings,
+    timeline,
+    teamsSnapshot: teams.map(team => ({ ...team })),
     teams: teams.map((team, i) => ({
       name: team.name,
       score: score(teams, numTeams, i),
@@ -53,6 +94,7 @@ export default function App() {
   const [timeline, setTimeline] = useState([])
   const [history, setHistory]   = useState(loadHistory)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
+  const [selectedHistory, setSelectedHistory] = useState(null)
 
   const teamsRef = useRef([])
   const matchStartRef = useRef(null)
@@ -137,6 +179,22 @@ export default function App() {
 
   function clearHistory() {
     setHistory([])
+    if (screen === 'history') {
+      setSelectedHistory(null)
+      setScreen('setup')
+    }
+  }
+
+  function openHistory(entry) {
+    const hydrated = hydrateHistoryEntry(entry)
+    setSelectedHistory(hydrated)
+    setMatchSettings(hydrated.settings)
+    setScreen('history')
+  }
+
+  function closeHistory() {
+    setSelectedHistory(null)
+    setScreen('setup')
   }
 
   return (
@@ -149,6 +207,7 @@ export default function App() {
           history={history}
           onClearHistory={clearHistory}
           defaultSettings={matchSettings}
+          onOpenHistory={openHistory}
         />
       )}
       {screen === 'match' && (
@@ -168,6 +227,20 @@ export default function App() {
           history={history}
           settings={matchSettings}
           onNew={newMatch}
+          onOpenHistory={openHistory}
+        />
+      )}
+      {screen === 'history' && selectedHistory && (
+        <Results
+          teams={selectedHistory.teams}
+          numTeams={selectedHistory.numTeams}
+          timeline={selectedHistory.timeline}
+          history={history}
+          settings={selectedHistory.settings}
+          onNew={newMatch}
+          onOpenHistory={openHistory}
+          isHistoryView
+          onBack={closeHistory}
         />
       )}
     </>

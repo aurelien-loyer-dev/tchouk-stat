@@ -72,8 +72,19 @@ function Card({ title, children }) {
 }
 
 // ── Results screen ────────────────────────────────────────────────────────────
-export default function Results({ teams, numTeams, timeline, history, onNew }) {
+export default function Results({
+  teams,
+  numTeams,
+  timeline,
+  history,
+  onNew,
+  onOpenHistory,
+  isHistoryView,
+  onBack,
+}) {
   const [tab, setTab] = useState(0)
+
+  if (!teams || teams.length === 0) return null
 
   const t   = teams[tab]
   const n   = numTeams
@@ -207,7 +218,11 @@ export default function Results({ teams, numTeams, timeline, history, onNew }) {
         ) : (
           <div className="hist-list">
             {history.slice(0, 8).map(entry => (
-              <div className="hist-item" key={entry.id}>
+              <button
+                className="hist-item hist-btn"
+                key={entry.id}
+                onClick={() => onOpenHistory?.(entry)}
+              >
                 <div className="hist-top">
                   <span>{fmtDate(entry.playedAt)}</span>
                   <span>{fmtDuration(entry.durationSec)}</span>
@@ -218,11 +233,21 @@ export default function Results({ teams, numTeams, timeline, history, onNew }) {
                 <div className="hist-stats">
                   {entry.teams.map(team => `${team.name}: ${team.tirs} tirs, ${team.fautes} fautes`).join(' | ')}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
       </Card>
+
+      {isHistoryView && (
+        <button
+          className="btn-ghost"
+          style={{ alignSelf: 'center', minWidth: 200, marginTop: 4 }}
+          onClick={onBack}
+        >
+          ← Retour à l'accueil
+        </button>
+      )}
 
       <button
         className="btn-ghost"
