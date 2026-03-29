@@ -737,9 +737,9 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .sc-logo-wrap {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+  width: clamp(100px, 11vw, 160px);
+  height: clamp(100px, 11vw, 160px);
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -753,22 +753,23 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .sc-logo-placeholder {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+  width: clamp(100px, 11vw, 160px);
+  height: clamp(100px, 11vw, 160px);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: clamp(40px, 4.6vw, 68px);
   font-weight: 900;
 }
 
 .sc-team-name {
-  font-size: 13px;
+  font-size: clamp(18px, 2.6vw, 34px);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.8px;
   text-align: center;
+  color: #000;
 }
 
 .sc-score {
@@ -926,8 +927,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 @media (max-width: 560px) {
   .sc-score { font-size: clamp(100px, 26vw, 180px); }
-  .sc-logo-wrap, .sc-logo-placeholder { width: 56px; height: 56px; }
-  .sc-logo-placeholder { font-size: 26px; }
+  .sc-logo-wrap, .sc-logo-placeholder { width: 82px; height: 82px; }
+  .sc-logo-placeholder { font-size: 34px; }
   .team-row { flex-wrap: wrap; }
   .sc-actions { width: 100%; max-width: 200px; }
   .sc-btn-score, .sc-btn-neg { flex: 1; text-align: center; }

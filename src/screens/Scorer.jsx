@@ -105,7 +105,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
                 </div>
             }
           </div>
-          <div className="sc-team-name" style={{ color: c1 }}>{teams[0]?.name}</div>
+          <div className="sc-team-name">{teams[0]?.name}</div>
           <AnimScore value={s0} color={c1} />
 
           {/* Score buttons */}
@@ -126,7 +126,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
                   </div>
               }
             </div>
-            <div className="sc-team-name" style={{ color: c2 }}>{teams[1]?.name}</div>
+            <div className="sc-team-name">{teams[1]?.name}</div>
             <AnimScore value={s1} color={c2} />
 
             <div className="sc-actions">
