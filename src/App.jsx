@@ -13,6 +13,15 @@ const DEFAULT_SETTINGS = {
 }
 
 const HISTORY_KEY = 'tchouk_match_history'
+const THEME_KEY = 'tchouk_theme'
+
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY)
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch {}
+  return 'light'
+}
 
 function loadHistory() {
   try {
@@ -63,6 +72,7 @@ export default function App() {
   const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
   const [history, setHistory]   = useState(loadHistory)
+  const [theme, setTheme] = useState(loadTheme)
 
   const teamsRef = useRef([])
   const matchStartRef = useRef(null)
@@ -75,6 +85,13 @@ export default function App() {
     document.documentElement.style.setProperty('--c1', matchSettings.teamColors[0] || DEFAULT_SETTINGS.teamColors[0])
     document.documentElement.style.setProperty('--c2', matchSettings.teamColors[1] || DEFAULT_SETTINGS.teamColors[1])
   }, [matchSettings])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    try {
+      localStorage.setItem(THEME_KEY, theme)
+    } catch {}
+  }, [theme])
 
   function startMatch(payload) {
     const names = Array.isArray(payload) ? payload : payload.names
@@ -165,6 +182,13 @@ export default function App() {
 
   return (
     <>
+      <button
+        className="theme-toggle"
+        onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+      >
+        {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
+      </button>
+
       {screen === 'setup' && (
         <Setup
           numTeams={numTeams}

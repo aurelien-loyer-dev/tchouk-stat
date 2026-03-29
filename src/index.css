@@ -15,6 +15,18 @@
   --r:   12px;
 }
 
+:root[data-theme='dark'] {
+  --bg:  #0d1117;
+  --s1:  #161b22;
+  --s2:  #1f2630;
+  --s3:  #2e3744;
+  --bdr: rgba(240,246,252,0.12);
+  --acc: #58a6ff;
+  --txt: #e6edf3;
+  --dim: #9ba7b5;
+  --ok:  #3fb950;
+}
+
 body {
   background: var(--bg);
   color: var(--txt);
@@ -32,6 +44,25 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 40;
+  border: 1px solid var(--bdr);
+  background: var(--s1);
+  color: var(--txt);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--s2);
 }
 
 /* ── SETUP ── */
@@ -729,11 +760,11 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 .sc-team-left {
   border-right: 1px solid var(--bdr);
-  background: color-mix(in srgb, var(--c1) 8%, #ffffff);
+  background: color-mix(in srgb, var(--c1) 8%, var(--s1));
 }
 
 .sc-team-right {
-  background: color-mix(in srgb, var(--c2) 8%, #ffffff);
+  background: color-mix(in srgb, var(--c2) 8%, var(--s1));
 }
 
 .sc-logo-wrap {
@@ -770,6 +801,10 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   letter-spacing: 0.8px;
   text-align: center;
   color: #000;
+}
+
+:root[data-theme='dark'] .sc-team-name {
+  color: var(--txt);
 }
 
 .sc-score {
