@@ -3,11 +3,29 @@ import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
+import Scorer from './screens/Scorer'
+import History from './screens/History'
 
 const DEFAULT_SETTINGS = {
   teamColors: ['#5de8d6', '#ff7272'],
   halfDurationMin: 12,
   halfCount: 2,
+}
+
+const HISTORY_KEY = 'tchouk_match_history'
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(history) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)))
+  } catch {}
 }
 
 function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
@@ -37,11 +55,14 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
 
 export default function App() {
   const [screen, setScreen]     = useState('setup')
-  const [numTeams, setNumTeams] = useState(1)
+  const [appMode, setAppMode]   = useState('stats') // 'stats' | 'scorer'
+  const [numTeams, setNumTeams] = useState(2)
   const [teams, setTeams]       = useState([])
+  const [teamLogos, setTeamLogos] = useState([null, null])
   const [timeline, setTimeline] = useState([])
   const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
+  const [history, setHistory]   = useState(loadHistory)
 
   const teamsRef = useRef([])
   const matchStartRef = useRef(null)
@@ -58,6 +79,8 @@ export default function App() {
   function startMatch(payload) {
     const names = Array.isArray(payload) ? payload : payload.names
     const settingsFromSetup = Array.isArray(payload) ? DEFAULT_SETTINGS : payload.settings
+    const logos = payload.logos || [null, null]
+    const mode = payload.mode || 'stats'
     const mergedSettings = {
       ...DEFAULT_SETTINGS,
       ...settingsFromSetup,
@@ -70,10 +93,12 @@ export default function App() {
     const nextTeams = names.map(mkTeam)
     matchStartRef.current = Date.now()
     teamsRef.current = nextTeams
+    setAppMode(mode)
     setMatchSettings(mergedSettings)
+    setTeamLogos(logos)
     setTimeline([])
     setTeams(nextTeams)
-    setScreen('match')
+    setScreen(mode === 'scorer' ? 'scorer' : 'match')
   }
 
   function handleAdj(i, id, d) {
@@ -109,7 +134,18 @@ export default function App() {
   function endMatch() {
     const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings)
     setLastSummary(summary)
+    const newHistory = [summary, ...history]
+    setHistory(newHistory)
+    saveHistory(newHistory)
     setScreen('results')
+  }
+
+  function resetScorer() {
+    const resetTeams = teamsRef.current.map(team => mkTeam(team.name))
+    teamsRef.current = resetTeams
+    matchStartRef.current = Date.now()
+    setTeams(resetTeams)
+    setTimeline([])
   }
 
   function newMatch() {
@@ -118,7 +154,13 @@ export default function App() {
     matchStartRef.current = null
     setTimeline([])
     setLastSummary(null)
+    setTeamLogos([null, null])
     setScreen('setup')
+  }
+
+  function clearHistory() {
+    setHistory([])
+    saveHistory([])
   }
 
   return (
@@ -129,6 +171,9 @@ export default function App() {
           setNumTeams={setNumTeams}
           onStart={startMatch}
           defaultSettings={matchSettings}
+          history={history}
+          onClearHistory={clearHistory}
+          onViewHistory={() => setScreen('history')}
         />
       )}
       {screen === 'match' && (
@@ -140,6 +185,17 @@ export default function App() {
           settings={matchSettings}
         />
       )}
+      {screen === 'scorer' && (
+        <Scorer
+          teams={teams}
+          numTeams={numTeams}
+          onAdj={handleAdj}
+          onEnd={endMatch}
+          onReset={resetScorer}
+          settings={matchSettings}
+          logos={teamLogos}
+        />
+      )}
       {screen === 'results' && (
         <Results
           teams={teams}
@@ -148,6 +204,13 @@ export default function App() {
           settings={matchSettings}
           summary={lastSummary}
           onNew={newMatch}
+        />
+      )}
+      {screen === 'history' && (
+        <History
+          history={history}
+          onBack={() => setScreen('setup')}
+          onClear={clearHistory}
         />
       )}
     </>
