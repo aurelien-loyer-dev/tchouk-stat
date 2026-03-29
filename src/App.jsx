@@ -227,6 +227,8 @@ export default function App() {
           timeline={timeline}
           settings={matchSettings}
           summary={lastSummary}
+          mode={appMode}
+          logos={teamLogos}
           onNew={newMatch}
         />
       )}
