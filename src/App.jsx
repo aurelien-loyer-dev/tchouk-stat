@@ -4,62 +4,10 @@ import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
 
-const HISTORY_KEY = 'tchouk-history-v1'
-const MAX_HISTORY = 25
 const DEFAULT_SETTINGS = {
   teamColors: ['#5de8d6', '#ff7272'],
   halfDurationMin: 12,
   halfCount: 2,
-}
-
-function normalizeTeam(team) {
-  return {
-    name: team?.name || 'Equipe',
-    pos: Number(team?.pos) || 0,
-    tGagne: Number(team?.tGagne) || 0,
-    tDonne: Number(team?.tDonne) || 0,
-    tCatche: Number(team?.tCatche) || 0,
-    tFaute: Number(team?.tFaute) || 0,
-    pReussie: Number(team?.pReussie) || 0,
-    pRatee: Number(team?.pRatee) || 0,
-    fZone: Number(team?.fZone) || 0,
-    fMarche: Number(team?.fMarche) || 0,
-    fAutre: Number(team?.fAutre) || 0,
-    padv: Number(team?.padv) || 0,
-  }
-}
-
-function hydrateHistoryEntry(entry) {
-  const teamsRaw = Array.isArray(entry?.teamsSnapshot) && entry.teamsSnapshot.length > 0
-    ? entry.teamsSnapshot
-    : entry?.teams || []
-
-  const teams = teamsRaw.map(normalizeTeam)
-  return {
-    ...entry,
-    numTeams: Number(entry?.numTeams) || (teams.length === 2 ? 2 : 1),
-    teams,
-    timeline: Array.isArray(entry?.timeline) ? entry.timeline : [],
-    settings: {
-      ...DEFAULT_SETTINGS,
-      ...(entry?.settings || {}),
-      teamColors: [
-        entry?.settings?.teamColors?.[0] || DEFAULT_SETTINGS.teamColors[0],
-        entry?.settings?.teamColors?.[1] || DEFAULT_SETTINGS.teamColors[1],
-      ],
-    },
-  }
-}
-
-function loadHistory() {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
 }
 
 function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
@@ -92,9 +40,8 @@ export default function App() {
   const [numTeams, setNumTeams] = useState(1)
   const [teams, setTeams]       = useState([])
   const [timeline, setTimeline] = useState([])
-  const [history, setHistory]   = useState(loadHistory)
+  const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
-  const [selectedHistory, setSelectedHistory] = useState(null)
 
   const teamsRef = useRef([])
   const matchStartRef = useRef(null)
@@ -102,10 +49,6 @@ export default function App() {
   useEffect(() => {
     teamsRef.current = teams
   }, [teams])
-
-  useEffect(() => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
-  }, [history])
 
   useEffect(() => {
     document.documentElement.style.setProperty('--c1', matchSettings.teamColors[0] || DEFAULT_SETTINGS.teamColors[0])
@@ -165,7 +108,7 @@ export default function App() {
 
   function endMatch() {
     const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings)
-    setHistory(prev => [summary, ...prev].slice(0, MAX_HISTORY))
+    setLastSummary(summary)
     setScreen('results')
   }
 
@@ -174,26 +117,7 @@ export default function App() {
     teamsRef.current = []
     matchStartRef.current = null
     setTimeline([])
-    setScreen('setup')
-  }
-
-  function clearHistory() {
-    setHistory([])
-    if (screen === 'history') {
-      setSelectedHistory(null)
-      setScreen('setup')
-    }
-  }
-
-  function openHistory(entry) {
-    const hydrated = hydrateHistoryEntry(entry)
-    setSelectedHistory(hydrated)
-    setMatchSettings(hydrated.settings)
-    setScreen('history')
-  }
-
-  function closeHistory() {
-    setSelectedHistory(null)
+    setLastSummary(null)
     setScreen('setup')
   }
 
@@ -204,10 +128,7 @@ export default function App() {
           numTeams={numTeams}
           setNumTeams={setNumTeams}
           onStart={startMatch}
-          history={history}
-          onClearHistory={clearHistory}
           defaultSettings={matchSettings}
-          onOpenHistory={openHistory}
         />
       )}
       {screen === 'match' && (
@@ -224,23 +145,9 @@ export default function App() {
           teams={teams}
           numTeams={numTeams}
           timeline={timeline}
-          history={history}
           settings={matchSettings}
+          summary={lastSummary}
           onNew={newMatch}
-          onOpenHistory={openHistory}
-        />
-      )}
-      {screen === 'history' && selectedHistory && (
-        <Results
-          teams={selectedHistory.teams}
-          numTeams={selectedHistory.numTeams}
-          timeline={selectedHistory.timeline}
-          history={history}
-          settings={selectedHistory.settings}
-          onNew={newMatch}
-          onOpenHistory={openHistory}
-          isHistoryView
-          onBack={closeHistory}
         />
       )}
     </>

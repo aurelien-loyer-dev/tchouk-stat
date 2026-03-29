@@ -1,18 +1,6 @@
 import { useState } from 'react'
 
-function fmtDate(iso) {
-  try {
-    return new Date(iso).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  } catch {
-    return 'Date inconnue'
-  }
-}
-
-export default function Setup({ numTeams, setNumTeams, onStart, history, onClearHistory, defaultSettings, onOpenHistory }) {
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings }) {
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -137,33 +125,6 @@ export default function Setup({ numTeams, setNumTeams, onStart, history, onClear
       <button className="btn-acc" onClick={handleStart}>
         Commencer
       </button>
-
-      <div className="history-box">
-        <div className="history-head">
-          <div className="flabel">Historique des matchs</div>
-          {history && history.length > 0 && (
-            <button className="btn-mini" onClick={onClearHistory}>Vider</button>
-          )}
-        </div>
-
-        {!history || history.length === 0 ? (
-          <div className="history-empty">Aucun match enregistré pour le moment.</div>
-        ) : (
-          <div className="history-list">
-            {history.slice(0, 5).map(entry => (
-              <button
-                className="history-item history-btn"
-                key={entry.id}
-                onClick={() => onOpenHistory?.(entry)}
-              >
-                <div className="history-date">{fmtDate(entry.playedAt)}</div>
-                <div className="history-score">{entry.teams.map(team => `${team.name} ${team.score}`).join(' - ')}</div>
-                <div className="history-meta">{entry.teams.map(team => `${team.tirs} tirs`).join(' | ')}</div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
     </>
   )
 }

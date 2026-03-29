@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { jsPDF } from 'jspdf'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../lib/stats'
 
 const SHOT_LABELS = {
@@ -15,17 +16,11 @@ function fmtDuration(totalSec) {
   return `${m}:${s}`
 }
 
-function fmtDate(iso) {
+function fmtDateTime(iso) {
   try {
-    return new Date(iso).toLocaleString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    return new Date(iso).toLocaleString('fr-FR')
   } catch {
-    return 'Date inconnue'
+    return ''
   }
 }
 
@@ -76,11 +71,9 @@ export default function Results({
   teams,
   numTeams,
   timeline,
-  history,
+  settings,
+  summary,
   onNew,
-  onOpenHistory,
-  isHistoryView,
-  onBack,
 }) {
   const [tab, setTab] = useState(0)
 
@@ -96,6 +89,69 @@ export default function Results({
   const ft  = fautesTotal(t)
 
   const shotEvents = (timeline || []).filter(e => e.teamIdx === tab && e.category === 'tirs')
+
+  function handleDownloadSheet() {
+    if (!summary) return
+
+    const now = new Date()
+    const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`
+
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const pageW = doc.internal.pageSize.getWidth()
+    const pageH = doc.internal.pageSize.getHeight()
+
+    let y = 15
+    const left = 14
+    const maxW = pageW - left * 2
+
+    function addLine(text, size = 11, weight = 'normal', space = 6) {
+      doc.setFont('helvetica', weight)
+      doc.setFontSize(size)
+      const lines = doc.splitTextToSize(text, maxW)
+      lines.forEach(line => {
+        if (y > pageH - 12) {
+          doc.addPage()
+          y = 15
+        }
+        doc.text(line, left, y)
+        y += space
+      })
+    }
+
+    addLine('Feuille de match - Tchoukball', 17, 'bold', 7)
+    addLine(`Date du match: ${fmtDateTime(summary.playedAt)}`, 11, 'normal', 5)
+    addLine(`Duree: ${fmtDuration(summary.durationSec)} | Equipes: ${summary.numTeams}`, 11, 'normal', 7)
+
+    if (Array.isArray(summary.teams)) {
+      addLine('Score final', 13, 'bold', 6)
+      addLine(summary.teams.map(team => `${team.name} ${team.score}`).join(' - '), 12, 'normal', 7)
+
+      addLine('Stats equipes', 13, 'bold', 6)
+      summary.teams.forEach(team => {
+        addLine(`${team.name}:`, 11, 'bold', 5)
+        addLine(`  Tirs ${team.tirs} | Gagnes ${team.tGagne} | Donnes ${team.tDonne} | Catches ${team.tCatche} | Fautes tir ${team.tFaute}`, 10, 'normal', 5)
+        addLine(`  Fautes total ${team.fautes} | Possessions ${team.pos}`, 10, 'normal', 6)
+      })
+    }
+
+    addLine('Parametres match', 13, 'bold', 6)
+    addLine(`Mi-temps: ${settings?.halfCount || '-'} x ${settings?.halfDurationMin || '-'} min`, 10, 'normal', 6)
+
+    addLine('Timeline des tirs', 13, 'bold', 6)
+    if (!timeline || timeline.length === 0) {
+      addLine('Aucun evenement enregistre.', 10, 'normal', 6)
+    } else {
+      timeline
+        .filter(ev => ev.category === 'tirs')
+        .forEach(ev => {
+          const label = SHOT_LABELS[ev.id] || ev.id
+          const scoreLine = Array.isArray(ev.scores) ? ` | Score: ${ev.scores.join(' - ')}` : ''
+          addLine(`${fmtDuration(ev.elapsedSec)} - ${ev.teamName} - ${label} (${ev.d > 0 ? '+1' : '-1'})${scoreLine}`, 10, 'normal', 5)
+        })
+    }
+
+    doc.save(`feuille-match-${stamp}.pdf`)
+  }
 
   return (
     <>
@@ -211,43 +267,13 @@ export default function Results({
         )}
       </Card>
 
-      {/* ── Historique ── */}
-      <Card title="Historique récent">
-        {!history || history.length === 0 ? (
-          <div className="tl-empty">Aucun match enregistré.</div>
-        ) : (
-          <div className="hist-list">
-            {history.slice(0, 8).map(entry => (
-              <button
-                className="hist-item hist-btn"
-                key={entry.id}
-                onClick={() => onOpenHistory?.(entry)}
-              >
-                <div className="hist-top">
-                  <span>{fmtDate(entry.playedAt)}</span>
-                  <span>{fmtDuration(entry.durationSec)}</span>
-                </div>
-                <div className="hist-scoreline">
-                  {entry.teams.map(team => `${team.name} ${team.score}`).join(' - ')}
-                </div>
-                <div className="hist-stats">
-                  {entry.teams.map(team => `${team.name}: ${team.tirs} tirs, ${team.fautes} fautes`).join(' | ')}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      {isHistoryView && (
-        <button
-          className="btn-ghost"
-          style={{ alignSelf: 'center', minWidth: 200, marginTop: 4 }}
-          onClick={onBack}
-        >
-          ← Retour à l'accueil
-        </button>
-      )}
+      <button
+        className="btn-ghost"
+        style={{ alignSelf: 'center', minWidth: 260, marginTop: 4 }}
+        onClick={handleDownloadSheet}
+      >
+        Telecharger la feuille de match (PDF)
+      </button>
 
       <button
         className="btn-ghost"
