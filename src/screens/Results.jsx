@@ -24,6 +24,14 @@ function fmtDateTime(iso) {
   }
 }
 
+function fileSafeName(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+}
+
 // ── Helpers d'affichage ───────────────────────────────────────────────────────
 function N({ v }) {
   if (v === null || v === undefined) return <span className="si-v na">—</span>
@@ -93,8 +101,9 @@ export default function Results({
   function handleDownloadSheet() {
     if (!summary) return
 
-    const now = new Date()
-    const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`
+    const team1 = fileSafeName(teams?.[0]?.name) || 'equipe1'
+    const team2 = fileSafeName(teams?.[1]?.name) || 'equipe2'
+    const pdfName = `${team1}vs${team2}.pdf`
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const pageW = doc.internal.pageSize.getWidth()
@@ -150,7 +159,7 @@ export default function Results({
         })
     }
 
-    doc.save(`feuille-match-${stamp}.pdf`)
+    doc.save(pdfName)
   }
 
   return (
