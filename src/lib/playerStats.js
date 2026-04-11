@@ -1,0 +1,67 @@
+// Stats disponibles par joueur
+export const PLAYER_STATS = [
+  { id: 'tirsReussis',      label: 'Tirs réussis',       sub: 'Shot sur cible' },
+  { id: 'pointsMarques',    label: 'Points marqués',     sub: '+1 pour l\'équipe',  scoreImpact: 'self' },
+  { id: 'pointsDonnes',     label: 'Points donnés',      sub: '+1 point adverse',   scoreImpact: 'opp' },
+  { id: 'fautesTir',        label: 'Fautes de tir',      sub: null },
+  { id: 'defenseSolo',      label: 'Défense solo',       sub: null },
+  { id: 'participationDef', label: 'Participation déf.', sub: null },
+  { id: 'passesRatees',     label: 'Passe ratée',        sub: null },
+  { id: 'fautesTech',       label: 'Faute technique',    sub: null },
+]
+
+export function mkPlayer(name, teamIdx) {
+  return {
+    id: (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : String(Date.now() + Math.random()),
+    name,
+    teamIdx,
+    tirsReussis:      0,
+    pointsMarques:    0,  // tGagne → +1 point équipe
+    pointsDonnes:     0,  // tDonne → +1 point adverse
+    fautesTir:        0,
+    defenseSolo:      0,
+    participationDef: 0,
+    passesRatees:     0,
+    fautesTech:       0,
+  }
+}
+
+// Tirs totaux par joueur : pointsMarques + pointsDonnes + fautesTir
+// (tirsReussis est une stat de qualité séparée, pas une outcome)
+export function playerTirsTotal(player) {
+  return (player.pointsMarques ?? 0) + (player.pointsDonnes ?? 0) + (player.fautesTir ?? 0)
+}
+
+// Stats dérivées calculées pour l'affichage et le PDF
+export function playerDerivedStats(player) {
+  const tirsTotal   = playerTirsTotal(player)
+  const defTotal    = (player.defenseSolo ?? 0) + (player.participationDef ?? 0)
+  const fautesTotal = (player.fautesTir ?? 0) + (player.fautesTech ?? 0)
+  const effOff      = tirsTotal > 0 ? player.pointsMarques / tirsTotal : null
+  const pctDonnes   = tirsTotal > 0 ? player.pointsDonnes  / tirsTotal : null
+
+  return { tirsTotal, defTotal, fautesTotal, effOff, pctDonnes }
+}
+
+// Score équipe = pointsMarques de l'équipe + pointsDonnes de l'adversaire
+// Pour numTeams === 1 : seulement les points de l'équipe 0
+export function playerTeamScore(players, teamIdx, numTeams = 2) {
+  if (numTeams === 1) {
+    return players.filter(p => p.teamIdx === 0).reduce((s, p) => s + p.pointsMarques, 0)
+  }
+  return (
+    players.filter(p => p.teamIdx === teamIdx).reduce((s, p) => s + p.pointsMarques, 0) +
+    players.filter(p => p.teamIdx === 1 - teamIdx).reduce((s, p) => s + p.pointsDonnes, 0)
+  )
+}
+
+export function applyPlayerAdj(players, playerId, statId, d) {
+  return players.map(p => {
+    if (p.id !== playerId) return p
+    const val = p[statId] ?? 0
+    if (d < 0 && val <= 0) return p
+    return { ...p, [statId]: d > 0 ? val + 1 : val - 1 }
+  })
+}

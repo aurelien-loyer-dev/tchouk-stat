@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
+import { applyPlayerAdj } from './lib/playerStats'
 import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
 import Scorer from './screens/Scorer'
 import History from './screens/History'
+import PlayerMatch from './screens/PlayerMatch'
+import PlayerResults from './screens/PlayerResults'
 
 const DEFAULT_SETTINGS = {
   teamColors: ['#5de8d6', '#ff7272'],
@@ -13,7 +16,7 @@ const DEFAULT_SETTINGS = {
 }
 
 const HISTORY_KEY = 'tchouk_match_history'
-const THEME_KEY = 'tchouk_theme'
+const THEME_KEY   = 'tchouk_theme'
 
 function loadTheme() {
   try {
@@ -24,17 +27,13 @@ function loadTheme() {
 }
 
 function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
-  } catch {
-    return []
-  }
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') }
+  catch { return [] }
 }
 
 function saveHistory(history) {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)))
-  } catch {}
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50))) }
+  catch {}
 }
 
 function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
@@ -49,37 +48,40 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
     timeline,
     teamsSnapshot: teams.map(team => ({ ...team })),
     teams: teams.map((team, i) => ({
-      name: team.name,
-      score: score(teams, numTeams, i),
-      tirs: tirs(teams, numTeams, i),
-      tGagne: team.tGagne,
-      tDonne: team.tDonne,
+      name:    team.name,
+      score:   score(teams, numTeams, i),
+      tirs:    tirs(teams, numTeams, i),
+      tGagne:  team.tGagne,
+      tDonne:  team.tDonne,
       tCatche: team.tCatche,
-      tFaute: team.tFaute,
-      fautes: fautesTotal(team),
-      pos: team.pos,
+      tFaute:  team.tFaute,
+      fautes:  fautesTotal(team),
+      pos:     team.pos,
     })),
   }
 }
 
 export default function App() {
-  const [screen, setScreen]     = useState('setup')
-  const [appMode, setAppMode]   = useState('stats') // 'stats' | 'scorer'
-  const [numTeams, setNumTeams] = useState(2)
-  const [teams, setTeams]       = useState([])
-  const [teamLogos, setTeamLogos] = useState([null, null])
-  const [timeline, setTimeline] = useState([])
+  const [screen, setScreen]         = useState('setup')
+  const [appMode, setAppMode]       = useState('stats') // 'stats' | 'scorer' | 'player'
+  const [numTeams, setNumTeams]     = useState(2)
+  const [teams, setTeams]           = useState([])
+  const [teamLogos, setTeamLogos]   = useState([null, null])
+  const [timeline, setTimeline]     = useState([])
   const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
-  const [history, setHistory]   = useState(loadHistory)
-  const [theme, setTheme] = useState(loadTheme)
+  const [history, setHistory]       = useState(loadHistory)
+  const [theme, setTheme]           = useState(loadTheme)
 
-  const teamsRef = useRef([])
+  // Mode joueurs
+  const [players, setPlayers]         = useState([])
+  const [playerNumTeams, setPlayerNumTeams] = useState(2)
+
+  const teamsRef      = useRef([])
+  const playersRef    = useRef([])
   const matchStartRef = useRef(null)
 
-  useEffect(() => {
-    teamsRef.current = teams
-  }, [teams])
+  useEffect(() => { teamsRef.current = teams }, [teams])
 
   useEffect(() => {
     document.documentElement.style.setProperty('--c1', matchSettings.teamColors[0] || DEFAULT_SETTINGS.teamColors[0])
@@ -88,16 +90,16 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    try {
-      localStorage.setItem(THEME_KEY, theme)
-    } catch {}
+    try { localStorage.setItem(THEME_KEY, theme) } catch {}
   }, [theme])
 
+  // ── Démarrage d'un match ──────────────────────────────────────────────────
   function startMatch(payload) {
-    const names = Array.isArray(payload) ? payload : payload.names
-    const settingsFromSetup = Array.isArray(payload) ? DEFAULT_SETTINGS : payload.settings
-    const logos = payload.logos || [null, null]
-    const mode = payload.mode || 'stats'
+    const names              = Array.isArray(payload) ? payload : payload.names
+    const settingsFromSetup  = Array.isArray(payload) ? DEFAULT_SETTINGS : payload.settings
+    const logos              = payload.logos  || [null, null]
+    const mode               = payload.mode   || 'stats'
+
     const mergedSettings = {
       ...DEFAULT_SETTINGS,
       ...settingsFromSetup,
@@ -115,9 +117,21 @@ export default function App() {
     setTeamLogos(logos)
     setTimeline([])
     setTeams(nextTeams)
+
+    if (mode === 'player') {
+      const playerList = payload.players || []
+      const pnt = payload.playerNumTeams ?? 2
+      playersRef.current = playerList
+      setPlayers(playerList)
+      setPlayerNumTeams(pnt)
+      setScreen('playermatch')
+      return
+    }
+
     setScreen(mode === 'scorer' ? 'scorer' : 'match')
   }
 
+  // ── Ajustement stats équipe (mode stats / scorer) ─────────────────────────
   function handleAdj(i, id, d) {
     const prev = teamsRef.current
     if (!prev[i]) return
@@ -127,18 +141,21 @@ export default function App() {
     teamsRef.current = next
     setTeams(next)
 
-    const now = Date.now()
+    const now        = Date.now()
     const elapsedSec = matchStartRef.current
       ? Math.max(0, Math.floor((now - matchStartRef.current) / 1000))
       : 0
-    const category = id.startsWith('t') ? 'tirs' : id.startsWith('p') ? 'passes' : id.startsWith('f') ? 'fautes' : 'autre'
+    const category = id.startsWith('t') ? 'tirs'
+      : id.startsWith('p') ? 'passes'
+      : id.startsWith('f') ? 'fautes'
+      : 'autre'
 
-    setTimeline(prevTimeline => [
-      ...prevTimeline,
+    setTimeline(prev => [
+      ...prev,
       {
         at: now,
         elapsedSec,
-        teamIdx: i,
+        teamIdx:  i,
         teamName: next[i].name,
         id,
         d,
@@ -148,6 +165,19 @@ export default function App() {
     ])
   }
 
+  // ── Ajustement stats joueur (mode player) ─────────────────────────────────
+  function handlePlayerAdj(playerId, statId, d) {
+    const prev = playersRef.current
+    const idx  = prev.findIndex(p => p.id === playerId)
+    if (idx === -1) return
+    if (d < 0 && (prev[idx][statId] ?? 0) <= 0) return
+
+    const next = applyPlayerAdj(prev, playerId, statId, d)
+    playersRef.current = next
+    setPlayers(next)
+  }
+
+  // ── Fin du match (mode stats) ─────────────────────────────────────────────
   function endMatch() {
     const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings)
     setLastSummary(summary)
@@ -155,6 +185,20 @@ export default function App() {
     setHistory(newHistory)
     saveHistory(newHistory)
     setScreen('results')
+  }
+
+  // ── Fin du match (mode player) ────────────────────────────────────────────
+  function endPlayerMatch() {
+    const now     = Date.now()
+    const summary = {
+      id:          typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(now),
+      playedAt:    new Date(now).toISOString(),
+      durationSec: matchStartRef.current ? Math.max(0, Math.round((now - matchStartRef.current) / 1000)) : 0,
+      mode:        'player',
+      settings:    matchSettings,
+    }
+    setLastSummary(summary)
+    setScreen('playerresults')
   }
 
   function resetScorer() {
@@ -167,11 +211,14 @@ export default function App() {
 
   function newMatch() {
     setTeams([])
-    teamsRef.current = []
+    teamsRef.current    = []
+    playersRef.current  = []
     matchStartRef.current = null
     setTimeline([])
     setLastSummary(null)
     setTeamLogos([null, null])
+    setPlayers([])
+    setPlayerNumTeams(2)
     setScreen('setup')
   }
 
@@ -220,6 +267,16 @@ export default function App() {
           logos={teamLogos}
         />
       )}
+      {screen === 'playermatch' && (
+        <PlayerMatch
+          teams={teams}
+          players={players}
+          numTeams={playerNumTeams}
+          onPlayerAdj={handlePlayerAdj}
+          onEnd={endPlayerMatch}
+          settings={matchSettings}
+        />
+      )}
       {screen === 'results' && (
         <Results
           teams={teams}
@@ -229,6 +286,16 @@ export default function App() {
           summary={lastSummary}
           mode={appMode}
           logos={teamLogos}
+          onNew={newMatch}
+        />
+      )}
+      {screen === 'playerresults' && (
+        <PlayerResults
+          teams={teams}
+          players={players}
+          numTeams={playerNumTeams}
+          settings={matchSettings}
+          summary={lastSummary}
           onNew={newMatch}
         />
       )}

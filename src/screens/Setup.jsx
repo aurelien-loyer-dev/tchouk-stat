@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { mkPlayer } from '../lib/playerStats'
 
 function fmtDateTime(iso) {
-  try { return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }
-  catch { return '' }
+  try {
+    return new Date(iso).toLocaleString('fr-FR', {
+      day: '2-digit', month: '2-digit', year: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+    })
+  } catch { return '' }
 }
 
 function LogoUpload({ label, logo, onChange, color }) {
@@ -37,8 +42,40 @@ function LogoUpload({ label, logo, onChange, color }) {
   )
 }
 
+// ── Liste de noms de joueurs (colonne) ────────────────────────────────────────
+function PlayerNamesCol({ teamLabel, teamColor, names, onChange }) {
+  function updateName(i, val) {
+    const next = [...names]
+    next[i] = val
+    onChange(next)
+  }
+  function addPlayer() { onChange([...names, '']) }
+  function removePlayer(i) { onChange(names.filter((_, j) => j !== i)) }
+
+  return (
+    <div className="ps-team-col">
+      <div className="ps-team-hd" style={{ color: teamColor }}>{teamLabel}</div>
+      {names.map((name, i) => (
+        <div className="ps-player-row" key={i}>
+          <input
+            type="text"
+            placeholder={`Joueur ${i + 1}`}
+            value={name}
+            onChange={e => updateName(i, e.target.value)}
+          />
+          {names.length > 1 && (
+            <button className="btn-mini ps-rm-btn" onClick={() => removePlayer(i)}>×</button>
+          )}
+        </div>
+      ))}
+      <button className="btn-mini ps-add-btn" onClick={addPlayer}>+ Joueur</button>
+    </div>
+  )
+}
+
+// ── Écran de configuration ────────────────────────────────────────────────────
 export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory }) {
-  const [mode, setMode] = useState('stats') // 'stats' | 'scorer'
+  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -48,29 +85,52 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
   const [halfDurationMin, setHalfDurationMin] = useState(defaultSettings?.halfDurationMin || 12)
   const [halfCount, setHalfCount] = useState(defaultSettings?.halfCount || 2)
 
-  useEffect(() => {
-    if (numTeams !== 2) setNumTeams(2)
-  }, [numTeams, setNumTeams])
+  // Noms des joueurs par équipe (mode 'player')
+  const [playerNumTeams, setPlayerNumTeams] = useState(2) // 1 ou 2 équipes en mode joueurs
+  const [players1, setPlayers1] = useState(['', '', ''])
+  const [players2, setPlayers2] = useState(['', '', ''])
+
+  useEffect(() => { if (numTeams !== 2) setNumTeams(2) }, [numTeams, setNumTeams])
+
+  const n1Label = name1.trim() || 'Équipe 1'
+  const n2Label = name2.trim() || 'Équipe 2'
 
   function handleStart() {
-    const effectiveNumTeams = 2
-    const n1 = name1.trim() || 'Équipe 1'
-    const names = [n1]
-    if (effectiveNumTeams === 2) names.push(name2.trim() || 'Équipe 2')
+    const settings = {
+      teamColors: [color1, color2],
+      halfDurationMin: Math.max(1, Number(halfDurationMin) || 1),
+      halfCount:       Math.max(1, Number(halfCount) || 1),
+    }
 
-    if (numTeams !== 2) {
-      setNumTeams(2)
+    if (mode === 'player') {
+      const buildPlayers = (names, teamIdx) =>
+        names
+          .map(n => n.trim())
+          .filter(n => n.length > 0)
+          .map(n => mkPlayer(n, teamIdx))
+
+      const allPlayers = [...buildPlayers(players1, 0)]
+      if (playerNumTeams === 2) allPlayers.push(...buildPlayers(players2, 1))
+
+      // Joueur par défaut si colonne vide
+      if (!allPlayers.some(p => p.teamIdx === 0)) allPlayers.unshift(mkPlayer('Joueur 1', 0))
+      if (playerNumTeams === 2 && !allPlayers.some(p => p.teamIdx === 1)) allPlayers.push(mkPlayer('Joueur 1', 1))
+
+      onStart({
+        names:          [n1Label, n2Label],
+        mode:           'player',
+        playerNumTeams,
+        players:        allPlayers,
+        settings,
+      })
+      return
     }
 
     onStart({
-      names,
+      names:    [n1Label, n2Label],
       mode,
-      logos: [logo1, logo2],
-      settings: {
-        teamColors: [color1, color2],
-        halfDurationMin: Math.max(1, Number(halfDurationMin) || 1),
-        halfCount: Math.max(1, Number(halfCount) || 1),
-      },
+      logos:    [logo1, logo2],
+      settings,
     })
   }
 
@@ -84,61 +144,66 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
     <>
       <h1>Tchoukball Assistant</h1>
 
-      {/* Mode selector */}
+      {/* ── Mode ── */}
       <section className="setup-section">
         <div className="section-title">Mode</div>
         <div className="seg mode-seg">
           <button className={mode === 'stats' ? 'on' : ''} onClick={() => setMode('stats')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: 'middle' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
               <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
             </svg>
             Feuille de stats
           </button>
           <button className={mode === 'scorer' ? 'on' : ''} onClick={() => setMode('scorer')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: 'middle' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
               <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
             </svg>
             Scoreur
           </button>
+          <button className={mode === 'player' ? 'on' : ''} onClick={() => setMode('player')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
+              <circle cx="9" cy="7" r="4" />
+              <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
+            </svg>
+            Stats joueurs
+          </button>
         </div>
       </section>
 
-      {/* Teams */}
-      <section className="setup-section">
-        <div className="section-title">Configuration des équipes</div>
-
-        <div className="flabel" style={{ marginBottom: 10 }}>
-          Format fixe: 2 équipes
-        </div>
-
-        <div className="team-rows">
-          {/* Team 1 */}
-          <div className="team-row">
-            {mode === 'scorer' && (
-              <LogoUpload label="Équipe 1" logo={logo1} onChange={setLogo1} color={color1} />
-            )}
-            <div className="team-row-fields">
-              <div className="field">
-                <div className="flabel">Équipe 1</div>
-                <input type="text" placeholder="Nom" value={name1} onChange={e => setName1(e.target.value)} onKeyDown={handleKey} autoFocus />
-              </div>
-              <div className="field" style={{ maxWidth: 80 }}>
-                <div className="flabel">Couleur</div>
-                <input className="color-in" type="color" value={color1} onChange={e => setColor1(e.target.value)} />
+      {/* ── Équipes (stats & scorer) ── */}
+      {mode !== 'player' && (
+        <section className="setup-section">
+          <div className="section-title">Configuration des équipes</div>
+          <div className="flabel" style={{ marginBottom: 10 }}>Format fixe : 2 équipes</div>
+          <div className="team-rows">
+            {/* Équipe 1 */}
+            <div className="team-row">
+              {mode === 'scorer' && <LogoUpload label="Équipe 1" logo={logo1} onChange={setLogo1} color={color1} />}
+              <div className="team-row-fields">
+                <div className="field">
+                  <div className="flabel">Équipe 1</div>
+                  <input type="text" placeholder="Nom" value={name1}
+                         onChange={e => setName1(e.target.value)} onKeyDown={handleKey} autoFocus />
+                </div>
+                <div className="field" style={{ maxWidth: 80 }}>
+                  <div className="flabel">Couleur</div>
+                  <input className="color-in" type="color" value={color1} onChange={e => setColor1(e.target.value)} />
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Team 2 */}
-          {numTeams === 2 && (
+            {/* Équipe 2 */}
             <div className="team-row">
-              {mode === 'scorer' && (
-                <LogoUpload label="Équipe 2" logo={logo2} onChange={setLogo2} color={color2} />
-              )}
+              {mode === 'scorer' && <LogoUpload label="Équipe 2" logo={logo2} onChange={setLogo2} color={color2} />}
               <div className="team-row-fields">
                 <div className="field">
                   <div className="flabel">Équipe 2</div>
-                  <input type="text" placeholder="Nom" value={name2} onChange={e => setName2(e.target.value)} onKeyDown={handleKey} />
+                  <input type="text" placeholder="Nom" value={name2}
+                         onChange={e => setName2(e.target.value)} onKeyDown={handleKey} />
                 </div>
                 <div className="field" style={{ maxWidth: 80 }}>
                   <div className="flabel">Couleur</div>
@@ -146,17 +211,77 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
-      {/* Half config */}
+      {/* ── Mode joueurs : noms des équipes + joueurs ── */}
+      {mode === 'player' && (
+        <section className="setup-section">
+          <div className="section-title">Équipes &amp; joueurs</div>
+
+          {/* Nombre d'équipes */}
+          <div className="seg" style={{ maxWidth: 280 }}>
+            <button className={playerNumTeams === 1 ? 'on' : ''} onClick={() => setPlayerNumTeams(1)}>
+              1 équipe
+            </button>
+            <button className={playerNumTeams === 2 ? 'on' : ''} onClick={() => setPlayerNumTeams(2)}>
+              2 équipes
+            </button>
+          </div>
+
+          {/* Noms + couleurs des équipes */}
+          <div className={`ps-teams-row${playerNumTeams === 1 ? ' ps-single' : ''}`}>
+            <div className="ps-team-name-field">
+              <div className="flabel">Équipe 1</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="text" placeholder="Nom équipe 1" value={name1}
+                       onChange={e => setName1(e.target.value)} autoFocus />
+                <input className="color-in" type="color" value={color1}
+                       onChange={e => setColor1(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
+              </div>
+            </div>
+            {playerNumTeams === 2 && (
+              <div className="ps-team-name-field">
+                <div className="flabel">Équipe 2</div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="text" placeholder="Nom équipe 2" value={name2}
+                         onChange={e => setName2(e.target.value)} />
+                  <input className="color-in" type="color" value={color2}
+                         onChange={e => setColor2(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Joueurs par équipe */}
+          <div className={`ps-players-grid${playerNumTeams === 1 ? ' ps-single' : ''}`}>
+            <PlayerNamesCol
+              teamLabel={n1Label}
+              teamColor={color1}
+              names={players1}
+              onChange={setPlayers1}
+            />
+            {playerNumTeams === 2 && (
+              <PlayerNamesCol
+                teamLabel={n2Label}
+                teamColor={color2}
+                names={players2}
+                onChange={setPlayers2}
+              />
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Mi-temps ── */}
       <section className="setup-section">
         <div className="section-title">Configuration des mi-temps</div>
         <div className="opts-grid">
           <div className="field">
             <div className="flabel">Durée d'une mi-temps (min)</div>
-            <input type="number" min={1} max={60} value={halfDurationMin} onChange={e => setHalfDurationMin(e.target.value)} />
+            <input type="number" min={1} max={60} value={halfDurationMin}
+                   onChange={e => setHalfDurationMin(e.target.value)} />
           </div>
           <div className="field">
             <div className="flabel">Nombre de mi-temps</div>
@@ -168,10 +293,10 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       </section>
 
       <button className="btn-acc" onClick={handleStart}>
-        {mode === 'scorer' ? 'Lancer le scoreur' : 'Commencer'}
+        {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
       </button>
 
-      {/* Match history preview */}
+      {/* ── Historique récent ── */}
       {recentHistory.length > 0 && (
         <section className="setup-section">
           <div className="history-head">
@@ -190,7 +315,9 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                     </span>
                   ))}
                 </div>
-                <div className="history-meta">{m.settings?.halfCount}×{m.settings?.halfDurationMin}min · {m.teams[0]?.tirs ?? 0} tirs</div>
+                <div className="history-meta">
+                  {m.settings?.halfCount}×{m.settings?.halfDurationMin}min · {m.teams[0]?.tirs ?? 0} tirs
+                </div>
               </div>
             ))}
           </div>
