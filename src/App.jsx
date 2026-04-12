@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
-import { applyPlayerAdj } from './lib/playerStats'
+import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
@@ -189,15 +189,29 @@ export default function App() {
 
   // ── Fin du match (mode player) ────────────────────────────────────────────
   function endPlayerMatch() {
-    const now     = Date.now()
+    const now  = Date.now()
+    const pls  = playersRef.current
+    const nt   = playerNumTeams
+    const s0   = playerTeamScore(pls, 0, nt)
+    const s1   = nt === 2 ? playerTeamScore(pls, 1, nt) : null
+
     const summary = {
       id:          typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(now),
       playedAt:    new Date(now).toISOString(),
       durationSec: matchStartRef.current ? Math.max(0, Math.round((now - matchStartRef.current) / 1000)) : 0,
       mode:        'player',
+      numTeams:    nt,
       settings:    matchSettings,
+      teams:       teamsRef.current.slice(0, nt).map((t, i) => ({
+        name:  t.name,
+        score: i === 0 ? s0 : s1,
+      })),
+      players:     pls,
     }
     setLastSummary(summary)
+    const newHistory = [summary, ...history]
+    setHistory(newHistory)
+    saveHistory(newHistory)
     setScreen('playerresults')
   }
 

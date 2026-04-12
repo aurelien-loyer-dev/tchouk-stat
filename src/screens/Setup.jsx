@@ -1,6 +1,142 @@
 import { useEffect, useRef, useState } from 'react'
 import { mkPlayer } from '../lib/playerStats'
 
+const COMPOS_KEY = 'tchouk_compos'
+function loadComposFromStorage() {
+  try { return JSON.parse(localStorage.getItem(COMPOS_KEY) || '[]') }
+  catch { return [] }
+}
+function saveComposToStorage(list) {
+  try { localStorage.setItem(COMPOS_KEY, JSON.stringify(list.slice(0, 30))) }
+  catch {}
+}
+
+// ── Gestionnaire de compositions ─────────────────────────────────────────────
+function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLabel }) {
+  const [open, setOpen]         = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [draft, setDraft]       = useState(null)
+
+  function startEdit(c) {
+    setEditingId(c.id)
+    setDraft({ name: c.name, teamName: c.teamName, color: c.color, players: [...c.players] })
+  }
+
+  function cancelEdit() { setEditingId(null); setDraft(null) }
+
+  function confirmEdit() {
+    if (!draft) return
+    onUpdate(editingId, {
+      name:     draft.name.trim() || draft.teamName,
+      teamName: draft.teamName,
+      color:    draft.color,
+      players:  draft.players.filter(p => p.trim()),
+    })
+    cancelEdit()
+  }
+
+  function draftSetPlayer(i, val) {
+    setDraft(d => { const p = [...d.players]; p[i] = val; return { ...d, players: p } })
+  }
+
+  function handleSave() {
+    const n = saveName.trim()
+    if (!n) return
+    onSave(n)
+    setSaveName('')
+  }
+
+  return (
+    <div className="ps-compo-mgr">
+      <button className="btn-mini ps-compo-toggle" onClick={() => setOpen(v => !v)}>
+        {open ? '▲ Compos' : '▼ Compos'}
+      </button>
+      {open && (
+        <div className="ps-compo-panel">
+          {compos.length === 0
+            ? <div className="ps-compo-empty">Aucune compo sauvegardée</div>
+            : compos.map(c => (
+                <div key={c.id}>
+                  {editingId === c.id && draft ? (
+                    <div className="ps-compo-edit">
+                      <div className="ps-compo-edit-row">
+                        <input
+                          className="ps-compo-edit-input"
+                          placeholder="Nom de la compo"
+                          value={draft.name}
+                          onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+                        />
+                      </div>
+                      <div className="ps-compo-edit-row">
+                        <input
+                          className="ps-compo-edit-input"
+                          placeholder="Nom d'équipe"
+                          value={draft.teamName}
+                          onChange={e => setDraft(d => ({ ...d, teamName: e.target.value }))}
+                        />
+                        <input
+                          type="color"
+                          className="color-in ps-compo-edit-color"
+                          value={draft.color}
+                          onChange={e => setDraft(d => ({ ...d, color: e.target.value }))}
+                        />
+                      </div>
+                      <div className="ps-compo-edit-players">
+                        {draft.players.map((p, i) => (
+                          <div className="ps-player-row" key={i}>
+                            <input
+                              type="text"
+                              placeholder={`Joueur ${i + 1}`}
+                              value={p}
+                              onChange={e => draftSetPlayer(i, e.target.value)}
+                            />
+                            {draft.players.length > 1 && (
+                              <button className="btn-mini ps-rm-btn"
+                                onClick={() => setDraft(d => ({ ...d, players: d.players.filter((_, j) => j !== i) }))}>×</button>
+                            )}
+                          </div>
+                        ))}
+                        <button className="btn-mini ps-add-btn"
+                          onClick={() => setDraft(d => ({ ...d, players: [...d.players, ''] }))}>+ Joueur</button>
+                      </div>
+                      <div className="ps-compo-edit-actions">
+                        <button className="btn-mini ps-compo-ok" onClick={confirmEdit}>Valider ✓</button>
+                        <button className="btn-mini" onClick={cancelEdit}>Annuler</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="ps-compo-item">
+                      <span className="ps-compo-dot" style={{ background: c.color }} />
+                      <span className="ps-compo-lbl">
+                        <span className="ps-compo-name">{c.name}</span>
+                        <span className="ps-compo-meta">{c.teamName} · {c.players.length}j</span>
+                      </span>
+                      <button className="btn-mini" onClick={() => { onLoad(c); setOpen(false) }}>Charger</button>
+                      <button className="btn-mini ps-compo-edit-btn" onClick={() => startEdit(c)}>✏</button>
+                      <button className="btn-mini ps-compo-del" onClick={() => onDelete(c.id)}>×</button>
+                    </div>
+                  )}
+                </div>
+              ))
+          }
+          <div className="ps-compo-save">
+            <input
+              type="text"
+              placeholder={currentTeamLabel ? `Sauvegarder "${currentTeamLabel}"…` : 'Nom de la compo…'}
+              value={saveName}
+              onChange={e => setSaveName(e.target.value)}
+              onFocus={() => { if (!saveName && currentTeamLabel) setSaveName(currentTeamLabel) }}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+            />
+            <button className="btn-mini" onClick={handleSave}>Sauvegarder</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function fmtDateTime(iso) {
   try {
     return new Date(iso).toLocaleString('fr-FR', {
@@ -43,7 +179,7 @@ function LogoUpload({ label, logo, onChange, color }) {
 }
 
 // ── Liste de noms de joueurs (colonne) ────────────────────────────────────────
-function PlayerNamesCol({ teamLabel, teamColor, names, onChange }) {
+function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveCompo, onDeleteCompo, onLoadCompo, onUpdateCompo }) {
   function updateName(i, val) {
     const next = [...names]
     next[i] = val
@@ -55,6 +191,14 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange }) {
   return (
     <div className="ps-team-col">
       <div className="ps-team-hd" style={{ color: teamColor }}>{teamLabel}</div>
+      <CompoLoader
+        compos={compos}
+        onLoad={onLoadCompo}
+        onSave={onSaveCompo}
+        onDelete={onDeleteCompo}
+        onUpdate={onUpdateCompo}
+        currentTeamLabel={teamLabel}
+      />
       {names.map((name, i) => (
         <div className="ps-player-row" key={i}>
           <input
@@ -89,6 +233,35 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
   const [playerNumTeams, setPlayerNumTeams] = useState(2) // 1 ou 2 équipes en mode joueurs
   const [players1, setPlayers1] = useState(['', '', ''])
   const [players2, setPlayers2] = useState(['', '', ''])
+
+  // Compositions sauvegardées
+  const [compos, setCompos] = useState(loadComposFromStorage)
+
+  function saveCompo(saveName, teamName, teamColor, players) {
+    const entry = {
+      id:       typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      name:     saveName,
+      teamName,
+      color:    teamColor,
+      players:  players.filter(p => p.trim()),
+      savedAt:  new Date().toISOString(),
+    }
+    const next = [entry, ...compos]
+    setCompos(next)
+    saveComposToStorage(next)
+  }
+
+  function deleteCompo(id) {
+    const next = compos.filter(c => c.id !== id)
+    setCompos(next)
+    saveComposToStorage(next)
+  }
+
+  function updateCompo(id, fields) {
+    const next = compos.map(c => c.id === id ? { ...c, ...fields, savedAt: new Date().toISOString() } : c)
+    setCompos(next)
+    saveComposToStorage(next)
+  }
 
   useEffect(() => { if (numTeams !== 2) setNumTeams(2) }, [numTeams, setNumTeams])
 
@@ -261,6 +434,11 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
               teamColor={color1}
               names={players1}
               onChange={setPlayers1}
+              compos={compos}
+              onSaveCompo={name => saveCompo(name, n1Label, color1, players1)}
+              onDeleteCompo={deleteCompo}
+              onUpdateCompo={updateCompo}
+              onLoadCompo={c => { setName1(c.teamName || c.name); setColor1(c.color); setPlayers1(c.players.length ? c.players : ['']) }}
             />
             {playerNumTeams === 2 && (
               <PlayerNamesCol
@@ -268,6 +446,11 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                 teamColor={color2}
                 names={players2}
                 onChange={setPlayers2}
+                compos={compos}
+                onSaveCompo={name => saveCompo(name, n2Label, color2, players2)}
+                onDeleteCompo={deleteCompo}
+                onUpdateCompo={updateCompo}
+                onLoadCompo={c => { setName2(c.teamName || c.name); setColor2(c.color); setPlayers2(c.players.length ? c.players : ['']) }}
               />
             )}
           </div>

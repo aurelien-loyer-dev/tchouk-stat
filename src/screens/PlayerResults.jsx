@@ -222,7 +222,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(15)
-    doc.text('Feuille de match — Stats par joueur', left, 12)
+    doc.text('Feuille de match', left, 12)
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
     doc.text(`Export : ${fmtDateTime(new Date().toISOString())}`, left, 19)
