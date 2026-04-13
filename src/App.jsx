@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
+import { supabase } from './lib/supabase'
 import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
@@ -73,6 +74,22 @@ export default function App() {
   const [history, setHistory]       = useState(loadHistory)
   const [theme, setTheme]           = useState(loadTheme)
 
+  // Chargement depuis Supabase au démarrage
+  useEffect(() => {
+    if (!supabase) return
+    supabase
+      .from('matches')
+      .select('data')
+      .order('played_at', { ascending: false })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (error || !data || data.length === 0) return
+        const matches = data.map(row => row.data)
+        setHistory(matches)
+        saveHistory(matches)
+      })
+  }, [])
+
   // Mode joueurs
   const [players, setPlayers]         = useState([])
   const [playerNumTeams, setPlayerNumTeams] = useState(2)
@@ -92,6 +109,16 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     try { localStorage.setItem(THEME_KEY, theme) } catch {}
   }, [theme])
+
+  // ── Sauvegarde cloud ─────────────────────────────────────────────────────
+  async function saveMatchToCloud(summary) {
+    if (!supabase) return
+    await supabase.from('matches').upsert({
+      id:        summary.id,
+      played_at: summary.playedAt,
+      data:      summary,
+    })
+  }
 
   // ── Démarrage d'un match ──────────────────────────────────────────────────
   function startMatch(payload) {
@@ -184,6 +211,7 @@ export default function App() {
     const newHistory = [summary, ...history]
     setHistory(newHistory)
     saveHistory(newHistory)
+    saveMatchToCloud(summary)
     setScreen('results')
   }
 
@@ -212,6 +240,7 @@ export default function App() {
     const newHistory = [summary, ...history]
     setHistory(newHistory)
     saveHistory(newHistory)
+    saveMatchToCloud(summary)
     setScreen('playerresults')
   }
 
@@ -239,6 +268,7 @@ export default function App() {
   function clearHistory() {
     setHistory([])
     saveHistory([])
+    if (supabase) supabase.from('matches').delete().neq('id', '')
   }
 
   return (
