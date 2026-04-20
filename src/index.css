@@ -1599,9 +1599,10 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .pm-player-name {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
 }
 
 .pm-player-pts {
