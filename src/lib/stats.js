@@ -11,9 +11,7 @@ export function mkTeam(name) {
     pReussie: 0,
     pRatee:   0,
     // Fautes techniques hors tir (pas de points)
-    fZone:    0,
-    fMarche:  0,
-    fAutre:   0,
+    fTech:    0,
     // 1-team mode : score adverse saisi manuellement
     padv:     0,
   }
@@ -56,7 +54,7 @@ export function catchsNous(teams, n, i) {
 
 // Total fautes (tir + techniques hors tir)
 export function fautesTotal(t) {
-  return t.tFaute + t.fZone + t.fMarche + t.fAutre
+  return t.tFaute + (t.fTech ?? 0) + (t.fZone ?? 0) + (t.fMarche ?? 0) + (t.fAutre ?? 0)
 }
 
 // Mise à jour immutable : tous les champs sont des compteurs indépendants

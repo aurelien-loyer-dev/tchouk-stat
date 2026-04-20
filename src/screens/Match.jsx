@@ -8,10 +8,10 @@ const CATEGORIES = [
     title: 'Tirs',
     deriveTotal: t => t.tGagne + t.tDonne + t.tCatche + t.tFaute,
     items: [
-      { id: 'tGagne',  label: 'Gagné',  sub: '+ point auto',          hl: true },
-      { id: 'tDonne',  label: 'Donné',  sub: '+ point adverse auto' },
-      { id: 'tCatche', label: 'Catché', sub: null },
-      { id: 'tFaute',  label: 'Cadre',  sub: null },
+      { id: 'tGagne',  label: 'Gagné',  hl: true },
+      { id: 'tDonne',  label: 'Donné' },
+      { id: 'tCatche', label: 'Catché' },
+      { id: 'tFaute',  label: 'Cadre' },
     ],
   },
   {
@@ -19,7 +19,7 @@ const CATEGORIES = [
     title: 'Passes',
     deriveTotal: null,
     items: [
-      { id: 'pRatee',   label: 'Ratée',   sub: null },
+      { id: 'pRatee', label: 'Ratée' },
     ],
   },
   {
@@ -27,9 +27,7 @@ const CATEGORIES = [
     title: 'Fautes techniques',
     deriveTotal: null,
     items: [
-      { id: 'fZone',   label: 'Zone',   sub: 'Pas de point' },
-      { id: 'fMarche', label: 'Marche', sub: 'Pas de point' },
-      { id: 'fAutre',  label: 'Autre',  sub: 'Pas de point' },
+      { id: 'fTech', label: 'Faute technique' },
     ],
   },
 ]

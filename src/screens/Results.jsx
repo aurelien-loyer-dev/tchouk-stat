@@ -409,11 +409,9 @@ export default function Results({
 
       {/* ── Fautes techniques ── */}
       <Card title="Fautes techniques">
-        <Row label="Total fautes" sub="tir + zone + marche + autre"><N v={ft} /></Row>
+        <Row label="Total fautes"><N v={ft} /></Row>
         <Row label="Fautes sur tir"><span className="si-v sub">{t.tFaute}</span></Row>
-        <Row label="Zones"><span className="si-v sub">{t.fZone}</span></Row>
-        <Row label="Marches"><span className="si-v sub">{t.fMarche}</span></Row>
-        <Row label="Autres"><span className="si-v sub">{t.fAutre}</span></Row>
+        <Row label="Fautes techniques"><span className="si-v sub">{(t.fTech ?? 0) + (t.fZone ?? 0) + (t.fMarche ?? 0) + (t.fAutre ?? 0)}</span></Row>
       </Card>
 
       {/* ── Données adverses ── */}
