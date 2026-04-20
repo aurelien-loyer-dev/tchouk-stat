@@ -82,15 +82,19 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
         <div className="sc-half-badge">
           MT {currentHalf}/{halfCount}
         </div>
-        <div className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}`} onClick={() => setRunning(v => !v)} title="Cliquer pour pause/reprise">
-          {fmtClock(remainingHalfSec)}
-        </div>
         <button className="sc-end-btn" onClick={handleEnd}>Fin</button>
       </div>
 
       {/* Clock progress bar */}
       <div className="sc-progress-track">
         <div className="sc-progress-fill" style={{ width: `${clockPct}%`, background: isLast10 ? '#ff5252' : 'var(--acc)' }} />
+      </div>
+
+      {/* Big centered clock */}
+      <div className="sc-clock-wrap">
+        <div className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}`} onClick={() => setRunning(v => !v)} title="Cliquer pour pause/reprise">
+          {fmtClock(remainingHalfSec)}
+        </div>
       </div>
 
       {/* Scoreboard */}

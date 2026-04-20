@@ -694,14 +694,22 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: rgba(255,255,255,0.8);
 }
 
+.sc-clock-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0 4px;
+}
+
 .sc-clock {
-  font-size: 42px;
+  font-size: 80px;
   font-weight: 900;
-  letter-spacing: -2px;
-  color: var(--inv-txt);
+  letter-spacing: -4px;
+  color: var(--txt);
   cursor: pointer;
   user-select: none;
   transition: opacity 0.15s;
+  line-height: 1;
 }
 
 .sc-clock:hover { opacity: 0.85; }
