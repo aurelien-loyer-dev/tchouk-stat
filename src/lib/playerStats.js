@@ -1,13 +1,13 @@
 // Stats disponibles par joueur
 export const PLAYER_STATS = [
   { id: 'tirsReussis',      label: 'Tirs réussis',       sub: 'Shot sur cible' },
-  { id: 'pointsMarques',    label: 'Points marqués',     sub: '+1 pour l\'équipe',  scoreImpact: 'self' },
-  { id: 'pointsDonnes',     label: 'Points donnés',      sub: '+1 point adverse',   scoreImpact: 'opp' },
-  { id: 'fautesTir',        label: 'Fautes de tir',      sub: null },
+  { id: 'pointsMarques',    label: 'Points marqués',     sub: null, scoreImpact: 'self', color: 'green' },
+  { id: 'pointsDonnes',     label: 'Points donnés',      sub: null, scoreImpact: 'opp',  color: 'red' },
+  { id: 'fautesTir',        label: 'Fautes de tir',      sub: null,                color: 'amber' },
   { id: 'defenseSolo',      label: 'Défense solo',       sub: null },
   { id: 'participationDef', label: 'Participation déf.', sub: null },
-  { id: 'passesRatees',     label: 'Passe ratée',        sub: null },
-  { id: 'fautesTech',       label: 'Faute technique',    sub: null },
+  { id: 'passesRatees',     label: 'Passe ratée',        sub: null,                color: 'red' },
+  { id: 'fautesTech',       label: 'Faute technique',    sub: null,                color: 'red' },
 ]
 
 export function mkPlayer(name, teamIdx) {

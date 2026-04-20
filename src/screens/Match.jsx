@@ -8,10 +8,10 @@ const CATEGORIES = [
     title: 'Tirs',
     deriveTotal: t => t.tGagne + t.tDonne + t.tCatche + t.tFaute,
     items: [
-      { id: 'tGagne',  label: 'Gagné',  hl: true },
-      { id: 'tDonne',  label: 'Donné' },
+      { id: 'tGagne',  label: 'Gagné',           hl: true },
+      { id: 'tDonne',  label: 'Donné',            color: 'red' },
       { id: 'tCatche', label: 'Catché' },
-      { id: 'tFaute',  label: 'Cadre' },
+      { id: 'tFaute',  label: 'Cadre',            color: 'amber' },
     ],
   },
   {
@@ -19,7 +19,7 @@ const CATEGORIES = [
     title: 'Passes',
     deriveTotal: null,
     items: [
-      { id: 'pRatee', label: 'Ratée' },
+      { id: 'pRatee', label: 'Ratée', color: 'amber' },
     ],
   },
   {
@@ -27,7 +27,7 @@ const CATEGORIES = [
     title: 'Fautes techniques',
     deriveTotal: null,
     items: [
-      { id: 'fTech', label: 'Faute technique' },
+      { id: 'fTech', label: 'Faute technique', color: 'red' },
     ],
   },
 ]
@@ -48,13 +48,11 @@ function Animated({ value, className, style }) {
 }
 
 // ── StatRow ───────────────────────────────────────────────────────────────────
-function StatRow({ label, sub, count, hl, onInc, onDec }) {
+function StatRow({ label, count, hl, color, onInc, onDec }) {
+  const cls = ['row', hl && 'hl', color && `row-${color}`].filter(Boolean).join(' ')
   return (
-    <div className={`row${hl ? ' hl' : ''}`}>
-      <div className="rl">
-        {label}
-        {sub && <small>{sub}</small>}
-      </div>
+    <div className={cls}>
+      <div className="rl">{label}</div>
       <Animated value={count} className="rv" />
       <button className="ab m" onClick={onDec}>−</button>
       <button className="ab p" onClick={onInc}>+</button>
@@ -82,10 +80,10 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
     <div className={`panel ${cls}`}>
       <div className="ph">{team.name}</div>
 
-      {/* Possession standalone */}
+      {/* Possession */}
+      <div className="cat-hd cat-first"><span>Possession</span></div>
       <StatRow
-        label="Possession"
-        sub={null}
+        label="Ballons"
         count={team.pos}
         onInc={() => onAdj(teamIdx, 'pos', 1)}
         onDec={() => onAdj(teamIdx, 'pos', -1)}
@@ -102,9 +100,9 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
             <StatRow
               key={item.id}
               label={item.label}
-              sub={item.sub}
               count={team[item.id]}
               hl={item.hl}
+              color={item.color}
               onInc={() => onAdj(teamIdx, item.id, 1)}
               onDec={() => onAdj(teamIdx, item.id, -1)}
             />
@@ -118,7 +116,6 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
           <div className="cat-hd"><span>Adversaire</span></div>
           <StatRow
             label="Score adverse"
-            sub="Pour les ratios défensifs"
             count={team.padv}
             onInc={() => onAdj(teamIdx, 'padv', 1)}
             onDec={() => onAdj(teamIdx, 'padv', -1)}

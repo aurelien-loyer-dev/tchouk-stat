@@ -165,7 +165,11 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
           {PLAYER_STATS.map(stat => (
             <button
               key={stat.id}
-              className={`pm-stat-btn${selectedStat === stat.id ? ' pm-stat-sel' : ''}`}
+              className={[
+                'pm-stat-btn',
+                stat.color && `pm-stat-${stat.color}`,
+                selectedStat === stat.id && 'pm-stat-sel',
+              ].filter(Boolean).join(' ')}
               onClick={() => handleStatClick(stat.id)}
             >
               <span className="pm-stat-label">{stat.label}</span>
