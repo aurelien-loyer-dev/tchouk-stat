@@ -291,10 +291,12 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .rl small { display: block; font-size: 10px; opacity: 0.4; margin-top: 1px; }
 
 .rv {
-  min-width: 52px; text-align: center;
-  font-size: 24px; font-weight: 800; color: var(--txt);
+  min-width: 60px; text-align: center;
+  font-size: 28px; font-weight: 900; color: var(--txt);
   display: flex; align-items: center; justify-content: center;
   border-left: 1px solid var(--bdr);
+  background: var(--s2);
+  letter-spacing: -1px;
 }
 
 .ab {
@@ -328,11 +330,11 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 /* ── Category headers ── */
 .cat-hd {
-  padding: 8px 16px 7px;
+  padding: 9px 16px 8px;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.8px;
   color: var(--dim);
   display: flex;
   justify-content: space-between;
@@ -343,10 +345,10 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 .cat-first { border-top: none; }
 .cat-total {
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 900;
   color: var(--txt);
-  letter-spacing: 0;
+  letter-spacing: -0.5px;
 }
 
 /* ── RESULTS ── */
@@ -1411,15 +1413,16 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 10px 8px;
-  border: 1.5px solid var(--bdr);
-  border-radius: 10px;
-  background: var(--s2);
+  gap: 4px;
+  padding: 14px 10px;
+  border: 2px solid var(--bdr);
+  border-radius: 12px;
+  background: var(--s1);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
   text-align: center;
-  min-height: 56px;
+  min-height: 68px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .pm-stat-btn:hover {
@@ -1452,8 +1455,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-stat-amber.pm-stat-sel { background: var(--warn); border-color: var(--warn); }
 
 .pm-stat-label {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
   color: var(--txt);
   line-height: 1.2;
 }
@@ -1577,14 +1580,15 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-player-card {
   background: var(--s1);
   border: 1.5px solid var(--bdr);
-  border-left-width: 3px;
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-left-width: 4px;
+  border-radius: 12px;
+  padding: 12px 14px;
   transition: box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .pm-player-active {
-  box-shadow: 0 0 0 2px var(--acc);
+  box-shadow: 0 0 0 2.5px var(--acc);
 }
 
 .pm-player-top {
@@ -1595,20 +1599,21 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .pm-player-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .pm-player-pts {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 900;
   color: var(--txt);
   white-space: nowrap;
+  letter-spacing: -1px;
 }
 
 .pm-player-pts-lbl {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   color: var(--dim);
 }
@@ -1624,40 +1629,40 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .pm-stat-cur {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 900;
   color: var(--txt);
-  min-width: 24px;
+  min-width: 32px;
   text-align: center;
-  margin-right: 4px;
+  letter-spacing: -0.5px;
 }
 
 .pm-adj-btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--bdr);
-  border-radius: 8px;
-  background: var(--s2);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.1s;
+  transition: background 0.1s, opacity 0.1s;
   flex-shrink: 0;
 }
 
 .pm-adj-btn:active { transform: scale(0.93); }
 
 .pm-adj-p {
-  color: var(--ok);
-  border-color: rgba(93, 232, 121, 0.35);
+  background: var(--ok);
+  color: #fff;
 }
 
-.pm-adj-p:hover { background: rgba(26, 155, 74, 0.1); }
+.pm-adj-p:hover { opacity: 0.85; }
 
 .pm-adj-m {
+  background: var(--s2);
   color: var(--dim);
 }
 
