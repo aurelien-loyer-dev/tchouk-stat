@@ -1806,3 +1806,116 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   .pm-players-wrap { grid-template-columns: 1fr; }
   .pr-legend { grid-template-columns: 1fr; }
 }
+
+/* ── AWARDS — Distinctions du match ── */
+.awards-card {
+  padding: 16px 16px 4px;
+}
+
+.award-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.award-section:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.award-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.award-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.award-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.award-full {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.award-desc {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.award-winner-name {
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.award-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.award-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--bdr);
+  border-radius: 10px;
+  background: var(--s2);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  text-align: center;
+}
+
+.award-chip:hover {
+  background: var(--s1);
+  border-color: var(--s3);
+}
+
+.award-chip:active {
+  transform: scale(0.95);
+}
+
+.award-chip-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+  white-space: nowrap;
+}
+
+.award-chip-sel .award-chip-name {
+  color: inherit;
+}
+
+.award-chip-stat {
+  font-size: 10px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.award-chip-sel .award-chip-stat {
+  color: inherit;
+  opacity: 0.75;
+}

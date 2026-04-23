@@ -1,5 +1,36 @@
+import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { PLAYER_STATS, playerTeamScore, playerDerivedStats, playerTirsTotal } from '../lib/playerStats'
+
+const AWARDS = [
+  {
+    key: 'bopm',
+    label: 'BOPM',
+    full: 'Best Offensive Player of the Match',
+    desc: 'Meilleur attaquant du match',
+    statHint: p => `${p.pointsMarques} pts marqués`,
+    color: '#d97706',
+    pdfRgb: [217, 119, 6],
+  },
+  {
+    key: 'bdpm',
+    label: 'BDPM',
+    full: 'Best Defensive Player of the Match',
+    desc: 'Meilleur défenseur du match',
+    statHint: p => `${p.defenseSolo + p.participationDef} act. déf.`,
+    color: '#1f6feb',
+    pdfRgb: [31, 111, 235],
+  },
+  {
+    key: 'mvp',
+    label: 'MVP',
+    full: 'Most Valuable Player',
+    desc: 'Joueur le plus complet du match',
+    statHint: p => `${p.pointsMarques} pts`,
+    color: '#eab308',
+    pdfRgb: [234, 179, 8],
+  },
+]
 
 function fmtDuration(totalSec) {
   const sec = Math.max(0, totalSec || 0)
@@ -98,6 +129,15 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
   const score1       = n === 2 ? playerTeamScore(players, 1, n) : null
   const team1Players = players.filter(p => p.teamIdx === 0)
   const team2Players = n === 2 ? players.filter(p => p.teamIdx === 1) : []
+
+  const [awards, setAwards] = useState({ bopm: null, bdpm: null, mvp: null })
+
+  function toggleAward(awardKey, playerId) {
+    setAwards(prev => ({
+      ...prev,
+      [awardKey]: prev[awardKey] === playerId ? null : playerId,
+    }))
+  }
 
   // ── PDF d'un seul joueur ──────────────────────────────────────────────────
   function generatePlayerPdf(player) {
@@ -363,6 +403,53 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       y += 8
     })
 
+    // ── Distinctions du match ──────────────────────────────────────────────
+    const selectedAwards = AWARDS.filter(a => awards[a.key])
+    if (selectedAwards.length > 0) {
+      ensurePage(20 + selectedAwards.length * 14)
+
+      doc.setFillColor(235, 240, 250)
+      doc.rect(left, y, maxW, 8, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(70, 80, 100)
+      doc.text('DISTINCTIONS DU MATCH', left + 4, y + 5.5)
+      doc.setTextColor(15, 23, 42)
+      y += 12
+
+      AWARDS.forEach(award => {
+        const winnerId = awards[award.key]
+        if (!winnerId) return
+        const winner = players.find(p => p.id === winnerId)
+        if (!winner) return
+
+        ensurePage(14)
+
+        doc.setFillColor(...award.pdfRgb)
+        doc.rect(left, y - 3, 3, 12, 'F')
+
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        doc.setTextColor(...award.pdfRgb)
+        doc.text(award.label, left + 6, y + 4)
+
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.setTextColor(90, 100, 120)
+        doc.text(`— ${award.full}`, left + 22, y + 4)
+
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(11)
+        doc.setTextColor(15, 23, 42)
+        doc.text(winner.name, left + maxW, y + 4, { align: 'right' })
+
+        doc.setDrawColor(230, 235, 245)
+        doc.line(left, y + 9, left + maxW, y + 9)
+
+        y += 14
+      })
+    }
+
     const t1 = fileSafeName(teams[0]?.name) || 'equipe1'
     const t2 = n === 2 ? (fileSafeName(teams[1]?.name) || 'equipe2') : 'solo'
     doc.save(`${t1}vs${t2}_joueurs.pdf`)
@@ -416,6 +503,46 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
           </div>
         </div>
       )}
+
+      <div className="card awards-card">
+        <div className="ctitle">Distinctions du match</div>
+        {AWARDS.map(award => {
+          const winnerId = awards[award.key]
+          const winner   = winnerId ? players.find(p => p.id === winnerId) : null
+          return (
+            <div key={award.key} className="award-section">
+              <div className="award-header">
+                <span className="award-badge" style={{ background: award.color }}>{award.label}</span>
+                <div className="award-info">
+                  <span className="award-full">{award.full}</span>
+                  <span className="award-desc">{award.desc}</span>
+                </div>
+                {winner && (
+                  <span className="award-winner-name" style={{ color: award.color }}>
+                    {winner.name}
+                  </span>
+                )}
+              </div>
+              <div className="award-players">
+                {players.map(p => {
+                  const sel = awards[award.key] === p.id
+                  return (
+                    <button
+                      key={p.id}
+                      className={`award-chip${sel ? ' award-chip-sel' : ''}`}
+                      style={sel ? { borderColor: award.color, background: award.color + '18', color: award.color } : {}}
+                      onClick={() => toggleAward(award.key, p.id)}
+                    >
+                      <span className="award-chip-name">{p.name}</span>
+                      <span className="award-chip-stat">{award.statHint(p)}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
 
       <button
         className="btn-ghost"
