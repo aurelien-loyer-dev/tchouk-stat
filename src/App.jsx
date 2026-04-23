@@ -9,6 +9,7 @@ import Scorer from './screens/Scorer'
 import History from './screens/History'
 import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
+import { Analytics } from "@vercel/analytics/react"
 
 const DEFAULT_SETTINGS = {
   teamColors: ['#5de8d6', '#ff7272'],
