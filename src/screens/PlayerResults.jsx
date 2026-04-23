@@ -110,57 +110,6 @@ function pct(num, den) {
   return `${Math.round((num / den) * 100)} %`
 }
 
-// ── Carte stats d'un joueur ───────────────────────────────────────────────────
-function PlayerStatCard({ player, teamColor, teamName }) {
-  const d = playerDerivedStats(player)
-
-  return (
-    <div className="pr-player-card" style={{ borderColor: teamColor }}>
-      <div className="pr-player-header">
-        <div>
-          <div className="pr-player-name">{player.name}</div>
-          <div className="pr-player-team">{teamName}</div>
-        </div>
-        <div className="pr-player-pts-big">{player.pointsMarques}</div>
-      </div>
-
-      <div className="pr-stat-section-title">Statistiques</div>
-      <div className="pr-stat-list">
-        {PLAYER_STATS.map(stat => (
-          <div className="pr-stat-row" key={stat.id}>
-            <span className="pr-stat-label">{stat.label}</span>
-            <span className="pr-stat-val">{player[stat.id] ?? 0}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="pr-stat-section-title">Totaux &amp; ratios</div>
-      <div className="pr-stat-list">
-        <div className="pr-stat-row">
-          <span className="pr-stat-label">Tirs total <small>pts marqués + donnés + fautes tir</small></span>
-          <span className="pr-stat-val">{d.tirsTotal}</span>
-        </div>
-        <div className="pr-stat-row">
-          <span className="pr-stat-label pr-ratio-lbl">Efficacité offensive <small>pts marqués / tirs</small></span>
-          <span className="pr-stat-val pr-stat-ratio">{pct(player.pointsMarques, d.tirsTotal)}</span>
-        </div>
-        <div className="pr-stat-row">
-          <span className="pr-stat-label pr-ratio-lbl">% points offerts <small>pts donnés / tirs</small></span>
-          <span className="pr-stat-val pr-stat-ratio">{pct(player.pointsDonnes, d.tirsTotal)}</span>
-        </div>
-        <div className="pr-stat-row">
-          <span className="pr-stat-label">Actions défensives <small>solo + participation</small></span>
-          <span className="pr-stat-val">{d.defTotal}</span>
-        </div>
-        <div className="pr-stat-row">
-          <span className="pr-stat-label">Total fautes <small>tir + techniques</small></span>
-          <span className="pr-stat-val">{d.fautesTotal}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ── Écran résultats joueurs ───────────────────────────────────────────────────
 export default function PlayerResults({ teams, players, numTeams, settings, summary, onNew }) {
   const n = numTeams ?? 2
@@ -499,38 +448,6 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
           <span style={{ color: 'var(--c1)' }}>{score0}</span>
         )}
       </div>
-
-      <div className="card">
-        <div className="ctitle" style={{ color: 'var(--c1)' }}>{teams[0]?.name || 'Équipe 1'}</div>
-        {team1Players.length === 0 && <div className="pr-no-players">Aucun joueur</div>}
-        <div className="pr-players-list">
-          {team1Players.map(p => (
-            <PlayerStatCard
-              key={p.id}
-              player={p}
-              teamColor="var(--c1)"
-              teamName={teams[0]?.name || 'Équipe 1'}
-            />
-          ))}
-        </div>
-      </div>
-
-      {n === 2 && (
-        <div className="card">
-          <div className="ctitle" style={{ color: 'var(--c2)' }}>{teams[1]?.name || 'Équipe 2'}</div>
-          {team2Players.length === 0 && <div className="pr-no-players">Aucun joueur</div>}
-          <div className="pr-players-list">
-            {team2Players.map(p => (
-              <PlayerStatCard
-                key={p.id}
-                player={p}
-                teamColor="var(--c2)"
-                teamName={teams[1]?.name || 'Équipe 2'}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ── Distinctions automatiques ── */}
       {players.length > 0 && (
