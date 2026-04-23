@@ -33,9 +33,23 @@ function mvpScore(p) {
   )
 }
 
-function bestPlayer(players, scoreFn) {
-  if (!players || players.length === 0) return null
-  return players.reduce((a, b) => scoreFn(a) >= scoreFn(b) ? a : b)
+// Retourne les groupes du top N, avec ex aequo groupés ensemble
+// Ex: [{rank:1, players:[A,B]}, {rank:2, players:[C]}, {rank:3, players:[D,E]}]
+function topPlayers(players, scoreFn, limit = 3) {
+  if (!players || players.length === 0) return []
+  const sorted = [...players].sort((a, b) => scoreFn(b) - scoreFn(a))
+  const groups = []
+  for (const p of sorted) {
+    const s    = scoreFn(p)
+    const last = groups[groups.length - 1]
+    if (last && last.score === s) {
+      last.players.push(p)
+    } else {
+      if (groups.length === limit) break
+      groups.push({ rank: groups.length + 1, score: s, players: [p] })
+    }
+  }
+  return groups
 }
 
 const AWARDS = [
@@ -121,11 +135,11 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
 
   const [showPicker, setShowPicker] = useState(false)
 
-  // Distinctions calculées automatiquement à partir des stats
+  // Top 3 par distinction, avec gestion des ex aequo
   const computedAwards = {
-    bopm: bestPlayer(players, offScore),
-    bdpm: bestPlayer(players, defScore),
-    mvp:  bestPlayer(players, mvpScore),
+    bopm: topPlayers(players, offScore),
+    bdpm: topPlayers(players, defScore),
+    mvp:  topPlayers(players, mvpScore),
   }
 
   function teamName(p) {
@@ -387,7 +401,11 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
 
     // ── Distinctions du match ──────────────────────────────────────────────
     if (players.length > 0) {
-      ensurePage(20 + AWARDS.length * 14)
+      const totalRows = AWARDS.reduce((s, a) => {
+        const gs = computedAwards[a.key] || []
+        return s + gs.reduce((s2, g) => s2 + g.players.length, 0)
+      }, 0)
+      ensurePage(20 + totalRows * 9 + AWARDS.length * 14)
 
       doc.setFillColor(235, 240, 250)
       doc.rect(left, y, maxW, 8, 'F')
@@ -399,33 +417,63 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       y += 12
 
       AWARDS.forEach(award => {
-        const winner = computedAwards[award.key]
-        if (!winner) return
+        const groups = computedAwards[award.key]
+        if (!groups || groups.length === 0) return
 
-        ensurePage(14)
-
+        ensurePage(12)
         doc.setFillColor(...award.pdfRgb)
-        doc.rect(left, y - 3, 3, 12, 'F')
-
+        doc.rect(left, y - 2, 3, 10, 'F')
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(9)
         doc.setTextColor(...award.pdfRgb)
         doc.text(award.label, left + 6, y + 4)
-
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(8)
         doc.setTextColor(90, 100, 120)
         doc.text(`— ${award.full}`, left + 22, y + 4)
+        y += 11
 
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(11)
-        doc.setTextColor(15, 23, 42)
-        doc.text(winner.name, left + maxW, y + 4, { align: 'right' })
+        groups.forEach(({ rank, players: gPlayers }) => {
+          gPlayers.forEach((p, i) => {
+            ensurePage(9)
 
-        doc.setDrawColor(230, 235, 245)
-        doc.line(left, y + 9, left + maxW, y + 9)
+            // Numéro de rang (seulement pour le premier du groupe)
+            if (i === 0) {
+              doc.setFont('helvetica', 'bold')
+              doc.setFontSize(8)
+              const [r, g2, b] = rank === 1 ? award.pdfRgb : [100, 110, 130]
+              doc.setTextColor(r, g2, b)
+              doc.text(String(rank), left + 6, y + 3)
+            }
 
-        y += 14
+            // Nom du joueur
+            doc.setFont('helvetica', rank === 1 ? 'bold' : 'normal')
+            doc.setFontSize(9)
+            const [nr, ng, nb] = rank === 1 ? award.pdfRgb : [15, 23, 42]
+            doc.setTextColor(nr, ng, nb)
+            doc.text(p.name, left + 14, y + 3)
+
+            // Ex aequo
+            if (i > 0) {
+              doc.setFont('helvetica', 'italic')
+              doc.setFontSize(7)
+              doc.setTextColor(150, 160, 175)
+              const nameW = doc.getTextWidth(p.name)
+              doc.text('ex æquo', left + 14 + nameW + 3, y + 3)
+            }
+
+            // Stats hint (droite)
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(7.5)
+            doc.setTextColor(90, 100, 120)
+            doc.text(award.hint(p, pct), left + maxW, y + 3, { align: 'right' })
+
+            doc.setDrawColor(235, 240, 250)
+            doc.line(left + 10, y + 6, left + maxW, y + 6)
+            y += 9
+          })
+        })
+        y += 6
       })
     }
 
@@ -454,18 +502,38 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         <div className="card awards-card">
           <div className="ctitle">Distinctions du match</div>
           {AWARDS.map(award => {
-            const winner = computedAwards[award.key]
-            if (!winner) return null
+            const groups = computedAwards[award.key]
+            if (!groups || groups.length === 0) return null
             return (
-              <div key={award.key} className="award-row">
-                <span className="award-badge" style={{ background: award.color }}>{award.label}</span>
-                <div className="award-body">
-                  <div className="award-full-line">
+              <div key={award.key} className="award-section">
+                <div className="award-header">
+                  <span className="award-badge" style={{ background: award.color }}>{award.label}</span>
+                  <div className="award-info">
                     <span className="award-full">{award.full}</span>
                     <span className="award-desc">{award.desc}</span>
                   </div>
-                  <div className="award-winner" style={{ color: award.color }}>{winner.name}</div>
-                  <div className="award-hint">{award.hint(winner, pct)}</div>
+                </div>
+                <div className="award-ranking">
+                  {groups.map(({ rank, players: gPlayers }) =>
+                    gPlayers.map((p, i) => (
+                      <div key={p.id} className="award-rank-row">
+                        <span
+                          className="award-rank-num"
+                          style={{ color: rank === 1 ? award.color : undefined }}
+                        >
+                          {i === 0 ? rank : ''}
+                        </span>
+                        <span
+                          className="award-rank-name"
+                          style={{ color: rank === 1 && i === 0 ? award.color : undefined, fontWeight: rank === 1 ? 900 : 600 }}
+                        >
+                          {p.name}
+                        </span>
+                        {i > 0 && <span className="award-eq-badge">ex æquo</span>}
+                        <span className="award-rank-hint">{award.hint(p, pct)}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )

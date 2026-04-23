@@ -1815,17 +1815,21 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   gap: 0;
 }
 
-.award-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+.award-section {
   padding: 12px 0;
   border-bottom: 1px solid var(--bdr);
 }
 
-.award-row:last-child {
+.award-section:last-child {
   border-bottom: none;
   padding-bottom: 2px;
+}
+
+.award-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .award-badge {
@@ -1839,23 +1843,13 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   border-radius: 6px;
   padding: 4px 8px;
   flex-shrink: 0;
-  margin-top: 2px;
   text-transform: uppercase;
 }
 
-.award-body {
+.award-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-}
-
-.award-full-line {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 1px;
 }
 
 .award-full {
@@ -1869,16 +1863,59 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--dim);
 }
 
-.award-winner {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  line-height: 1.1;
+.award-ranking {
+  display: flex;
+  flex-direction: column;
 }
 
-.award-hint {
+.award-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.award-rank-row:last-child {
+  border-bottom: none;
+}
+
+.award-rank-num {
+  width: 18px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--dim);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.award-rank-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--txt);
+  min-width: 0;
+}
+
+.award-eq-badge {
+  font-size: 10px;
+  color: var(--dim);
+  border: 1px solid var(--bdr);
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  font-style: italic;
+}
+
+.award-rank-hint {
   font-size: 11px;
   color: var(--dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .award-rank-hint { display: none; }
 }
 
 /* ── PDF stats joueur — sélecteur ── */
