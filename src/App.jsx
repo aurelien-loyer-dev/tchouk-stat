@@ -351,6 +351,7 @@ export default function App() {
           onClear={clearHistory}
         />
       )}
+      <Analytics />
     </>
   )
 }
