@@ -1809,24 +1809,23 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 /* ── AWARDS — Distinctions du match ── */
 .awards-card {
-  padding: 16px 16px 4px;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.award-section {
+.award-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid var(--bdr);
 }
 
-.award-section:last-child {
+.award-row:last-child {
   border-bottom: none;
-  padding-bottom: 4px;
-}
-
-.award-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  padding-bottom: 2px;
 }
 
 .award-badge {
@@ -1840,15 +1839,23 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   border-radius: 6px;
   padding: 4px 8px;
   flex-shrink: 0;
+  margin-top: 2px;
   text-transform: uppercase;
 }
 
-.award-info {
-  flex: 1;
+.award-body {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
+  flex: 1;
   min-width: 0;
+}
+
+.award-full-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .award-full {
@@ -1862,60 +1869,72 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--dim);
 }
 
-.award-winner-name {
-  font-size: 14px;
+.award-winner {
+  font-size: 18px;
   font-weight: 900;
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
 }
 
-.award-players {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.award-hint {
+  font-size: 11px;
+  color: var(--dim);
 }
 
-.award-chip {
+/* ── PDF stats joueur — sélecteur ── */
+.player-pdf-wrap {
+  align-self: center;
+  width: 100%;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 7px 12px;
-  border: 1.5px solid var(--bdr);
-  border-radius: 10px;
-  background: var(--s2);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.player-pdf-btn {
+  width: 100%;
   text-align: center;
 }
 
-.award-chip:hover {
+.player-pdf-panel {
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
   background: var(--s1);
-  border-color: var(--s3);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
-.award-chip:active {
-  transform: scale(0.95);
+.player-pdf-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--bdr);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
 }
 
-.award-chip-name {
-  font-size: 13px;
+.player-pdf-item:last-child {
+  border-bottom: none;
+}
+
+.player-pdf-item:hover {
+  background: var(--s2);
+}
+
+.player-pdf-name {
+  font-size: 14px;
   font-weight: 700;
   color: var(--txt);
-  white-space: nowrap;
 }
 
-.award-chip-sel .award-chip-name {
-  color: inherit;
-}
-
-.award-chip-stat {
-  font-size: 10px;
+.player-pdf-team {
+  font-size: 12px;
   color: var(--dim);
-  white-space: nowrap;
-}
-
-.award-chip-sel .award-chip-stat {
-  color: inherit;
-  opacity: 0.75;
+  font-weight: 400;
 }

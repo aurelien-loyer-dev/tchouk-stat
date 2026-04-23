@@ -2,36 +2,82 @@ import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { PLAYER_STATS, playerTeamScore, playerDerivedStats, playerTirsTotal } from '../lib/playerStats'
 
+// ── Algorithmes de scoring automatique ───────────────────────────────────────
+//
+// BOPM : attaque pure — pts marqués, efficacité, pénalise pts donnés et fautes tir
+// BDPM : défense pure — actions défensives, pénalise passes ratées et fautes tech
+// MVP  : bilan global — pondère attaque + défense + toutes les fautes
+//
+function offScore(p) {
+  const tt  = p.pointsMarques + p.pointsDonnes + p.fautesTir
+  const eff = tt > 0 ? p.pointsMarques / tt : 0
+  return p.pointsMarques * 2 - p.pointsDonnes * 2 - p.fautesTir + eff * 8
+}
+
+function defScore(p) {
+  return p.defenseSolo * 3 + p.participationDef * 1.5 - p.passesRatees * 0.5 - p.fautesTech
+}
+
+function mvpScore(p) {
+  const tt  = p.pointsMarques + p.pointsDonnes + p.fautesTir
+  const eff = tt > 0 ? p.pointsMarques / tt : 0
+  return (
+    p.pointsMarques * 2
+    - p.pointsDonnes * 2
+    - p.fautesTir
+    + p.defenseSolo * 2
+    + p.participationDef
+    - p.passesRatees * 0.5
+    - p.fautesTech * 1.5
+    + eff * 8
+  )
+}
+
+function bestPlayer(players, scoreFn) {
+  if (!players || players.length === 0) return null
+  return players.reduce((a, b) => scoreFn(a) >= scoreFn(b) ? a : b)
+}
+
 const AWARDS = [
   {
-    key: 'bopm',
-    label: 'BOPM',
-    full: 'Best Offensive Player of the Match',
-    desc: 'Meilleur attaquant du match',
-    statHint: p => `${p.pointsMarques} pts marqués`,
-    color: '#d97706',
+    key:    'bopm',
+    label:  'BOPM',
+    full:   'Best Offensive Player of the Match',
+    desc:   'Meilleur attaquant du match',
+    fn:     offScore,
+    color:  '#d97706',
     pdfRgb: [217, 119, 6],
+    hint: (p, pctFn) => {
+      const tt = p.pointsMarques + p.pointsDonnes + p.fautesTir
+      return `${p.pointsMarques} pts marqués · ${pctFn(p.pointsMarques, tt)} eff. · ${p.pointsDonnes} pts donnés`
+    },
   },
   {
-    key: 'bdpm',
-    label: 'BDPM',
-    full: 'Best Defensive Player of the Match',
-    desc: 'Meilleur défenseur du match',
-    statHint: p => `${p.defenseSolo + p.participationDef} act. déf.`,
-    color: '#1f6feb',
+    key:    'bdpm',
+    label:  'BDPM',
+    full:   'Best Defensive Player of the Match',
+    desc:   'Meilleur défenseur du match',
+    fn:     defScore,
+    color:  '#1f6feb',
     pdfRgb: [31, 111, 235],
+    hint: (p) => `${p.defenseSolo} déf. solo · ${p.participationDef} part. déf.`,
   },
   {
-    key: 'mvp',
-    label: 'MVP',
-    full: 'Most Valuable Player',
-    desc: 'Joueur le plus complet du match',
-    statHint: p => `${p.pointsMarques} pts`,
-    color: '#eab308',
+    key:    'mvp',
+    label:  'MVP',
+    full:   'Most Valuable Player',
+    desc:   'Joueur le plus complet du match',
+    fn:     mvpScore,
+    color:  '#eab308',
     pdfRgb: [234, 179, 8],
+    hint: (p, pctFn) => {
+      const tt = p.pointsMarques + p.pointsDonnes + p.fautesTir
+      return `${p.pointsMarques} pts · ${pctFn(p.pointsMarques, tt)} eff. · ${p.defenseSolo + p.participationDef} déf. · ${p.fautesTir + p.fautesTech} fautes`
+    },
   },
 ]
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtDuration(totalSec) {
   const sec = Math.max(0, totalSec || 0)
   const m   = String(Math.floor(sec / 60)).padStart(2, '0')
@@ -46,7 +92,7 @@ function fmtDateTime(iso) {
 function fileSafeName(name) {
   return String(name || '')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '')
 }
@@ -64,8 +110,8 @@ function pct(num, den) {
   return `${Math.round((num / den) * 100)} %`
 }
 
-// ── Carte stats d'un joueur (écran résultats) ─────────────────────────────────
-function PlayerStatCard({ player, teamColor, teamName, onDownload }) {
+// ── Carte stats d'un joueur ───────────────────────────────────────────────────
+function PlayerStatCard({ player, teamColor, teamName }) {
   const d = playerDerivedStats(player)
 
   return (
@@ -78,7 +124,6 @@ function PlayerStatCard({ player, teamColor, teamName, onDownload }) {
         <div className="pr-player-pts-big">{player.pointsMarques}</div>
       </div>
 
-      {/* Stats brutes */}
       <div className="pr-stat-section-title">Statistiques</div>
       <div className="pr-stat-list">
         {PLAYER_STATS.map(stat => (
@@ -89,7 +134,6 @@ function PlayerStatCard({ player, teamColor, teamName, onDownload }) {
         ))}
       </div>
 
-      {/* Totaux & ratios */}
       <div className="pr-stat-section-title">Totaux &amp; ratios</div>
       <div className="pr-stat-list">
         <div className="pr-stat-row">
@@ -113,10 +157,6 @@ function PlayerStatCard({ player, teamColor, teamName, onDownload }) {
           <span className="pr-stat-val">{d.fautesTotal}</span>
         </div>
       </div>
-
-      <button className="btn-mini pr-dl-btn" onClick={() => onDownload(player)}>
-        PDF joueur ↓
-      </button>
     </div>
   )
 }
@@ -130,26 +170,29 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
   const team1Players = players.filter(p => p.teamIdx === 0)
   const team2Players = n === 2 ? players.filter(p => p.teamIdx === 1) : []
 
-  const [awards, setAwards] = useState({ bopm: null, bdpm: null, mvp: null })
+  const [showPicker, setShowPicker] = useState(false)
 
-  function toggleAward(awardKey, playerId) {
-    setAwards(prev => ({
-      ...prev,
-      [awardKey]: prev[awardKey] === playerId ? null : playerId,
-    }))
+  // Distinctions calculées automatiquement à partir des stats
+  const computedAwards = {
+    bopm: bestPlayer(players, offScore),
+    bdpm: bestPlayer(players, defScore),
+    mvp:  bestPlayer(players, mvpScore),
+  }
+
+  function teamName(p) {
+    return p.teamIdx === 0 ? (teams[0]?.name || 'Équipe 1') : (teams[1]?.name || 'Équipe 2')
   }
 
   // ── PDF d'un seul joueur ──────────────────────────────────────────────────
   function generatePlayerPdf(player) {
-    const teamName = player.teamIdx === 0 ? (teams[0]?.name || 'Équipe 1') : (teams[1]?.name || 'Équipe 2')
-    const d        = playerDerivedStats(player)
-    const doc      = new jsPDF({ unit: 'mm', format: 'a4' })
-    const pageW    = doc.internal.pageSize.getWidth()
-    const left     = 14
-    const maxW     = pageW - left * 2
-    let y          = 0
+    const tName = teamName(player)
+    const d     = playerDerivedStats(player)
+    const doc   = new jsPDF({ unit: 'mm', format: 'a4' })
+    const pageW = doc.internal.pageSize.getWidth()
+    const left  = 14
+    const maxW  = pageW - left * 2
+    let y       = 0
 
-    // En-tête
     doc.setFillColor(20, 30, 48)
     doc.rect(0, 0, pageW, 28, 'F')
     doc.setTextColor(255, 255, 255)
@@ -166,7 +209,6 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.setTextColor(15, 23, 42)
     y = 36
 
-    // Nom + équipe
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(20)
     doc.text(player.name, left, y)
@@ -174,11 +216,10 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(11)
     doc.setTextColor(100, 110, 130)
-    doc.text(teamName, left, y)
+    doc.text(tName, left, y)
     doc.setTextColor(15, 23, 42)
     y += 12
 
-    // Bloc points marqués
     doc.setFillColor(240, 245, 255)
     doc.roundedRect(left, y - 5, maxW, 14, 2, 2, 'F')
     doc.setFont('helvetica', 'bold')
@@ -228,11 +269,11 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     y += 6
     y = sectionHeader('Totaux & ratios', y)
     const derived = [
-      { label: 'Tirs total',           val: d.tirsTotal,                         sub: 'pts marqués + donnés + fautes tir' },
+      { label: 'Tirs total',           val: d.tirsTotal,                            sub: 'pts marqués + donnés + fautes tir' },
       { label: 'Efficacité offensive', val: pct(player.pointsMarques, d.tirsTotal), sub: 'pts marqués / tirs total' },
       { label: '% points offerts',     val: pct(player.pointsDonnes,  d.tirsTotal), sub: 'pts donnés / tirs total' },
-      { label: 'Actions défensives',   val: d.defTotal,                           sub: 'défense solo + participation' },
-      { label: 'Total fautes',         val: d.fautesTotal,                        sub: 'fautes de tir + techniques' },
+      { label: 'Actions défensives',   val: d.defTotal,                             sub: 'défense solo + participation' },
+      { label: 'Total fautes',         val: d.fautesTotal,                          sub: 'fautes de tir + techniques' },
     ]
     derived.forEach((row, idx) => {
       y = statRow(row.label, row.val, row.sub, idx, y)
@@ -256,7 +297,6 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       if (y + need > pageH - 14) { doc.addPage(); y = 14 }
     }
 
-    // En-tête
     doc.setFillColor(20, 30, 48)
     doc.rect(0, 0, pageW, 28, 'F')
     doc.setTextColor(255, 255, 255)
@@ -285,7 +325,6 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       y += 8
     }
 
-    // Définition des colonnes
     const cols = [
       { label: 'Joueur',   w: 30, key: null },
       { label: 'Pts',      w: 9,  key: 'pointsMarques' },
@@ -312,10 +351,10 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     }
 
     function cellVal(player, key) {
-      if (key === null) return player.name
-      if (key === '__tirsTotal')  return String(playerTirsTotal(player))
-      if (key === '__effOff')     return pct(player.pointsMarques, playerTirsTotal(player))
-      if (key === '__pctDon')     return pct(player.pointsDonnes,  playerTirsTotal(player))
+      if (key === null)            return player.name
+      if (key === '__tirsTotal')   return String(playerTirsTotal(player))
+      if (key === '__effOff')      return pct(player.pointsMarques, playerTirsTotal(player))
+      if (key === '__pctDon')      return pct(player.pointsDonnes,  playerTirsTotal(player))
       return String(player[key] ?? 0)
     }
 
@@ -328,10 +367,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       sc.forEach((col, i) => {
         const isFirst = i === 0
         const x = isFirst ? xOf(i) + 2 : xOf(i) + col.w / 2
-        doc.text(col.label, x, y0 + 1, {
-          align: isFirst ? 'left' : 'center',
-          maxWidth: col.w - 2,
-        })
+        doc.text(col.label, x, y0 + 1, { align: isFirst ? 'left' : 'center', maxWidth: col.w - 2 })
       })
       doc.setTextColor(15, 23, 42)
       return y0 + rowH
@@ -349,10 +385,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         doc.setFont('helvetica', isBold ? 'bold' : 'normal')
         doc.setFontSize(isBold ? 8 : 7.5)
         doc.setTextColor(isBold ? 15 : 50, isBold ? 23 : 60, isBold ? 42 : 80)
-        doc.text(val, x, y0 + 1, {
-          align: isFirst ? 'left' : 'center',
-          maxWidth: col.w - 2,
-        })
+        doc.text(val, x, y0 + 1, { align: isFirst ? 'left' : 'center', maxWidth: col.w - 2 })
       })
       doc.setDrawColor(230, 235, 245)
       doc.line(left, y0 + rowH - 4, left + maxW, y0 + rowH - 4)
@@ -404,9 +437,8 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     })
 
     // ── Distinctions du match ──────────────────────────────────────────────
-    const selectedAwards = AWARDS.filter(a => awards[a.key])
-    if (selectedAwards.length > 0) {
-      ensurePage(20 + selectedAwards.length * 14)
+    if (players.length > 0) {
+      ensurePage(20 + AWARDS.length * 14)
 
       doc.setFillColor(235, 240, 250)
       doc.rect(left, y, maxW, 8, 'F')
@@ -418,9 +450,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       y += 12
 
       AWARDS.forEach(award => {
-        const winnerId = awards[award.key]
-        if (!winnerId) return
-        const winner = players.find(p => p.id === winnerId)
+        const winner = computedAwards[award.key]
         if (!winner) return
 
         ensurePage(14)
@@ -480,7 +510,6 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
               player={p}
               teamColor="var(--c1)"
               teamName={teams[0]?.name || 'Équipe 1'}
-              onDownload={generatePlayerPdf}
             />
           ))}
         </div>
@@ -497,52 +526,61 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
                 player={p}
                 teamColor="var(--c2)"
                 teamName={teams[1]?.name || 'Équipe 2'}
-                onDownload={generatePlayerPdf}
               />
             ))}
           </div>
         </div>
       )}
 
-      <div className="card awards-card">
-        <div className="ctitle">Distinctions du match</div>
-        {AWARDS.map(award => {
-          const winnerId = awards[award.key]
-          const winner   = winnerId ? players.find(p => p.id === winnerId) : null
-          return (
-            <div key={award.key} className="award-section">
-              <div className="award-header">
+      {/* ── Distinctions automatiques ── */}
+      {players.length > 0 && (
+        <div className="card awards-card">
+          <div className="ctitle">Distinctions du match</div>
+          {AWARDS.map(award => {
+            const winner = computedAwards[award.key]
+            if (!winner) return null
+            return (
+              <div key={award.key} className="award-row">
                 <span className="award-badge" style={{ background: award.color }}>{award.label}</span>
-                <div className="award-info">
-                  <span className="award-full">{award.full}</span>
-                  <span className="award-desc">{award.desc}</span>
+                <div className="award-body">
+                  <div className="award-full-line">
+                    <span className="award-full">{award.full}</span>
+                    <span className="award-desc">{award.desc}</span>
+                  </div>
+                  <div className="award-winner" style={{ color: award.color }}>{winner.name}</div>
+                  <div className="award-hint">{award.hint(winner, pct)}</div>
                 </div>
-                {winner && (
-                  <span className="award-winner-name" style={{ color: award.color }}>
-                    {winner.name}
-                  </span>
-                )}
               </div>
-              <div className="award-players">
-                {players.map(p => {
-                  const sel = awards[award.key] === p.id
-                  return (
-                    <button
-                      key={p.id}
-                      className={`award-chip${sel ? ' award-chip-sel' : ''}`}
-                      style={sel ? { borderColor: award.color, background: award.color + '18', color: award.color } : {}}
-                      onClick={() => toggleAward(award.key, p.id)}
-                    >
-                      <span className="award-chip-name">{p.name}</span>
-                      <span className="award-chip-stat">{award.statHint(p)}</span>
-                    </button>
-                  )
-                })}
-              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── PDF stats d'un joueur (sélecteur) ── */}
+      {players.length > 0 && (
+        <div className="player-pdf-wrap">
+          <button
+            className="btn-ghost player-pdf-btn"
+            onClick={() => setShowPicker(s => !s)}
+          >
+            PDF stats joueur {showPicker ? '▲' : '▼'}
+          </button>
+          {showPicker && (
+            <div className="player-pdf-panel">
+              {players.map(p => (
+                <button
+                  key={p.id}
+                  className="player-pdf-item"
+                  onClick={() => { generatePlayerPdf(p); setShowPicker(false) }}
+                >
+                  <span className="player-pdf-name">{p.name}</span>
+                  <span className="player-pdf-team">{teamName(p)}</span>
+                </button>
+              ))}
             </div>
-          )
-        })}
-      </div>
+          )}
+        </div>
+      )}
 
       <button
         className="btn-ghost"
