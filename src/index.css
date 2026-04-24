@@ -231,7 +231,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .sb-scores { display: flex; align-items: center; justify-content: center; gap: 22px; }
 .sb-t      { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .sb-name   { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); }
-.sb-score  { font-size: 68px; font-weight: 900; line-height: 1; letter-spacing: -3px; }
+.sb-score  { font-size: 68px; font-weight: 900; line-height: 1; letter-spacing: -3px; user-select: none; }
 .sb-sep    { font-size: 36px; color: #9aa6b2; font-weight: 200; }
 
 .clock-wrap {
@@ -360,6 +360,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   font-weight: 800;
   letter-spacing: -1.4px;
   padding: 4px 0;
+  user-select: none;
 }
 
 .tabs  { display: flex; gap: 8px; justify-content: center; }
@@ -859,6 +860,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   font-weight: 900;
   line-height: 1;
   letter-spacing: -12px;
+  user-select: none;
 }
 
 @keyframes sc-bump {
@@ -1141,6 +1143,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   line-height: 1;
   font-weight: 900;
   letter-spacing: -4px;
+  user-select: none;
 }
 
 @media (max-width: 560px) {
