@@ -11,21 +11,30 @@ import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
 import { Analytics } from "@vercel/analytics/react"
 
-// Renvoie un text-shadow de contour si la couleur est trop claire ou trop sombre
-function teamHalo(hex) {
+function colorLum(hex) {
   const clean = String(hex || '').replace('#', '')
   const full  = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
   const n     = Number.parseInt(full, 16)
-  if (Number.isNaN(n)) return 'none'
+  if (Number.isNaN(n)) return 0.5
   const r = (n >> 16) & 255
   const g = (n >> 8)  & 255
   const b =  n        & 255
-  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+}
+
+// Contour texte pour couleurs très claires ou très sombres
+function teamHalo(hex) {
+  const lum = colorLum(hex)
   if (lum > 0.75)
     return '-1px -1px 0 rgba(0,0,0,0.28), 1px -1px 0 rgba(0,0,0,0.28), -1px 1px 0 rgba(0,0,0,0.28), 1px 1px 0 rgba(0,0,0,0.28), 0 0 8px rgba(0,0,0,0.18)'
   if (lum < 0.22)
     return '-1px -1px 0 rgba(255,255,255,0.38), 1px -1px 0 rgba(255,255,255,0.38), -1px 1px 0 rgba(255,255,255,0.38), 1px 1px 0 rgba(255,255,255,0.38), 0 0 8px rgba(255,255,255,0.25)'
   return 'none'
+}
+
+// Couleur du texte sur fond coloré (bouton +1, etc.)
+function teamBtnTxt(hex) {
+  return colorLum(hex) > 0.55 ? '#111111' : '#ffffff'
 }
 
 const DEFAULT_SETTINGS = {
@@ -123,8 +132,10 @@ export default function App() {
     const c2 = matchSettings.teamColors[1] || DEFAULT_SETTINGS.teamColors[1]
     document.documentElement.style.setProperty('--c1', c1)
     document.documentElement.style.setProperty('--c2', c2)
-    document.documentElement.style.setProperty('--c1-halo', teamHalo(c1))
-    document.documentElement.style.setProperty('--c2-halo', teamHalo(c2))
+    document.documentElement.style.setProperty('--c1-halo',    teamHalo(c1))
+    document.documentElement.style.setProperty('--c2-halo',    teamHalo(c2))
+    document.documentElement.style.setProperty('--c1-btn-txt', teamBtnTxt(c1))
+    document.documentElement.style.setProperty('--c2-btn-txt', teamBtnTxt(c2))
   }, [matchSettings])
 
   useEffect(() => {

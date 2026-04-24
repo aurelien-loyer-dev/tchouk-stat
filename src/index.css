@@ -1,8 +1,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --c1-halo: none;
-  --c2-halo: none;
+  --c1-halo:    none;
+  --c2-halo:    none;
+  --c1-btn-txt: #ffffff;
+  --c2-btn-txt: #ffffff;
   --bg:  #f6f7fb;
   --s1:  #ffffff;
   --s2:  #eef1f6;
@@ -266,8 +268,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 @media (max-width: 560px) { .grid.g2 { grid-template-columns: 1fr; } }
 
 .panel { background: var(--s1); border-radius: 14px; overflow: hidden; border: 1px solid var(--bdr); border-top: 4px solid; }
-.panel.p0 { border-top-color: var(--c1); }
-.panel.p1 { border-top-color: var(--c2); }
+.panel.p0 { border-top-color: var(--c1); box-shadow: 0 -1px 0 0 rgba(0,0,0,0.08) inset; }
+.panel.p1 { border-top-color: var(--c2); box-shadow: 0 -1px 0 0 rgba(0,0,0,0.08) inset; }
 .panel.ps { border-top-color: var(--acc); }
 
 .ph {
@@ -369,8 +371,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   background: var(--s1); color: var(--dim); font-size: 14px; font-weight: 700;
   cursor: pointer; transition: all 0.18s;
 }
-.tab.a0 { border-color: var(--c1); color: var(--c1); background: rgba(14,159,143,0.08); }
-.tab.a1 { border-color: var(--c2); color: var(--c2); background: rgba(209,67,67,0.08); }
+.tab.a0 { border-color: var(--c1); color: var(--c1); background: color-mix(in srgb, var(--c1) 10%, transparent); text-shadow: var(--c1-halo); }
+.tab.a1 { border-color: var(--c2); color: var(--c2); background: color-mix(in srgb, var(--c2) 10%, transparent); text-shadow: var(--c2-halo); }
 
 .card          { background: var(--s1); border-radius: 12px; padding: 16px; border: 1px solid var(--bdr); }
 .ctitle        { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin-bottom: 14px; }
@@ -890,7 +892,10 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   font-weight: 800;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18), 0 0 0 1.5px rgba(0,0,0,0.10);
 }
+.sc-team-left  .sc-btn-score { color: var(--c1-btn-txt); }
+.sc-team-right .sc-btn-score { color: var(--c2-btn-txt); }
 .sc-btn-score:active { opacity: 0.85; transform: scale(0.97); }
 
 .sc-btn-neg {
