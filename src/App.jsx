@@ -11,8 +11,25 @@ import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
 import { Analytics } from "@vercel/analytics/react"
 
+// Renvoie un text-shadow de contour si la couleur est trop claire ou trop sombre
+function teamHalo(hex) {
+  const clean = String(hex || '').replace('#', '')
+  const full  = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
+  const n     = Number.parseInt(full, 16)
+  if (Number.isNaN(n)) return 'none'
+  const r = (n >> 16) & 255
+  const g = (n >> 8)  & 255
+  const b =  n        & 255
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  if (lum > 0.75)
+    return '-1px -1px 0 rgba(0,0,0,0.28), 1px -1px 0 rgba(0,0,0,0.28), -1px 1px 0 rgba(0,0,0,0.28), 1px 1px 0 rgba(0,0,0,0.28), 0 0 8px rgba(0,0,0,0.18)'
+  if (lum < 0.22)
+    return '-1px -1px 0 rgba(255,255,255,0.38), 1px -1px 0 rgba(255,255,255,0.38), -1px 1px 0 rgba(255,255,255,0.38), 1px 1px 0 rgba(255,255,255,0.38), 0 0 8px rgba(255,255,255,0.25)'
+  return 'none'
+}
+
 const DEFAULT_SETTINGS = {
-  teamColors: ['#5de8d6', '#ff7272'],
+  teamColors: ['#e88c0b', '#b016ee'],
   halfDurationMin: 12,
   halfCount: 2,
 }
@@ -102,8 +119,12 @@ export default function App() {
   useEffect(() => { teamsRef.current = teams }, [teams])
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--c1', matchSettings.teamColors[0] || DEFAULT_SETTINGS.teamColors[0])
-    document.documentElement.style.setProperty('--c2', matchSettings.teamColors[1] || DEFAULT_SETTINGS.teamColors[1])
+    const c1 = matchSettings.teamColors[0] || DEFAULT_SETTINGS.teamColors[0]
+    const c2 = matchSettings.teamColors[1] || DEFAULT_SETTINGS.teamColors[1]
+    document.documentElement.style.setProperty('--c1', c1)
+    document.documentElement.style.setProperty('--c2', c2)
+    document.documentElement.style.setProperty('--c1-halo', teamHalo(c1))
+    document.documentElement.style.setProperty('--c2-halo', teamHalo(c2))
   }, [matchSettings])
 
   useEffect(() => {

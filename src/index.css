@@ -1,6 +1,8 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --c1-halo: none;
+  --c2-halo: none;
   --bg:  #f6f7fb;
   --s1:  #ffffff;
   --s2:  #eef1f6;
@@ -1975,3 +1977,32 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--dim);
   font-weight: 400;
 }
+
+/* ── Contours automatiques pour les couleurs très claires ou très sombres ──
+   --c1-halo / --c2-halo sont calculés en JS (App.jsx) selon la luminance.
+   Aucune retouche dans les composants : tout passe par les sélecteurs CSS.
+────────────────────────────────────────────────────────────────────────────── */
+
+/* Scoreboard match & player-match — équipe gauche / droite */
+.sb-scores > div:first-of-type .sb-score,
+.sb-scores > div:first-of-type .sb-name  { text-shadow: var(--c1-halo); }
+.sb-scores > div:last-of-type  .sb-score,
+.sb-scores > div:last-of-type  .sb-name  { text-shadow: var(--c2-halo); }
+
+/* Scorer plein écran — grands chiffres + initiale logo */
+.sc-team-left  .sc-score,
+.sc-team-left  .sc-logo-placeholder { text-shadow: var(--c1-halo); }
+.sc-team-right .sc-score,
+.sc-team-right .sc-logo-placeholder { text-shadow: var(--c2-halo); }
+
+/* Score final résultats (.rf) */
+.rf > span:first-child { text-shadow: var(--c1-halo); }
+.rf > span:last-child  { text-shadow: var(--c2-halo); }
+
+/* Résultats scorer — grands scores */
+.res-simple-board > :first-child .res-simple-score { text-shadow: var(--c1-halo); }
+.res-simple-board > :last-child  .res-simple-score { text-shadow: var(--c2-halo); }
+
+/* Panneaux statistiques */
+.panel.p0 .ph { text-shadow: var(--c1-halo); }
+.panel.p1 .ph { text-shadow: var(--c2-halo); }

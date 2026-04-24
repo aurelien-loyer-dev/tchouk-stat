@@ -474,7 +474,7 @@ export default function Results({
         style={{ alignSelf: 'center', minWidth: 260, marginTop: 4 }}
         onClick={handleDownloadSheet}
       >
-        Telecharger la feuille de match (PDF)
+        Télécharger la feuille de match (PDF)
       </button>
 
       <button
