@@ -213,8 +213,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 .btn-end {
   background: var(--s1);
-  border: 1px solid rgba(209, 67, 67, 0.35);
-  color: var(--c2);
+  border: 1px solid color-mix(in srgb, var(--err) 40%, transparent);
+  color: var(--err);
   border-radius: var(--r);
   padding: 13px 24px;
   font-size: 15px;
@@ -224,13 +224,13 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   align-self: center;
   min-width: 220px;
 }
-.btn-end:hover { background: rgba(209,67,67,0.06); }
+.btn-end:hover { background: color-mix(in srgb, var(--err) 8%, transparent); }
 
 /* ── SCOREBOARD ── */
 .sb { background: var(--s1); border-radius: 14px; padding: 18px; border: 1px solid var(--bdr); }
 .sb-scores { display: flex; align-items: center; justify-content: center; gap: 22px; }
 .sb-t      { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.sb-name   { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); }
+.sb-name   { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; user-select: none; }
 .sb-score  { font-size: 68px; font-weight: 900; line-height: 1; letter-spacing: -3px; user-select: none; }
 .sb-sep    { font-size: 36px; color: #9aa6b2; font-weight: 200; }
 
@@ -2009,3 +2009,9 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 /* Panneaux statistiques */
 .panel.p0 .ph { text-shadow: var(--c1-halo); }
 .panel.p1 .ph { text-shadow: var(--c2-halo); }
+
+/* PlayerMatch — en-têtes de colonnes équipe + noms des joueurs */
+.pm-players-wrap > .pm-team-col:first-child .pm-team-hd,
+.pm-players-wrap > .pm-team-col:first-child .pm-player-name { text-shadow: var(--c1-halo); }
+.pm-players-wrap > .pm-team-col:last-child  .pm-team-hd,
+.pm-players-wrap > .pm-team-col:last-child  .pm-player-name { text-shadow: var(--c2-halo); }
