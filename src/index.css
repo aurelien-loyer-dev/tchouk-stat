@@ -925,8 +925,6 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   font-size: clamp(16px, min(2vw, 2.2vh), 26px);
   font-weight: 800;
   margin-top: -6px;
-  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.18);
-  paint-order: stroke fill;
 }
 
 .sc-ctrl {
@@ -2008,11 +2006,13 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .sb-scores > div:last-of-type  .sb-score,
 .sb-scores > div:last-of-type  .sb-name  { text-shadow: var(--c2-halo); }
 
-/* Scorer plein écran — grands chiffres + initiale logo */
+/* Scorer plein écran — grands chiffres + initiale logo + score mi-temps */
 .sc-team-left  .sc-score,
-.sc-team-left  .sc-logo-placeholder { text-shadow: var(--c1-halo); }
+.sc-team-left  .sc-logo-placeholder,
+.sc-team-left  .sc-half-score { text-shadow: var(--c1-halo); }
 .sc-team-right .sc-score,
-.sc-team-right .sc-logo-placeholder { text-shadow: var(--c2-halo); }
+.sc-team-right .sc-logo-placeholder,
+.sc-team-right .sc-half-score { text-shadow: var(--c2-halo); }
 
 /* Score final résultats (.rf) */
 .rf > span:first-child { text-shadow: var(--c1-halo); }
