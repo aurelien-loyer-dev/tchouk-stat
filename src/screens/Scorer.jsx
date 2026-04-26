@@ -25,9 +25,8 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const two = numTeams === 2
   const [elapsedSec, setElapsedSec] = useState(0)
   const [running, setRunning] = useState(false)
-  // halfSnapshots[i] = cumulative scores [t0, t1] at the START of half (i+1)
-  // halfSnapshots[0] = [0, 0] always; halfSnapshots[1] = scores when half 1 ended; etc.
   const [halfSnapshots, setHalfSnapshots] = useState([[0, 0]])
+  const [matchEnded, setMatchEnded] = useState(false)
 
   const halfDurationMin = Math.max(1, Number(settings?.halfDurationMin) || 12)
   const halfCount       = Math.max(1, Number(settings?.halfCount) || 2)
@@ -67,60 +66,41 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const s1Ref = useRef(s1)
   s0Ref.current = s0
   s1Ref.current = s1
-  const prevHalfRef   = useRef(1)
-  const matchDoneRef  = useRef(false)
+  const prevHalfRef = useRef(1)
 
   // Capture snapshot when half changes (half 1→2, 2→3…)
   useEffect(() => {
     if (currentHalf !== prevHalfRef.current) {
       prevHalfRef.current = currentHalf
-      const snap = [s0Ref.current, s1Ref.current ?? 0]
-      setHalfSnapshots(prev => [...prev, snap])
+      setHalfSnapshots(prev => [...prev, [s0Ref.current, s1Ref.current ?? 0]])
     }
   }, [currentHalf])
 
-  // Capture final snapshot when the last half ends (currentHalf doesn't change for the last half)
-  useEffect(() => {
-    if (elapsedSec >= totalMatchSec && !matchDoneRef.current) {
-      matchDoneRef.current = true
-      setHalfSnapshots(prev => {
-        if (prev.length <= halfCount) {
-          return [...prev, [s0Ref.current, s1Ref.current ?? 0]]
-        }
-        return prev
-      })
-    }
-  }, [elapsedSec, totalMatchSec, halfCount])
-
   // Current half's start scores = last snapshot
-  const halfStart   = halfSnapshots[halfSnapshots.length - 1]
-  const halfScore0  = s0 - halfStart[0]
-  const halfScore1  = two ? (s1 ?? 0) - halfStart[1] : null
+  const halfStart  = halfSnapshots[halfSnapshots.length - 1]
+  const halfScore0 = s0 - halfStart[0]
+  const halfScore1 = two ? (s1 ?? 0) - halfStart[1] : null
 
-  // Build per-half score rows for the summary panel
-  const halfSummaryRows = useMemo(() => {
-    const rows = []
+  // Build per-half score rows for the end screen
+  function buildEndRows(finalS0, finalS1) {
+    const snaps = [...halfSnapshots, [finalS0, finalS1 ?? 0]]
+    const rows  = []
     for (let h = 1; h <= halfCount; h++) {
-      const start = halfSnapshots[h - 1]
-      const end   = halfSnapshots[h]
-      if (!start) break
-      if (end) {
-        rows.push({ half: h, t0: end[0] - start[0], t1: end[1] - start[1], done: true })
-      } else if (h === currentHalf) {
-        rows.push({ half: h, t0: s0 - start[0], t1: (s1 ?? 0) - start[1], done: false })
-      }
+      const start = snaps[h - 1]
+      const end   = snaps[h]
+      if (!start || !end) break
+      rows.push({ half: h, t0: end[0] - start[0], t1: end[1] - start[1] })
     }
     return rows
-  }, [halfSnapshots, currentHalf, s0, s1, halfCount])
-
-  const showSummary = halfSnapshots.length > 1 // at least one half completed
+  }
 
   function adjScore(teamIdx, d) {
     onAdj(teamIdx, 'tGagne', d)
   }
 
   function handleEnd() {
-    if (window.confirm('Terminer le match ?')) onEnd()
+    setRunning(false)
+    setMatchEnded(true)
   }
 
   function handleResetCurrentHalf() {
@@ -138,23 +118,92 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
     setRunning(false)
     setElapsedSec(0)
     setHalfSnapshots([[0, 0]])
-    prevHalfRef.current  = 1
-    matchDoneRef.current = false
+    setMatchEnded(false)
+    prevHalfRef.current = 1
     onReset?.()
   }
 
   const clockPct = totalHalfSec > 0 ? (elapsedInHalf / totalHalfSec) * 100 : 0
   const isLast10 = remainingHalfSec <= 10 && remainingHalfSec > 0 && running
-  const matchOver = elapsedSec >= totalMatchSec
 
+  // ── End screen ──────────────────────────────────────────────────────────────
+  if (matchEnded) {
+    const endRows = buildEndRows(s0, s1)
+    return (
+      <div className="sc-root sc-end-root">
+        <div className="sc-topbar">
+          <div className="sc-half-badge">Fin du match</div>
+          <button className="sc-ctrl-btn" style={{ fontSize: 13 }} onClick={handleResetScorer}>
+            Rejouer
+          </button>
+        </div>
+
+        <div className="sc-end-body">
+          {/* Final score */}
+          <div className="sc-end-final">
+            <div className="sc-end-team">
+              <div className="sc-end-logo-wrap">
+                {logos?.[0]
+                  ? <img src={logos[0]} className="sc-logo" alt={teams[0]?.name} />
+                  : <div className="sc-logo-placeholder" style={{ background: c1 + '22', color: c1 }}>{(teams[0]?.name || 'E')[0].toUpperCase()}</div>
+                }
+              </div>
+              <div className="sc-end-name" style={{ color: c1 }}>{teams[0]?.name}</div>
+              <div className="sc-end-score" style={{ color: c1 }}>{s0}</div>
+            </div>
+            {two && (
+              <div className="sc-end-team">
+                <div className="sc-end-logo-wrap">
+                  {logos?.[1]
+                    ? <img src={logos[1]} className="sc-logo" alt={teams[1]?.name} />
+                    : <div className="sc-logo-placeholder" style={{ background: c2 + '22', color: c2 }}>{(teams[1]?.name || 'E')[0].toUpperCase()}</div>
+                  }
+                </div>
+                <div className="sc-end-name" style={{ color: c2 }}>{teams[1]?.name}</div>
+                <div className="sc-end-score" style={{ color: c2 }}>{s1}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Per-half breakdown */}
+          {endRows.length > 0 && (
+            <div className="sc-end-halves">
+              <div className="sc-halves-title">Score par mi-temps</div>
+              <div className="sc-end-halves-grid">
+                <span className="sc-halves-label" />
+                <span className="sc-end-col-hd" style={{ color: c1 }}>{teams[0]?.name}</span>
+                {two && <span className="sc-end-col-hd" style={{ color: c2 }}>{teams[1]?.name}</span>}
+              </div>
+              {endRows.map(({ half, t0, t1 }) => (
+                <div key={half} className="sc-end-halves-grid">
+                  <span className="sc-halves-label">MT{half}</span>
+                  <span className="sc-end-half-val" style={{ color: c1 }}>+{t0}</span>
+                  {two && <span className="sc-end-half-val" style={{ color: c2 }}>+{t1}</span>}
+                </div>
+              ))}
+              <div className="sc-end-halves-grid sc-end-total-row">
+                <span className="sc-halves-label">Total</span>
+                <span className="sc-end-half-val" style={{ color: c1 }}>{s0}</span>
+                {two && <span className="sc-end-half-val" style={{ color: c2 }}>{s1}</span>}
+              </div>
+            </div>
+          )}
+
+          <button className="btn-acc sc-end-cta" onClick={onEnd}>
+            Voir les résultats
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Main scorer screen ───────────────────────────────────────────────────────
   return (
     <div className="sc-root">
 
       {/* Top bar */}
       <div className="sc-topbar">
-        <div className="sc-half-badge">
-          MT {currentHalf}/{halfCount}
-        </div>
+        <div className="sc-half-badge">MT {currentHalf}/{halfCount}</div>
         <button className="sc-end-btn" onClick={handleEnd}>Fin</button>
       </div>
 
@@ -172,7 +221,6 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
 
       {/* Scoreboard */}
       <div className="sc-board">
-        {/* Team 1 */}
         <div className="sc-team sc-team-left" style={{ '--tc': c1 }}>
           <div className="sc-logo-wrap">
             {logos?.[0]
@@ -191,7 +239,6 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           </div>
         </div>
 
-        {/* Team 2 (only in 2-team mode) */}
         {two && (
           <div className="sc-team sc-team-right" style={{ '--tc': c2 }}>
             <div className="sc-logo-wrap">
@@ -237,35 +284,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           Reset tout
         </button>
       </div>
-
-      {/* Per-half score summary — appears once at least one half is completed */}
-      {showSummary && (
-        <div className="sc-halves-summary">
-          <div className="sc-halves-title">
-            {matchOver ? 'Récap du match' : 'Mi-temps'}
-          </div>
-          <div className="sc-halves-header">
-            <span />
-            <span style={{ color: c1 }}>{teams[0]?.name}</span>
-            {two && <span style={{ color: c2 }}>{teams[1]?.name}</span>}
-          </div>
-          {halfSummaryRows.map(({ half, t0, t1, done }) => (
-            <div key={half} className={`sc-halves-row${done ? '' : ' sc-halves-row-live'}`}>
-              <span className="sc-halves-label">MT{half}</span>
-              <span className="sc-halves-score" style={{ color: c1 }}>+{t0}</span>
-              {two && <span className="sc-halves-score" style={{ color: c2 }}>+{t1}</span>}
-              {!done && <span className="sc-halves-live">en cours</span>}
-            </div>
-          ))}
-          {matchOver && (
-            <div className="sc-halves-row sc-halves-total">
-              <span className="sc-halves-label">Total</span>
-              <span className="sc-halves-score" style={{ color: c1 }}>{s0}</span>
-              {two && <span className="sc-halves-score" style={{ color: c2 }}>{s1}</span>}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
+
 }

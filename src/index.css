@@ -952,6 +952,114 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .sc-ctrl-btn:hover { background: var(--s2); color: var(--txt); }
 .sc-ctrl-btn.active { background: var(--acc); color: #fff; border-color: var(--acc); }
 
+.sc-end-root {
+  justify-content: flex-start;
+}
+
+.sc-end-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 20px 32px;
+  overflow-y: auto;
+}
+
+.sc-end-final {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.sc-end-team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sc-end-logo-wrap {
+  width: clamp(64px, 10vw, 120px);
+  height: clamp(64px, 10vw, 120px);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sc-end-name {
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  text-align: center;
+}
+
+.sc-end-score {
+  font-size: clamp(72px, 14vw, 160px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -4px;
+}
+
+.sc-end-halves {
+  width: 100%;
+  max-width: 380px;
+  background: var(--s1);
+  border: 1px solid var(--bdr);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sc-end-halves-grid {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.sc-end-col-hd {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.sc-end-half-val {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.sc-end-total-row {
+  border-top: 1px solid var(--bdr);
+  margin-top: 4px;
+  padding-top: 8px;
+}
+
+.sc-end-total-row .sc-end-half-val {
+  font-size: 24px;
+}
+
+.sc-end-cta {
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  padding: 16px;
+  font-size: 17px;
+}
+
 .sc-halves-summary {
   margin: 0 14px 16px;
   background: var(--s1);
