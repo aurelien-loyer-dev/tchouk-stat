@@ -103,7 +103,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const isLast10 = remainingHalfSec <= 10 && remainingHalfSec > 0 && running
 
   function fmtHalfScore(n) {
-    return n > 0 ? `+${n}` : `${n}`
+    return `+${n}`
   }
 
   return (
@@ -144,7 +144,6 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           <div className="sc-team-name">{teams[0]?.name}</div>
           <AnimScore value={s0} color={c1} />
           <div className="sc-half-score" style={{ color: c1 }}>
-            <span className="sc-half-score-lbl">mt</span>
             {fmtHalfScore(halfScore0)}
           </div>
 
@@ -169,7 +168,6 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
             <div className="sc-team-name">{teams[1]?.name}</div>
             <AnimScore value={s1} color={c2} />
             <div className="sc-half-score" style={{ color: c2 }}>
-              <span className="sc-half-score-lbl">mt</span>
               {fmtHalfScore(halfScore1)}
             </div>
 

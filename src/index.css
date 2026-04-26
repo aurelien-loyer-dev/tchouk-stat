@@ -922,21 +922,11 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .sc-half-score {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
   font-size: clamp(16px, min(2vw, 2.2vh), 26px);
   font-weight: 800;
-  opacity: 0.75;
   margin-top: -6px;
-}
-
-.sc-half-score-lbl {
-  font-size: clamp(9px, 1vw, 13px);
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  opacity: 0.6;
+  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.18);
+  paint-order: stroke fill;
 }
 
 .sc-ctrl {
