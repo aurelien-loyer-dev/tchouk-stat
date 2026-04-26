@@ -25,6 +25,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const two = numTeams === 2
   const [elapsedSec, setElapsedSec] = useState(0)
   const [running, setRunning] = useState(false)
+  const [halfStartScores, setHalfStartScores] = useState([0, 0])
 
   const halfDurationMin = Math.max(1, Number(settings?.halfDurationMin) || 12)
   const halfCount       = Math.max(1, Number(settings?.halfCount) || 2)
@@ -34,17 +35,20 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const c1 = settings?.teamColors?.[0] || '#5de8d6'
   const c2 = settings?.teamColors?.[1] || '#ff7272'
 
+  // Stop at end of each half, not just end of match
   useEffect(() => {
     if (!running) return
     const id = window.setInterval(() => {
       setElapsedSec(prev => {
         const next = prev + 1
-        if (next >= totalMatchSec) { setRunning(false); return totalMatchSec }
+        const currentHalfEnd = (Math.floor(prev / totalHalfSec) + 1) * totalHalfSec
+        const stop = Math.min(currentHalfEnd, totalMatchSec)
+        if (next >= stop) { setRunning(false); return stop }
         return next
       })
     }, 1000)
     return () => window.clearInterval(id)
-  }, [running, totalMatchSec])
+  }, [running, totalMatchSec, totalHalfSec])
 
   const currentHalf = useMemo(() => {
     if (elapsedSec >= totalMatchSec) return halfCount
@@ -54,6 +58,26 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   const elapsedInHalf    = elapsedSec >= totalMatchSec ? totalHalfSec : elapsedSec % totalHalfSec
   const remainingHalfSec = Math.max(0, totalHalfSec - elapsedInHalf)
 
+  const s0 = score(teams, numTeams, 0)
+  const s1 = two ? score(teams, numTeams, 1) : null
+
+  // Track scores at start of each half to compute per-half score
+  const s0Ref = useRef(s0)
+  const s1Ref = useRef(s1)
+  s0Ref.current = s0
+  s1Ref.current = s1
+  const prevHalfRef = useRef(1)
+
+  useEffect(() => {
+    if (currentHalf !== prevHalfRef.current) {
+      prevHalfRef.current = currentHalf
+      setHalfStartScores([s0Ref.current, s1Ref.current ?? 0])
+    }
+  }, [currentHalf])
+
+  const halfScore0 = s0 - halfStartScores[0]
+  const halfScore1 = two ? (s1 ?? 0) - halfStartScores[1] : null
+
   function adjScore(teamIdx, d) {
     onAdj(teamIdx, 'tGagne', d)
   }
@@ -62,17 +86,25 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
     if (window.confirm('Terminer le match ?')) onEnd()
   }
 
+  function handleResetCurrentHalf() {
+    setRunning(false)
+    setElapsedSec((currentHalf - 1) * totalHalfSec)
+  }
+
   function handleResetScorer() {
     setRunning(false)
     setElapsedSec(0)
+    setHalfStartScores([0, 0])
+    prevHalfRef.current = 1
     onReset?.()
   }
 
-  const s0 = score(teams, numTeams, 0)
-  const s1 = two ? score(teams, numTeams, 1) : null
-
   const clockPct = totalHalfSec > 0 ? (elapsedInHalf / totalHalfSec) * 100 : 0
   const isLast10 = remainingHalfSec <= 10 && remainingHalfSec > 0 && running
+
+  function fmtHalfScore(n) {
+    return n > 0 ? `+${n}` : `${n}`
+  }
 
   return (
     <div className="sc-root">
@@ -111,6 +143,10 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           </div>
           <div className="sc-team-name">{teams[0]?.name}</div>
           <AnimScore value={s0} color={c1} />
+          <div className="sc-half-score" style={{ color: c1 }}>
+            <span className="sc-half-score-lbl">mt</span>
+            {fmtHalfScore(halfScore0)}
+          </div>
 
           {/* Score buttons */}
           <div className="sc-actions">
@@ -132,6 +168,10 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
             </div>
             <div className="sc-team-name">{teams[1]?.name}</div>
             <AnimScore value={s1} color={c2} />
+            <div className="sc-half-score" style={{ color: c2 }}>
+              <span className="sc-half-score-lbl">mt</span>
+              {fmtHalfScore(halfScore1)}
+            </div>
 
             <div className="sc-actions">
               <button className="sc-btn-score" style={{ background: c2 }} onClick={() => adjScore(1, 1)}>+1</button>
@@ -150,9 +190,13 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           }
           {running ? 'Pause' : elapsedSec > 0 ? 'Reprendre' : 'Démarrer'}
         </button>
-        <button className="sc-ctrl-btn" onClick={handleResetScorer}>
+        <button className="sc-ctrl-btn" onClick={handleResetCurrentHalf} title="Remet le chrono de cette mi-temps à zéro">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          Reset scoreur
+          Reset MT
+        </button>
+        <button className="sc-ctrl-btn" onClick={handleResetScorer} title="Remet le scoreur complet à zéro">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Reset tout
         </button>
       </div>
     </div>
