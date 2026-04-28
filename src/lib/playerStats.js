@@ -1,15 +1,21 @@
 // Stats disponibles par joueur
 export const PLAYER_STATS = [
-  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,             color: 'amber' },
-  { id: 'pointsMarques',      label: 'Points marqués',       sub: null, scoreImpact: 'self', color: 'green' },
-  { id: 'pointsDonnes',       label: 'Points donnés',        sub: null, scoreImpact: 'opp',  color: 'red' },
-  { id: 'fautesTir',          label: 'Fautes de tir',        sub: null,             color: 'amber' },
-  { id: 'defenseSolo',        label: 'Défense solo',         sub: null },
-  { id: 'participationDef',   label: 'Participation déf.',   sub: null },
-  { id: 'defenseRatee',       label: 'Défense ratée',        sub: null,             color: 'red' },
-  { id: 'passesRatees',       label: 'Passe ratée',          sub: null,             color: 'red' },
-  { id: 'fautesTech',         label: 'Faute technique',      sub: null,             color: 'red' },
-  { id: 'sanctions',          label: 'Sanctions',            sub: null,             color: 'red' },
+  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,             color: 'amber', group: 'off' },
+  { id: 'pointsMarques',      label: 'Points marqués',       sub: null, scoreImpact: 'self', color: 'green', group: 'off' },
+  { id: 'pointsDonnes',       label: 'Points donnés',        sub: null, scoreImpact: 'opp',  color: 'red',   group: 'off' },
+  { id: 'fautesTir',          label: 'Fautes de tir',        sub: null,             color: 'amber', group: 'off' },
+  { id: 'defenseSolo',        label: 'Défense solo',         sub: null,                             group: 'def' },
+  { id: 'participationDef',   label: 'Participation déf.',   sub: null,                             group: 'def' },
+  { id: 'defenseRatee',       label: 'Défense ratée',        sub: null,             color: 'red',   group: 'def' },
+  { id: 'passesRatees',       label: 'Passe ratée',          sub: null,             color: 'red',   group: 'tech' },
+  { id: 'fautesTech',         label: 'Faute technique',      sub: null,             color: 'red',   group: 'tech' },
+  { id: 'sanctions',          label: 'Sanctions',            sub: null,             color: 'red',   group: 'tech' },
+]
+
+export const STAT_GROUPS = [
+  { id: 'off',  label: 'Offensives' },
+  { id: 'def',  label: 'Défensives' },
+  { id: 'tech', label: 'Techniques' },
 ]
 
 export function mkPlayer(name, teamIdx) {

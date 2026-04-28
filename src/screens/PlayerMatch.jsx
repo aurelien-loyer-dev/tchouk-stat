@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PLAYER_STATS, playerTeamScore } from '../lib/playerStats'
+import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../lib/playerStats'
 
 function fmtClock(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, '0')
@@ -161,21 +161,31 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
             ? <>Stat : <strong>{selectedDef.label}</strong> — touche un joueur</>
             : 'Sélectionne une stat à affecter à un joueur'}
         </div>
-        <div className="pm-stat-grid">
-          {PLAYER_STATS.map(stat => (
-            <button
-              key={stat.id}
-              className={[
-                'pm-stat-btn',
-                stat.color && `pm-stat-${stat.color}`,
-                selectedStat === stat.id && 'pm-stat-sel',
-              ].filter(Boolean).join(' ')}
-              onClick={() => handleStatClick(stat.id)}
-            >
-              <span className="pm-stat-label">{stat.label}</span>
-              {stat.sub && <span className="pm-stat-sub">{stat.sub}</span>}
-            </button>
-          ))}
+        <div className="pm-stat-groups">
+          {STAT_GROUPS.map(group => {
+            const stats = PLAYER_STATS.filter(s => s.group === group.id)
+            return (
+              <div key={group.id} className="pm-stat-group">
+                <div className="pm-stat-group-label">{group.label}</div>
+                <div className="pm-stat-grid">
+                  {stats.map(stat => (
+                    <button
+                      key={stat.id}
+                      className={[
+                        'pm-stat-btn',
+                        stat.color && `pm-stat-${stat.color}`,
+                        selectedStat === stat.id && 'pm-stat-sel',
+                      ].filter(Boolean).join(' ')}
+                      onClick={() => handleStatClick(stat.id)}
+                    >
+                      <span className="pm-stat-label">{stat.label}</span>
+                      {stat.sub && <span className="pm-stat-sub">{stat.sub}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 

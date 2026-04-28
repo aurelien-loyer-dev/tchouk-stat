@@ -1600,6 +1600,27 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--acc);
 }
 
+.pm-stat-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pm-stat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pm-stat-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--dim);
+  padding-left: 2px;
+}
+
 .pm-stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
