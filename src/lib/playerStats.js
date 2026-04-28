@@ -1,13 +1,15 @@
 // Stats disponibles par joueur
 export const PLAYER_STATS = [
-  { id: 'tirsReussis',      label: 'Tirs réussis',       sub: 'Shot sur cible' },
-  { id: 'pointsMarques',    label: 'Points marqués',     sub: null, scoreImpact: 'self', color: 'green' },
-  { id: 'pointsDonnes',     label: 'Points donnés',      sub: null, scoreImpact: 'opp',  color: 'red' },
-  { id: 'fautesTir',        label: 'Fautes de tir',      sub: null,                color: 'amber' },
-  { id: 'defenseSolo',      label: 'Défense solo',       sub: null },
-  { id: 'participationDef', label: 'Participation déf.', sub: null },
-  { id: 'passesRatees',     label: 'Passe ratée',        sub: null,                color: 'red' },
-  { id: 'fautesTech',       label: 'Faute technique',    sub: null,                color: 'red' },
+  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,             color: 'amber' },
+  { id: 'pointsMarques',      label: 'Points marqués',       sub: null, scoreImpact: 'self', color: 'green' },
+  { id: 'pointsDonnes',       label: 'Points donnés',        sub: null, scoreImpact: 'opp',  color: 'red' },
+  { id: 'fautesTir',          label: 'Fautes de tir',        sub: null,             color: 'amber' },
+  { id: 'defenseSolo',        label: 'Défense solo',         sub: null },
+  { id: 'participationDef',   label: 'Participation déf.',   sub: null },
+  { id: 'defenseRatee',       label: 'Défense ratée',        sub: null,             color: 'red' },
+  { id: 'passesRatees',       label: 'Passe ratée',          sub: null,             color: 'red' },
+  { id: 'fautesTech',         label: 'Faute technique',      sub: null,             color: 'red' },
+  { id: 'sanctions',          label: 'Sanctions',            sub: null,             color: 'red' },
 ]
 
 export function mkPlayer(name, teamIdx) {
@@ -17,19 +19,21 @@ export function mkPlayer(name, teamIdx) {
       : String(Date.now() + Math.random()),
     name,
     teamIdx,
-    tirsReussis:      0,
-    pointsMarques:    0,  // tGagne → +1 point équipe
-    pointsDonnes:     0,  // tDonne → +1 point adverse
-    fautesTir:        0,
-    defenseSolo:      0,
-    participationDef: 0,
-    passesRatees:     0,
-    fautesTech:       0,
+    tirsNonTransformes: 0,
+    pointsMarques:      0,  // tGagne → +1 point équipe
+    pointsDonnes:       0,  // tDonne → +1 point adverse
+    fautesTir:          0,
+    defenseSolo:        0,
+    participationDef:   0,
+    defenseRatee:       0,
+    passesRatees:       0,
+    fautesTech:         0,
+    sanctions:          0,
   }
 }
 
 // Tirs totaux par joueur : pointsMarques + pointsDonnes + fautesTir
-// (tirsReussis est une stat de qualité séparée, pas une outcome)
+// (tirsNonTransformes est une stat de qualité séparée, pas une outcome)
 export function playerTirsTotal(player) {
   return (player.pointsMarques ?? 0) + (player.pointsDonnes ?? 0) + (player.fautesTir ?? 0)
 }
