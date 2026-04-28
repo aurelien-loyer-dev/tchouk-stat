@@ -1,8 +1,8 @@
 // Stats disponibles par joueur
 export const PLAYER_STATS = [
   { id: 'pointsMarques',      label: 'Points marqués',       sub: null, scoreImpact: 'self', color: 'green', group: 'off' },
+  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,                             group: 'off' },
   { id: 'pointsDonnes',       label: 'Points donnés',        sub: null, scoreImpact: 'opp',  color: 'red',   group: 'off' },
-  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,             color: 'amber', group: 'off' },
   { id: 'fautesTir',          label: 'Fautes de tir',        sub: null,             color: 'amber', group: 'off' },
   { id: 'defenseSolo',        label: 'Défense solo',         sub: null,             color: 'green', group: 'def' },
   { id: 'participationDef',   label: 'Participation déf.',   sub: null,                             group: 'def' },
