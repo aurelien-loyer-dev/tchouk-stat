@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../lib/playerStats'
-
-function fmtClock(sec) {
-  const m = String(Math.floor(sec / 60)).padStart(2, '0')
-  const s = String(sec % 60).padStart(2, '0')
-  return `${m}:${s}`
-}
+import { fmtClock } from '../lib/format'
 
 // ── Carte joueur ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, teamColor, selectedStat, onAdj }) {

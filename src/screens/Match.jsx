@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score, tirs } from '../lib/stats'
+import { fmtClock } from '../lib/format'
 
 // ── Définition des catégories et boutons ──────────────────────────────────────
 const CATEGORIES = [
@@ -161,12 +162,6 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
   const elapsedInHalf = elapsedSec >= totalMatchSec ? totalHalfSec : elapsedSec % totalHalfSec
   const remainingHalfSec = Math.max(0, totalHalfSec - elapsedInHalf)
   const remainingMatchSec = Math.max(0, totalMatchSec - elapsedSec)
-
-  function fmtClock(sec) {
-    const m = String(Math.floor(sec / 60)).padStart(2, '0')
-    const s = String(sec % 60).padStart(2, '0')
-    return `${m}:${s}`
-  }
 
   function resetClock() {
     setRunning(false)

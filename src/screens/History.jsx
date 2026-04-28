@@ -2,34 +2,7 @@ import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { buildShotSeries } from '../lib/shotSeries'
 import { playerTirsTotal, playerDerivedStats, playerTeamScore } from '../lib/playerStats'
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function fmtDuration(totalSec) {
-  const sec = Math.max(0, totalSec || 0)
-  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`
-}
-
-function fmtDateTime(iso) {
-  try { return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) }
-  catch { return '' }
-}
-
-function fileSafeName(name) {
-  return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '')
-}
-
-function hexToRgb(hex) {
-  const clean = String(hex || '').replace('#', '')
-  const full  = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
-  const n     = Number.parseInt(full, 16)
-  if (Number.isNaN(n)) return { r: 31, g: 111, b: 235 }
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
-}
-
-function pct(num, den) {
-  if (!den) return '—'
-  return `${Math.round((num / den) * 100)} %`
-}
+import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
 
 // ── PDF : match stats / scoreur ───────────────────────────────────────────────
 function generateStatsPdf(match) {
@@ -59,7 +32,7 @@ function generateStatsPdf(match) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(90, 100, 120)
-  doc.text(`Format : ${settings?.halfCount}×${settings?.halfDurationMin} min  ·  Durée : ${fmtDuration(durationSec)}`, left, y)
+  doc.text(`Format : ${settings?.halfCount}×${settings?.halfDurationMin} min  ·  Durée : ${fmtClock(durationSec)}`, left, y)
   doc.setTextColor(15, 23, 42)
   y += 10
 
@@ -134,7 +107,7 @@ function generateStatsPdf(match) {
       if (y > pageH - 14) return
       doc.setFillColor(...(idx % 2 === 0 ? [255, 255, 255] : [248, 250, 254]))
       doc.rect(left, y - 4, maxW, 6.5, 'F')
-      const vals = [fmtDuration(ev.elapsedSec), ev.teamName || '', `${SHOT_LBL[ev.id] || ev.id} (${ev.d > 0 ? '+1' : '-1'})`, (ev.scores || []).join(' – ')]
+      const vals = [fmtClock(ev.elapsedSec), ev.teamName || '', `${SHOT_LBL[ev.id] || ev.id} (${ev.d > 0 ? '+1' : '-1'})`, (ev.scores || []).join(' – ')]
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(50, 60, 80)
       vals.forEach((v, i) => doc.text(v, exOf(i) + 2, y + 0.5, { maxWidth: evc[i].w - 3 }))
       doc.setDrawColor(235, 240, 250); doc.line(left, y + 2.5, left + maxW, y + 2.5)
@@ -177,7 +150,7 @@ function generatePlayerMatchPdf(match) {
   doc.setTextColor(15, 23, 42); y = 34
 
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 100, 120)
-  doc.text(`Durée : ${fmtDuration(durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`, left, y)
+  doc.text(`Durée : ${fmtClock(durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`, left, y)
   doc.setTextColor(15, 23, 42); y += 8
 
   const cols = [
@@ -277,7 +250,7 @@ function MiniTimeline({ timeline, settings, teams }) {
         return (
           <g key={tick}>
             <line x1={tx} y1={pt} x2={tx} y2={h - pb} className="tg-grid" />
-            <text x={tx} y={h - 8} textAnchor="middle" className="tg-label">{fmtDuration(Math.round(maxT * tick))}</text>
+            <text x={tx} y={h - 8} textAnchor="middle" className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
           </g>
         )
       })}
@@ -319,7 +292,7 @@ function MatchDetail({ match, onClose }) {
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="ctitle">Résumé</div>
         <div className="si"><div className="si-l">Format</div><span className="si-v" style={{ fontSize: 14 }}>{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtDuration(match.durationSec)}</span></div>
+        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(match.durationSec)}</span></div>
         <div className="si"><div className="si-l">Événements tir</div><span className="si-v" style={{ fontSize: 14 }}>{match.shotEvents}</span></div>
       </div>
 
@@ -364,7 +337,7 @@ function MatchDetail({ match, onClose }) {
               const color = settings?.teamColors?.[ev.teamIdx] || 'var(--dim)'
               return (
                 <div className="tl-item" key={`${ev.at}-${i}`}>
-                  <div className="tl-time">{fmtDuration(ev.elapsedSec)}</div>
+                  <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
                   <div className="tl-main">
                     <div className="tl-label">
                       <span style={{ color, fontWeight: 700, marginRight: 4 }}>{ev.teamName}</span>
@@ -420,7 +393,7 @@ function PlayerMatchDetail({ match, onClose }) {
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="ctitle">Résumé</div>
         <div className="si"><div className="si-l">Format</div><span className="si-v" style={{ fontSize: 14 }}>{settings?.halfCount}×{settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtDuration(durationSec)}</span></div>
+        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(durationSec)}</span></div>
         <div className="si"><div className="si-l">Joueurs</div><span className="si-v" style={{ fontSize: 14 }}>{players.length}</span></div>
       </div>
 

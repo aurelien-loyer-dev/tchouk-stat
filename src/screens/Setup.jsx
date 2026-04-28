@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { mkPlayer } from '../lib/playerStats'
+import { fmtDateTime } from '../lib/format'
 
 const COMPOS_KEY = 'tchouk_compos'
 function loadComposFromStorage() {
@@ -135,15 +136,6 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
       )}
     </div>
   )
-}
-
-function fmtDateTime(iso) {
-  try {
-    return new Date(iso).toLocaleString('fr-FR', {
-      day: '2-digit', month: '2-digit', year: '2-digit',
-      hour: '2-digit', minute: '2-digit',
-    })
-  } catch { return '' }
 }
 
 function LogoUpload({ label, logo, onChange, color }) {

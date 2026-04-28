@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { PLAYER_STATS, playerTeamScore, playerDerivedStats, playerTirsTotal } from '../lib/playerStats'
+import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
 
 // ── Algorithmes de scoring automatique ───────────────────────────────────────
 //
@@ -90,39 +91,6 @@ const AWARDS = [
     },
   },
 ]
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function fmtDuration(totalSec) {
-  const sec = Math.max(0, totalSec || 0)
-  const m   = String(Math.floor(sec / 60)).padStart(2, '0')
-  const s   = String(sec % 60).padStart(2, '0')
-  return `${m}:${s}`
-}
-
-function fmtDateTime(iso) {
-  try { return new Date(iso).toLocaleString('fr-FR') } catch { return '' }
-}
-
-function fileSafeName(name) {
-  return String(name || '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '')
-}
-
-function hexToRgb(hex) {
-  const clean = String(hex || '').replace('#', '')
-  const full  = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
-  const n     = Number.parseInt(full, 16)
-  if (Number.isNaN(n)) return { r: 31, g: 111, b: 235 }
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
-}
-
-function pct(num, den) {
-  if (!den || den === 0) return '—'
-  return `${Math.round((num / den) * 100)} %`
-}
 
 // ── Écran résultats joueurs ───────────────────────────────────────────────────
 export default function PlayerResults({ teams, players, numTeams, settings, summary, onNew }) {
@@ -281,7 +249,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       doc.setFontSize(9)
       doc.setTextColor(90, 100, 120)
       doc.text(
-        `Date : ${fmtDateTime(summary.playedAt)}  ·  Durée : ${fmtDuration(summary.durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`,
+        `Date : ${fmtDateTime(summary.playedAt)}  ·  Durée : ${fmtClock(summary.durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`,
         left, y
       )
       doc.setTextColor(15, 23, 42)

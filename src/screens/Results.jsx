@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../lib/stats'
 import { buildShotSeries } from '../lib/shotSeries'
+import { fmtClock, fmtDateTime, hexToRgb, fileSafeName } from '../lib/format'
 
 const SHOT_LABELS = {
   tGagne: 'Tir gagné',
@@ -9,40 +10,6 @@ const SHOT_LABELS = {
   tCatche: 'Tir catché',
   tFaute: 'Faute sur tir',
 }
-
-function fmtDuration(totalSec) {
-  const sec = Math.max(0, totalSec || 0)
-  const m = String(Math.floor(sec / 60)).padStart(2, '0')
-  const s = String(sec % 60).padStart(2, '0')
-  return `${m}:${s}`
-}
-
-function fmtDateTime(iso) {
-  try {
-    return new Date(iso).toLocaleString('fr-FR')
-  } catch {
-    return ''
-  }
-}
-
-function fileSafeName(name) {
-  return String(name || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '')
-}
-
-function hexToRgb(hex) {
-  const clean = String(hex || '').replace('#', '')
-  const full = clean.length === 3
-    ? clean.split('').map(c => c + c).join('')
-    : clean
-  const n = Number.parseInt(full, 16)
-  if (Number.isNaN(n)) return { r: 31, g: 111, b: 235 }
-  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
-}
-
 
 function TimelineGraph({ teams, timeline, settings }) {
   const { series, maxT, maxV, hasData } = buildShotSeries(teams, timeline)
@@ -67,7 +34,7 @@ function TimelineGraph({ teams, timeline, settings }) {
           return (
             <g key={`x-${tick}`}>
               <line x1={tx} y1={pt} x2={tx} y2={h - pb} className="tg-grid" />
-              <text x={tx} y={h - 12} textAnchor="middle" className="tg-label">{fmtDuration(Math.round(maxT * tick))}</text>
+              <text x={tx} y={h - 12} textAnchor="middle" className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
             </g>
           )
         })}
@@ -277,7 +244,7 @@ export default function Results({
 
     addCard('Resume', [
       `Date du match: ${fmtDateTime(summary.playedAt)}`,
-      `Duree: ${fmtDuration(summary.durationSec)}`,
+      `Duree: ${fmtClock(summary.durationSec)}`,
       `Format: ${summary.numTeams} equipe(s)`,
       `Mi-temps: ${settings?.halfCount || '-'} x ${settings?.halfDurationMin || '-'} min`,
     ])
@@ -334,7 +301,7 @@ export default function Results({
       events.forEach(ev => {
         const label = SHOT_LABELS[ev.id] || ev.id
         const scoreLine = Array.isArray(ev.scores) ? ` | Score: ${ev.scores.join(' - ')}` : ''
-        addLine(`${fmtDuration(ev.elapsedSec)} - ${ev.teamName} - ${label} (${ev.d > 0 ? '+1' : '-1'})${scoreLine}`, 9, 'normal', 4.5)
+        addLine(`${fmtClock(ev.elapsedSec)} - ${ev.teamName} - ${label} (${ev.d > 0 ? '+1' : '-1'})${scoreLine}`, 9, 'normal', 4.5)
       })
     }
 
@@ -378,7 +345,7 @@ export default function Results({
             <span className="si-v sub">{fmtDateTime(summary.playedAt)}</span>
           </Row>
           <Row label="Duree totale">
-            <span className="si-v sub">{fmtDuration(summary.durationSec)}</span>
+            <span className="si-v sub">{fmtClock(summary.durationSec)}</span>
           </Row>
           <Row label="Format">
             <span className="si-v sub">{summary.numTeams} equipes</span>
@@ -456,7 +423,7 @@ export default function Results({
           <div className="tl-list">
             {shotEvents.map((ev, i) => (
               <div className="tl-item" key={`${ev.at}-${i}`}>
-                <div className="tl-time">{fmtDuration(ev.elapsedSec)}</div>
+                <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
                 <div className="tl-main">
                   <div className="tl-label">
                     {SHOT_LABELS[ev.id] || ev.id}

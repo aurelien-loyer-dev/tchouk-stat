@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score } from '../lib/stats'
-
-function fmtClock(sec) {
-  const m = String(Math.floor(sec / 60)).padStart(2, '0')
-  const s = String(sec % 60).padStart(2, '0')
-  return `${m}:${s}`
-}
+import { fmtClock } from '../lib/format'
 
 function AnimScore({ value, color }) {
   const ref  = useRef(null)
