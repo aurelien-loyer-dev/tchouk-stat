@@ -163,7 +163,18 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
   const remainingHalfSec = Math.max(0, totalHalfSec - elapsedInHalf)
   const remainingMatchSec = Math.max(0, totalMatchSec - elapsedSec)
 
-  function resetClock() {
+  function handleSkipHalf() {
+    if (currentHalf >= halfCount) return
+    setRunning(false)
+    setElapsedSec(currentHalf * totalHalfSec)
+  }
+
+  function handleResetCurrentHalf() {
+    setRunning(false)
+    setElapsedSec((currentHalf - 1) * totalHalfSec)
+  }
+
+  function handleResetAll() {
     setRunning(false)
     setElapsedSec(0)
   }
@@ -205,7 +216,17 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
             <button className="btn-mini" onClick={() => setRunning(v => !v)}>
               {running ? 'Pause' : elapsedSec > 0 ? 'Reprendre' : 'Démarrer'}
             </button>
-            <button className="btn-mini" onClick={resetClock}>Reset</button>
+            {currentHalf < halfCount && (
+              <button className="btn-mini" onClick={handleSkipHalf} title="Passer à la mi-temps suivante">
+                MT suiv.
+              </button>
+            )}
+            <button className="btn-mini" onClick={handleResetCurrentHalf} title="Remet le chrono de cette mi-temps à zéro">
+              Reset MT
+            </button>
+            <button className="btn-mini" onClick={handleResetAll} title="Remet le chrono complet à zéro">
+              Reset tout
+            </button>
           </div>
         </div>
       </div>
