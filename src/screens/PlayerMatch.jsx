@@ -12,7 +12,7 @@ function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
       style={{ borderColor: teamColor }}
     >
       <div className="pm-player-top">
-        <div className="pm-player-name" style={{ color: teamColor }}>{player.name}</div>
+        <div className="pm-player-name">{player.name}</div>
         <div className="pm-player-pts">
           {player.pointsMarques}
           <span className="pm-player-pts-lbl"> pts</span>

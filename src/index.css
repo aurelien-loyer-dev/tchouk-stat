@@ -1582,17 +1582,17 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   background: var(--s1);
   border: 1px solid var(--bdr);
   border-radius: var(--r);
-  padding: 14px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 .pm-stats-hint {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--dim);
   text-align: center;
-  padding: 4px 0;
+  padding: 2px 0;
   transition: color 0.2s;
 }
 
@@ -1603,17 +1603,17 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-stat-groups {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .pm-stat-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .pm-stat-group-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -1624,7 +1624,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 5px;
 }
 
 @media (max-width: 640px) {
@@ -1636,15 +1636,15 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 14px 10px;
+  gap: 2px;
+  padding: 8px 6px;
   border: 2px solid var(--bdr);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--s1);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
   text-align: center;
-  min-height: 68px;
+  min-height: 46px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
@@ -1678,7 +1678,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-stat-amber.pm-stat-sel { background: var(--warn); border-color: var(--warn); }
 
 .pm-stat-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--txt);
   line-height: 1.2;
@@ -1768,22 +1768,22 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .pm-team-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* Grille interne : joueurs côte à côte dans chaque colonne d'équipe */
 .pm-players-grid-inner {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
 }
 
 .pm-single-team .pm-players-grid-inner {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 @media (max-width: 480px) {
-  .pm-players-grid-inner { grid-template-columns: 1fr; }
+  .pm-players-grid-inner { grid-template-columns: repeat(2, 1fr); }
 }
 
 .pm-team-hd {
@@ -1804,8 +1804,8 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   background: var(--s1);
   border: 1.5px solid var(--bdr);
   border-left-width: 4px;
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 7px 8px;
   transition: box-shadow 0.15s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
@@ -1822,22 +1822,26 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .pm-player-name {
-  font-size: 17px;
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.3px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pm-player-pts {
-  font-size: 26px;
+  font-size: 18px;
   font-weight: 900;
   color: var(--txt);
   white-space: nowrap;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
 }
 
 .pm-player-pts-lbl {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
   color: var(--dim);
 }
@@ -1846,28 +1850,28 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  margin-top: 8px;
-  padding-top: 8px;
+  gap: 4px;
+  margin-top: 5px;
+  padding-top: 5px;
   border-top: 1px solid var(--bdr);
 }
 
 .pm-stat-cur {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 900;
   color: var(--txt);
-  min-width: 32px;
+  min-width: 24px;
   text-align: center;
   letter-spacing: -0.5px;
 }
 
 .pm-adj-btn {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -2230,8 +2234,6 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 .panel.p0 .ph { text-shadow: var(--c1-halo); }
 .panel.p1 .ph { text-shadow: var(--c2-halo); }
 
-/* PlayerMatch — en-têtes de colonnes équipe + noms des joueurs */
-.pm-players-wrap > .pm-team-col:first-child .pm-team-hd,
-.pm-players-wrap > .pm-team-col:first-child .pm-player-name { text-shadow: var(--c1-halo); }
-.pm-players-wrap > .pm-team-col:last-child  .pm-team-hd,
-.pm-players-wrap > .pm-team-col:last-child  .pm-player-name { text-shadow: var(--c2-halo); }
+/* PlayerMatch — en-têtes de colonnes équipe */
+.pm-players-wrap > .pm-team-col:first-child .pm-team-hd { text-shadow: var(--c1-halo); }
+.pm-players-wrap > .pm-team-col:last-child  .pm-team-hd { text-shadow: var(--c2-halo); }
