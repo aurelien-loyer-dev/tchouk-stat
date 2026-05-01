@@ -210,7 +210,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 }
 
 // ── Écran de configuration ────────────────────────────────────────────────────
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory }) {
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament }) {
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
@@ -469,6 +469,10 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
 
       <button className="btn-acc" onClick={handleStart}>
         {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
+      </button>
+
+      <button className="btn-ghost" style={{ alignSelf: 'center' }} onClick={onViewTournament}>
+        🏆 Tournois
       </button>
 
       {/* ── Historique récent ── */}

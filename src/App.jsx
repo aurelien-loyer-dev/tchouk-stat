@@ -9,6 +9,7 @@ import Scorer from './screens/Scorer'
 import History from './screens/History'
 import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
+import Tournament from './screens/Tournament'
 import { Analytics } from "@vercel/analytics/react"
 
 function colorLum(hex) {
@@ -43,8 +44,9 @@ const DEFAULT_SETTINGS = {
   halfCount: 2,
 }
 
-const HISTORY_KEY = 'tchouk_match_history'
-const THEME_KEY   = 'tchouk_theme'
+const HISTORY_KEY     = 'tchouk_match_history'
+const THEME_KEY       = 'tchouk_theme'
+const TOURNAMENTS_KEY = 'tchouk_tournaments'
 
 function loadTheme() {
   try {
@@ -61,6 +63,16 @@ function loadHistory() {
 
 function saveHistory(history) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50))) }
+  catch {}
+}
+
+function loadTournaments() {
+  try { return JSON.parse(localStorage.getItem(TOURNAMENTS_KEY) || '[]') }
+  catch { return [] }
+}
+
+function saveTournaments(list) {
+  try { localStorage.setItem(TOURNAMENTS_KEY, JSON.stringify(list.slice(0, 50))) }
   catch {}
 }
 
@@ -100,6 +112,7 @@ export default function App() {
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
   const [theme, setTheme]           = useState(loadTheme)
+  const [tournaments, setTournaments] = useState(loadTournaments)
 
   // Chargement depuis Supabase au démarrage
   useEffect(() => {
@@ -304,6 +317,11 @@ export default function App() {
     if (supabase) supabase.from('matches').delete().neq('id', '')
   }
 
+  function handleSaveTournaments(list) {
+    setTournaments(list)
+    saveTournaments(list)
+  }
+
   return (
     <>
       <button
@@ -322,6 +340,7 @@ export default function App() {
           history={history}
           onClearHistory={clearHistory}
           onViewHistory={() => setScreen('history')}
+          onViewTournament={() => setScreen('tournament')}
         />
       )}
       {screen === 'match' && (
@@ -381,6 +400,13 @@ export default function App() {
           history={history}
           onBack={() => setScreen('setup')}
           onClear={clearHistory}
+        />
+      )}
+      {screen === 'tournament' && (
+        <Tournament
+          tournaments={tournaments}
+          onSave={handleSaveTournaments}
+          onBack={() => setScreen('setup')}
         />
       )}
       <Analytics />
