@@ -192,8 +192,22 @@ function TournamentEnd({ tournament, onBack }) {
   )
 }
 
+function ValidationBanner({ onValidate }) {
+  return (
+    <div className="trn-validate-banner">
+      <div>
+        <div className="trn-validate-title">Tournoi terminé</div>
+        <div className="trn-validate-text">Valide le tournoi pour afficher l'écran final et le classement complet.</div>
+      </div>
+      <button className="btn-acc trn-validate-btn" onClick={onValidate}>
+        Valider le tournoi
+      </button>
+    </div>
+  )
+}
+
 // ── Vue Tous contre tous ──────────────────────────────────────────────────────
-function RoundRobinView({ tournament, onUpdate }) {
+function RoundRobinView({ tournament, onUpdate, finished, onValidate }) {
   const done = tournament.matches.filter(m => m.score1 !== null).length
   const perGroup = tournament.knockoutSize ?? 0
 
@@ -223,12 +237,16 @@ function RoundRobinView({ tournament, onUpdate }) {
             onScore={(ri, mi, s1, s2) => onUpdate(setKnockoutScore(tournament, ri, mi, s1, s2))} />
         </>
       )}
+
+      {finished && (
+        <ValidationBanner onValidate={onValidate} />
+      )}
     </>
   )
 }
 
 // ── Vue Poules ────────────────────────────────────────────────────────────────
-function GroupsView({ tournament, onUpdate }) {
+function GroupsView({ tournament, onUpdate, finished, onValidate }) {
   const allMatches = tournament.groups.flatMap(g => g.matches)
   const done = allMatches.filter(m => m.score1 !== null).length
   const perGroup = tournament.knockoutSize ? Math.ceil(tournament.knockoutSize / tournament.groups.length) : 0
@@ -264,17 +282,21 @@ function GroupsView({ tournament, onUpdate }) {
             onScore={(ri, mi, s1, s2) => onUpdate(setKnockoutScore(tournament, ri, mi, s1, s2))} />
         </>
       )}
+
+      {finished && (
+        <ValidationBanner onValidate={onValidate} />
+      )}
     </>
   )
 }
 
 // ── Vue Ronde suisse ──────────────────────────────────────────────────────────
-function SwissView({ tournament, onUpdate }) {
+function SwissView({ tournament, onUpdate, finished, onValidate }) {
   const allMatches = tournament.rounds.flatMap(r => r.matches)
   const currentRound = tournament.rounds[tournament.rounds.length - 1]
   const roundDone = isRoundComplete(currentRound)
   const canNext = roundDone && tournament.rounds.length < tournament.numSwissRounds
-  const finished = roundDone && tournament.rounds.length >= tournament.numSwissRounds
+  const roundFinished = roundDone && tournament.rounds.length >= tournament.numSwissRounds;
 
   return (
     <>
@@ -305,9 +327,7 @@ function SwissView({ tournament, onUpdate }) {
           Ronde {tournament.rounds.length + 1} →
         </button>
       )}
-      {finished && (
-        <div className="trn-finished">🏆 Tournoi terminé !</div>
-      )}
+      {finished && roundFinished && <ValidationBanner onValidate={onValidate} />}
     </>
   )
 }
@@ -430,10 +450,10 @@ function TournamentSetup({ onStart, onCancel }) {
 }
 
 // ── Détail d'un tournoi ───────────────────────────────────────────────────────
-function TournamentDetail({ tournament, onUpdate, onBack }) {
+function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated }) {
   const formatLabel = { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse' }
   const { finished } = getTournamentEndState(tournament)
-  if (finished) {
+  if (validated) {
     return (
       <div className="trn-detail">
         <div className="trn-topbar">
@@ -463,9 +483,9 @@ function TournamentDetail({ tournament, onUpdate, onBack }) {
         </div>
       </div>
 
-      {tournament.format === 'roundrobin' && <RoundRobinView tournament={tournament} onUpdate={onUpdate} />}
-      {tournament.format === 'groups'     && <GroupsView     tournament={tournament} onUpdate={onUpdate} />}
-      {tournament.format === 'swiss'      && <SwissView      tournament={tournament} onUpdate={onUpdate} />}
+      {tournament.format === 'roundrobin' && <RoundRobinView tournament={tournament} onUpdate={onUpdate} finished={finished} onValidate={() => onValidate(tournament.id)} />}
+      {tournament.format === 'groups'     && <GroupsView     tournament={tournament} onUpdate={onUpdate} finished={finished} onValidate={() => onValidate(tournament.id)} />}
+      {tournament.format === 'swiss'      && <SwissView      tournament={tournament} onUpdate={onUpdate} finished={finished} onValidate={() => onValidate(tournament.id)} />}
     </div>
   )
 }
@@ -474,6 +494,7 @@ function TournamentDetail({ tournament, onUpdate, onBack }) {
 export default function Tournament({ tournaments, onSave, onBack, theme, onToggleTheme }) {
   const [view, setView]       = useState('list')
   const [active, setActive]   = useState(null)
+  const [validatedIds, setValidatedIds] = useState([])
 
   function handleStart(t) {
     const next = [t, ...tournaments]
@@ -483,11 +504,17 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
   function handleUpdate(updated) {
     const next = tournaments.map(t => t.id === updated.id ? updated : t)
     onSave(next); setActive(updated)
+    setValidatedIds(ids => ids.filter(id => id !== updated.id))
+  }
+
+  function handleValidate(id) {
+    setValidatedIds(ids => ids.includes(id) ? ids : [id, ...ids])
   }
 
   function handleDelete(id) {
     if (!window.confirm('Supprimer ce tournoi ?')) return
     onSave(tournaments.filter(t => t.id !== id))
+    setValidatedIds(ids => ids.filter(vId => vId !== id))
     if (active?.id === id) setView('list')
   }
 
@@ -495,7 +522,15 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
     return <TournamentSetup onStart={handleStart} onCancel={() => setView('list')} />
 
   if (view === 'detail' && active)
-    return <TournamentDetail tournament={active} onUpdate={handleUpdate} onBack={() => setView('list')} />
+    return (
+      <TournamentDetail
+        tournament={active}
+        onUpdate={handleUpdate}
+        onBack={() => setView('list')}
+        onValidate={handleValidate}
+        validated={validatedIds.includes(active.id)}
+      />
+    )
 
   return (
     <div className="trn-list-screen">

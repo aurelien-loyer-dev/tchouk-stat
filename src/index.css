@@ -2460,6 +2460,34 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--acc); padding: 20px;
 }
 
+.trn-validate-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--acc) 28%, var(--bdr));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--acc) 7%, var(--s1));
+}
+
+.trn-validate-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--txt);
+}
+
+.trn-validate-text {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.45;
+}
+
+.trn-validate-btn {
+  min-width: 190px;
+}
+
 .trn-end {
   background: var(--s1);
   border: 1px solid var(--bdr);
@@ -2571,6 +2599,14 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
     max-width: 48px;
     height: 40px;
     font-size: 17px;
+  }
+  .trn-validate-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .trn-validate-btn {
+    width: 100%;
+    min-width: unset;
   }
   .trn-groups-grid { grid-template-columns: 1fr; }
   .trn-bracket { flex-direction: column; }
