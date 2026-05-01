@@ -211,7 +211,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 
 // ── Écran de configuration ────────────────────────────────────────────────────
 export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament, theme, onToggleTheme }) {
-  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
+  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player' | 'tournament'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -342,11 +342,23 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             </svg>
             Stats joueurs
           </button>
+          <button className={mode === 'tournament' ? 'on' : ''} onClick={() => setMode('tournament')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
+              <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+              <path d="M8 20h8" />
+              <path d="M12 12v5" />
+              <path d="M9 20h6" />
+              <path d="M6 6H4a2 2 0 0 0 2 2" />
+              <path d="M18 6h2a2 2 0 0 1-2 2" />
+            </svg>
+            Tournois
+          </button>
         </div>
       </section>
 
       {/* ── Équipes (stats & scorer) ── */}
-      {mode !== 'player' && (
+      {mode !== 'player' && mode !== 'tournament' && (
         <section className="setup-section">
           <div className="section-title">Configuration des équipes</div>
           <div className="flabel" style={{ marginBottom: 10 }}>Format fixe : 2 équipes</div>
@@ -454,33 +466,49 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
         </section>
       )}
 
-      {/* ── Mi-temps ── */}
-      <section className="setup-section">
-        <div className="section-title">Configuration des mi-temps</div>
-        <div className="opts-grid">
-          <div className="field">
-            <div className="flabel">Durée d'une mi-temps (min)</div>
-            <input type="number" min={1} max={60} value={halfDurationMin}
-                   onChange={e => setHalfDurationMin(e.target.value)} />
+      {mode === 'tournament' && (
+        <section className="setup-section">
+          <div className="section-title">Tournois</div>
+          <div className="setup-mode-info">
+            Crée, consulte et gère tes tournois depuis un seul endroit.
           </div>
-          <div className="field">
-            <div className="flabel">Nombre de mi-temps</div>
-            <select className="sel" value={halfCount} onChange={e => setHalfCount(e.target.value)}>
-              {[1, 2, 3, 4].map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
+          <button className="btn-acc" onClick={onViewTournament}>
+            Ouvrir les tournois →
+          </button>
+        </section>
+      )}
+
+      {mode !== 'tournament' && (
+        <>
+          {/* ── Mi-temps ── */}
+          <section className="setup-section">
+            <div className="section-title">Configuration des mi-temps</div>
+            <div className="opts-grid">
+              <div className="field">
+                <div className="flabel">Durée d'une mi-temps (min)</div>
+                <input type="number" min={1} max={60} value={halfDurationMin}
+                       onChange={e => setHalfDurationMin(e.target.value)} />
+              </div>
+              <div className="field">
+                <div className="flabel">Nombre de mi-temps</div>
+                <select className="sel" value={halfCount} onChange={e => setHalfCount(e.target.value)}>
+                  {[1, 2, 3, 4].map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <div className="setup-actions">
+            <button className="btn-acc setup-start-btn" onClick={handleStart}>
+              {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
+            </button>
+
+            <button className="btn-ghost setup-secondary-btn" onClick={onViewTournament}>
+              🏆 Tournois
+            </button>
           </div>
-        </div>
-      </section>
-
-      <div className="setup-actions">
-        <button className="btn-acc setup-start-btn" onClick={handleStart}>
-          {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
-        </button>
-
-        <button className="btn-ghost setup-secondary-btn" onClick={onViewTournament}>
-          🏆 Tournois
-        </button>
-      </div>
+        </>
+      )}
 
       {/* ── Historique récent ── */}
       {recentHistory.length > 0 && (

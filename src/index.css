@@ -96,6 +96,12 @@ body {
   flex-wrap: wrap;
 }
 
+.setup-mode-info {
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .setup-start-btn {
   flex: 1 1 260px;
 }
