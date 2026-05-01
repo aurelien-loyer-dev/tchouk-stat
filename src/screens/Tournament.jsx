@@ -114,6 +114,79 @@ function Progress({ done, total, label }) {
   )
 }
 
+function getTournamentMatches(tournament) {
+  if (tournament.format === 'groups') return tournament.groups?.flatMap(g => g.matches) || []
+  if (tournament.format === 'swiss') return tournament.rounds?.flatMap(r => r.matches) || []
+  return tournament.matches || []
+}
+
+function isAllPlayed(matches) {
+  return matches.length > 0 && matches.every(m => m.score1 !== null && m.score2 !== null)
+}
+
+function getWinnerFromKnockout(rounds) {
+  const finalRound = rounds?.[rounds.length - 1]
+  const finalMatch = finalRound?.matches?.[0]
+  if (!finalMatch || finalMatch.score1 === null || finalMatch.score2 === null || finalMatch.score1 === finalMatch.score2) return null
+  return finalMatch.score1 > finalMatch.score2 ? finalMatch.team1 : finalMatch.team2
+}
+
+function getTournamentEndState(tournament) {
+  const allMatches = getTournamentMatches(tournament)
+  const standings = calcStandings(tournament.teams, allMatches)
+  const knockoutDone = tournament.knockoutRounds
+    ? tournament.knockoutRounds.every(round => round.matches.every(match => match.score1 !== null && match.score2 !== null && match.score1 !== match.score2))
+    : false
+  const finished = tournament.format === 'swiss'
+    ? isRoundComplete(tournament.rounds?.[tournament.rounds.length - 1]) && tournament.rounds.length >= tournament.numSwissRounds
+    : tournament.knockoutRounds
+    ? isAllPlayed(allMatches) && knockoutDone
+    : isAllPlayed(allMatches)
+
+  const winner = tournament.knockoutRounds
+    ? getWinnerFromKnockout(tournament.knockoutRounds)
+    : standings[0]?.team || null
+
+  return { finished, standings, winner, allMatches }
+}
+
+function TournamentEnd({ tournament, onBack }) {
+  const { standings, winner, allMatches } = getTournamentEndState(tournament)
+  const topThree = standings.slice(0, 3)
+  const totalPlayed = allMatches.filter(m => m.score1 !== null && m.score2 !== null).length
+
+  return (
+    <div className="trn-end">
+      <div className="trn-end-hero">
+        <div className="trn-end-badge">🏆</div>
+        <div className="trn-end-title">Tournoi terminé</div>
+        <div className="trn-end-subtitle">
+          {winner ? `Vainqueur : ${winner}` : 'Classement final disponible'}
+        </div>
+        <div className="trn-end-meta">
+          {totalPlayed} matchs joués · {tournament.teams.length} équipes
+        </div>
+      </div>
+
+      <div className="trn-section">Podium</div>
+      <div className="trn-podium">
+        {topThree.map((row, i) => (
+          <div key={row.team} className={`trn-podium-card trn-podium-${i + 1}`}>
+            <div className="trn-podium-rank">#{i + 1}</div>
+            <div className="trn-podium-team">{row.team}</div>
+            <div className="trn-podium-points">{row.pts} pts</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="trn-section">Classement final</div>
+      <Standings teams={tournament.teams} matches={allMatches} />
+
+      <button className="btn-acc trn-end-btn" onClick={onBack}>← Retour à la liste</button>
+    </div>
+  )
+}
+
 // ── Vue Tous contre tous ──────────────────────────────────────────────────────
 function RoundRobinView({ tournament, onUpdate }) {
   const done = tournament.matches.filter(m => m.score1 !== null).length
@@ -354,6 +427,25 @@ function TournamentSetup({ onStart, onCancel }) {
 // ── Détail d'un tournoi ───────────────────────────────────────────────────────
 function TournamentDetail({ tournament, onUpdate, onBack }) {
   const formatLabel = { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse' }
+  const { finished } = getTournamentEndState(tournament)
+  if (finished) {
+    return (
+      <div className="trn-detail">
+        <div className="trn-topbar">
+          <button className="btn-mini" onClick={onBack}>← Retour</button>
+          <div>
+            <div className="trn-topbar-title">{tournament.name}</div>
+            <div className="trn-topbar-meta">
+              {formatLabel[tournament.format]} · {tournament.teams.length} équipes
+            </div>
+          </div>
+        </div>
+
+        <TournamentEnd tournament={tournament} onBack={onBack} />
+      </div>
+    )
+  }
+
   return (
     <div className="trn-detail">
       <div className="trn-topbar">
@@ -374,7 +466,7 @@ function TournamentDetail({ tournament, onUpdate, onBack }) {
 }
 
 // ── Écran principal Tournois ──────────────────────────────────────────────────
-export default function Tournament({ tournaments, onSave, onBack }) {
+export default function Tournament({ tournaments, onSave, onBack, theme, onToggleTheme }) {
   const [view, setView]       = useState('list')
   const [active, setActive]   = useState(null)
 
@@ -405,6 +497,9 @@ export default function Tournament({ tournaments, onSave, onBack }) {
       <div className="trn-topbar">
         <button className="btn-mini" onClick={onBack}>← Accueil</button>
         <div className="trn-topbar-title">Tournois</div>
+        <button className="btn-mini trn-theme-btn" onClick={onToggleTheme}>
+          {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
+        </button>
         <button className="btn-acc trn-new-btn" onClick={() => setView('setup')}>+ Nouveau</button>
       </div>
 

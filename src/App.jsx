@@ -324,12 +324,14 @@ export default function App() {
 
   return (
     <>
-      <button
-        className="theme-toggle"
-        onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
-      >
-        {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
-      </button>
+      {screen !== 'setup' && screen !== 'tournament' && (
+        <button
+          className="theme-toggle"
+          onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+        >
+          {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
+        </button>
+      )}
 
       {screen === 'setup' && (
         <Setup
@@ -341,6 +343,8 @@ export default function App() {
           onClearHistory={clearHistory}
           onViewHistory={() => setScreen('history')}
           onViewTournament={() => setScreen('tournament')}
+          theme={theme}
+          onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
         />
       )}
       {screen === 'match' && (
@@ -407,6 +411,8 @@ export default function App() {
           tournaments={tournaments}
           onSave={handleSaveTournaments}
           onBack={() => setScreen('setup')}
+          theme={theme}
+          onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
         />
       )}
       <Analytics />
