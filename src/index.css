@@ -2402,7 +2402,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   max-width: 100%;
 }
 .trn-si {
-  width: 36px; max-width: 36px; height: 34px; text-align: center;
+  width: 40px; max-width: 40px; height: 34px; text-align: center;
   border: 1.5px solid var(--bdr); border-radius: 8px;
   background: var(--s2); color: var(--txt);
   font-size: 16px; font-weight: 700;
@@ -2542,7 +2542,7 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   .trn-theme-btn { margin-left: auto; }
   .trn-podium { grid-template-columns: 1fr; }
   .trn-match { padding: 7px 10px; }
-  .trn-si { width: 32px; max-width: 32px; font-size: 15px; }
+  .trn-si { width: 36px; max-width: 36px; font-size: 15px; }
   .trn-groups-grid { grid-template-columns: 1fr; }
   .trn-bracket { flex-direction: column; }
   .trn-bround { min-width: unset; }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   mkTournament, calcStandings, setMatchScore, setKnockoutScore,
   startKnockout, canStartKnockout, addSwissRound, isRoundComplete,
@@ -10,6 +10,11 @@ function MatchRow({ match, onScore, compact }) {
   const [s1, setS1] = useState(match.score1 !== null ? String(match.score1) : '')
   const [s2, setS2] = useState(match.score2 !== null ? String(match.score2) : '')
   const played = match.score1 !== null && match.score2 !== null
+
+  useEffect(() => {
+    setS1(match.score1 !== null ? String(match.score1) : '')
+    setS2(match.score2 !== null ? String(match.score2) : '')
+  }, [match.score1, match.score2])
 
   function save(v1, v2) {
     const n1 = parseInt(v1), n2 = parseInt(v2)
