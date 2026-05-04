@@ -45,6 +45,28 @@ export function genGroups(teams, numGroups) {
   return groups
 }
 
+// Calcule les stats de confrontation directe entre deux équipes
+function headToHeadStats(team1, team2, matches) {
+  const h2h = { won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0, played: 0 }
+  matches.forEach(m => {
+    if (m.score1 === null || m.score2 === null) return
+    const { score1: s1, score2: s2 } = m
+    if (m.team1 === team1 && m.team2 === team2) {
+      h2h.played++; h2h.gf += s1; h2h.ga += s2
+      if (s1 > s2)      { h2h.won++; h2h.pts += 3 }
+      else if (s2 > s1) { h2h.lost++; h2h.pts += 0 }
+      else              { h2h.drawn++; h2h.pts += 1 }
+    }
+    if (m.team1 === team2 && m.team2 === team1) {
+      h2h.played++; h2h.gf += s2; h2h.ga += s1
+      if (s2 > s1)      { h2h.won++; h2h.pts += 3 }
+      else if (s1 > s2) { h2h.lost++; h2h.pts += 0 }
+      else              { h2h.drawn++; h2h.pts += 1 }
+    }
+  })
+  return h2h
+}
+
 export function calcStandings(teamNames, matches) {
   const s = Object.fromEntries(
     teamNames.map(t => [t, { team: t, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0 }])
@@ -58,9 +80,47 @@ export function calcStandings(teamNames, matches) {
     else if (s2 > s1) { s[m.team2].won++; s[m.team2].pts += 3; s[m.team1].lost++ }
     else              { s[m.team1].drawn++; s[m.team1].pts++; s[m.team2].drawn++; s[m.team2].pts++ }
   })
-  return Object.values(s)
+  const standings = Object.values(s)
     .map(r => ({ ...r, gd: r.gf - r.ga }))
-    .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.team.localeCompare(b.team))
+
+  // Trier avec tiebreaker complet sur confrontations directes et cas extremes
+  return standings.sort((a, b) => {
+    // 1. Trier par points
+    if (b.pts !== a.pts) return b.pts - a.pts
+    
+    // 2. Si même nombre de points, comparer confrontations directes
+    const h2hA = headToHeadStats(a.team, b.team, matches)
+    const h2hB = headToHeadStats(b.team, a.team, matches)
+    
+    // 2.1 Points en confrontation directe
+    if (h2hA.pts !== h2hB.pts) return h2hB.pts - h2hA.pts
+    
+    // 2.2 Si elles se sont affrontées, utiliser la confrontation directe pour départager
+    if (h2hA.played > 0) {
+      const h2hGdA = h2hA.gf - h2hA.ga
+      const h2hGdB = h2hB.gf - h2hB.ga
+      if (h2hGdA !== h2hGdB) return h2hGdB - h2hGdA
+      if (h2hA.gf !== h2hB.gf) return h2hB.gf - h2hA.gf
+    }
+    
+    // 3. Différence buts générale
+    if (b.gd !== a.gd) return b.gd - a.gd
+    
+    // 4. Buts marqués généraux
+    if (b.gf !== a.gf) return b.gf - a.gf
+    
+    // 5. Nombre de victoires (cas extrême : même pts, même différence buts, même BP)
+    if (b.won !== a.won) return b.won - a.won
+    
+    // 6. Nombre de matchs joués (équipes avec byes/moins de matchs)
+    if (b.played !== a.played) return b.played - a.played
+    
+    // 7. Buts concédés (meilleure défense en cas d'égalité complète)
+    if (a.ga !== b.ga) return a.ga - b.ga
+    
+    // 8. Ordre alphabétique en dernier recours
+    return a.team.localeCompare(b.team)
+  })
 }
 
 function hasPlayed(t1, t2, matches) {
