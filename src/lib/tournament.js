@@ -4,12 +4,32 @@ export function mkMatch(team1, team2) {
   return { id: newId(), team1, team2, score1: null, score2: null }
 }
 
+// Algorithme de Berger (méthode du cercle) :
+// génère des rondes où chaque équipe joue exactement une fois → zéro back-to-back au sein d'une ronde.
+// Pour n impair, un "bye" fictif est ajouté puis retiré.
 export function genRoundRobinMatches(teams) {
-  const matches = []
-  for (let i = 0; i < teams.length; i++)
-    for (let j = i + 1; j < teams.length; j++)
-      matches.push(mkMatch(teams[i], teams[j]))
-  return matches
+  const n = teams.length
+  if (n < 2) return []
+
+  const circle = n % 2 === 0 ? [...teams] : [...teams, null]
+  const N = circle.length
+  const rounds = []
+
+  for (let r = 0; r < N - 1; r++) {
+    const round = []
+    for (let i = 0; i < N / 2; i++) {
+      const t1 = circle[i]
+      const t2 = circle[N - 1 - i]
+      if (t1 !== null && t2 !== null) round.push(mkMatch(t1, t2))
+    }
+    rounds.push(round)
+    // Rotation : fixe circle[0], décale circle[1..N-1] d'un cran
+    const last = circle[N - 1]
+    for (let i = N - 1; i > 1; i--) circle[i] = circle[i - 1]
+    circle[1] = last
+  }
+
+  return rounds.flat()
 }
 
 export function genGroups(teams, numGroups) {

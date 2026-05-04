@@ -2612,3 +2612,103 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   .trn-bracket { flex-direction: column; }
   .trn-bround { min-width: unset; }
 }
+
+/* ── Tableau croisé (Cross-table) ── */
+.trn-xt-wrap { overflow: hidden; }
+
+.trn-xt-scroll { overflow-x: auto; }
+
+.trn-xt {
+  border-collapse: collapse;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* Coin vide en haut à gauche */
+.trn-xt-corner {
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+}
+
+/* En-têtes de colonnes : numéro seulement */
+.trn-xt-ch {
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  text-align: center;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  min-width: 46px;
+}
+
+/* En-têtes de lignes : numéro + nom */
+.trn-xt-rh {
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  padding: 5px 10px 5px 8px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.trn-xt-rnum {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  min-width: 16px;
+}
+.trn-xt-rname {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--txt);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Cellule diagonale (même équipe) */
+.trn-xt-self {
+  background: var(--s3);
+  border: 1px solid var(--bdr);
+  text-align: center;
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* Cellule non jouée */
+.trn-xt-empty {
+  border: 1px solid var(--bdr);
+  text-align: center;
+  color: var(--bdr);
+  background: var(--s1);
+}
+
+/* Cellules résultats */
+.trn-xt-cell {
+  border: 1px solid var(--bdr);
+  text-align: center;
+  padding: 5px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+/* Victoire */
+.trn-xt-w {
+  background: color-mix(in srgb, var(--ok) 18%, var(--s1));
+  color: var(--ok);
+}
+
+/* Défaite */
+.trn-xt-l {
+  background: color-mix(in srgb, var(--err) 12%, var(--s1));
+  color: var(--err);
+}
+
+/* Nul */
+.trn-xt-d {
+  background: color-mix(in srgb, var(--warn) 14%, var(--s1));
+  color: var(--warn);
+}
