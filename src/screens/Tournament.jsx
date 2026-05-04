@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   mkTournament, calcStandings, setMatchScore, setKnockoutScore,
   startKnockout, canStartKnockout, addSwissRound, isRoundComplete,
+  canStartFullPlacement, startFullPlacement, setPlacementScore,
 } from '../lib/tournament'
 import { fmtDateTime } from '../lib/format'
 
@@ -172,13 +173,41 @@ function isAllPlayed(matches) {
   return matches.length > 0 && matches.every(m => m.score1 !== null && m.score2 !== null)
 }
 
-// Construit le classement final basé sur la phase finale (knockout).
-// Ordre : vainqueur finale → finaliste → perdants demies → perdants quarts → … → éliminés de poules.
-// À chaque tour, les ex-aequo sont départagés par leur classement de poule.
 function buildFinalRanking(tournament) {
   const allGroupMatches = getTournamentMatches(tournament)
   const groupStandings  = calcStandings(tournament.teams, allGroupMatches)
+  const groupStatsOf    = t => groupStandings.find(s => s.team === t) ?? { pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
 
+  // ── Classement complet (placement rounds) ──────────────────────────────────
+  if (tournament.placementRounds?.length) {
+    const n = tournament.teams.length
+    const result = new Array(n).fill(null)
+
+    tournament.placementRounds.forEach(({ forPos, match }) => {
+      const [wp, lp] = forPos
+      if (match.score1 !== null && match.score2 !== null) {
+        const winner = match.score1 >= match.score2 ? match.team1 : match.team2
+        const loser  = match.score1 >= match.score2 ? match.team2 : match.team1
+        result[wp - 1] = { ...groupStatsOf(winner), team: winner }
+        result[lp - 1] = { ...groupStatsOf(loser),  team: loser  }
+      } else {
+        // Match pas encore joué : remplit avec l'ordre de poule
+        if (!result[wp - 1]) result[wp - 1] = { ...groupStatsOf(match.team1), team: match.team1 }
+        if (!result[lp - 1]) result[lp - 1] = { ...groupStatsOf(match.team2), team: match.team2 }
+      }
+    })
+
+    // Remplit les trous restants (byes, équipes non appariées)
+    const placed = new Set(result.filter(Boolean).map(r => r.team))
+    const unplaced = groupStandings.filter(s => !placed.has(s.team))
+    let ui = 0
+    for (let i = 0; i < n; i++) {
+      if (!result[i] && unplaced[ui]) result[i] = unplaced[ui++]
+    }
+    return result.filter(Boolean)
+  }
+
+  // ── Knockout (phase finale) ────────────────────────────────────────────────
   const rounds = tournament.knockoutRounds
   if (!rounds || rounds.length === 0) return groupStandings
 
@@ -191,8 +220,6 @@ function buildFinalRanking(tournament) {
   const ranked = []
 
   const groupRankOf = t => groupStandings.findIndex(s => s.team === t)
-  const groupStatsOf = t => groupStandings.find(s => s.team === t) ?? { pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
-
   const add = t => { if (!placed.has(t)) { ranked.push({ ...groupStatsOf(t), team: t }); placed.add(t) } }
 
   // 1er : vainqueur de la finale
@@ -221,8 +248,12 @@ function getTournamentEndState(tournament) {
   const knockoutDone = tournament.knockoutRounds
     ? tournament.knockoutRounds.every(r => r.matches.every(m => m.score1 !== null && m.score2 !== null && m.score1 !== m.score2))
     : false
+  const placementDone = tournament.placementRounds?.length > 0
+    && tournament.placementRounds.every(r => r.match.score1 !== null && r.match.score2 !== null)
   const finished = tournament.format === 'swiss'
     ? isRoundComplete(tournament.rounds?.[tournament.rounds.length - 1]) && tournament.rounds.length >= tournament.numSwissRounds
+    : tournament.placementRounds
+    ? isAllPlayed(allMatches) && placementDone
     : tournament.knockoutRounds
     ? isAllPlayed(allMatches) && knockoutDone
     : isAllPlayed(allMatches)
@@ -398,6 +429,29 @@ function GroupsView({ tournament, onUpdate, finished, onValidate }) {
         </>
       )}
 
+      {canStartFullPlacement(tournament) && (
+        <button className="btn-acc trn-ko-btn" onClick={() => onUpdate(startFullPlacement(tournament))}>
+          Lancer les matchs de classement →
+        </button>
+      )}
+      {tournament.placementRounds?.length > 0 && (
+        <>
+          <div className="trn-section">Matchs de classement</div>
+          <div className="trn-placement-list">
+            {tournament.placementRounds.map((r, ri) => (
+              <div key={r.id} className="trn-placement-row">
+                <div className="trn-placement-label">{r.label}</div>
+                <MatchRow
+                  key={r.match.id + r.match.score1 + r.match.score2}
+                  match={r.match}
+                  onScore={(s1, s2) => onUpdate(setPlacementScore(tournament, ri, s1, s2))}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {finished && (
         <ValidationBanner onValidate={onValidate} />
       )}
@@ -458,13 +512,14 @@ const KNOCKOUT_OPTIONS = [
 ]
 
 function TournamentSetup({ onStart, onCancel }) {
-  const [name, setName]             = useState('')
-  const [format, setFormat]         = useState('roundrobin')
-  const [teamInput, setTeamInput]   = useState('')
-  const [teams, setTeams]           = useState([])
-  const [numGroups, setNumGroups]   = useState(2)
-  const [knockoutSize, setKoSize]   = useState(null)
+  const [name, setName]               = useState('')
+  const [format, setFormat]           = useState('roundrobin')
+  const [teamInput, setTeamInput]     = useState('')
+  const [teams, setTeams]             = useState([])
+  const [numGroups, setNumGroups]     = useState(2)
+  const [knockoutSize, setKoSize]     = useState(null)
   const [swissRounds, setSwissRounds] = useState(5)
+  const [fullPlacement, setFull]      = useState(false)
 
   function addTeam() {
     const t = teamInput.trim()
@@ -477,12 +532,13 @@ function TournamentSetup({ onStart, onCancel }) {
     onStart(mkTournament({
       name: n, format, teams,
       numGroups: Number(numGroups),
-      knockoutSize,
+      knockoutSize: fullPlacement ? null : knockoutSize,
+      fullPlacement: format === 'groups' ? fullPlacement : false,
       numSwissRounds: Number(swissRounds),
     }))
   }
 
-  const showKo = format === 'roundrobin' || format === 'groups'
+  const showKo = (format === 'roundrobin' || format === 'groups') && !fullPlacement
 
   return (
     <>
@@ -510,10 +566,18 @@ function TournamentSetup({ onStart, onCancel }) {
         {format === 'groups' && (
           <div className="trn-field">
             <div className="flabel">Nombre de poules</div>
-            <select className="sel" value={numGroups} onChange={e => setNumGroups(e.target.value)}>
+            <select className="sel" value={numGroups} onChange={e => { setNumGroups(e.target.value); setFull(false) }}>
               {[2, 3, 4, 6, 8].map(n => <option key={n} value={n}>{n} poules</option>)}
             </select>
           </div>
+        )}
+
+        {format === 'groups' && (
+          <label className="trn-toggle">
+            <input type="checkbox" checked={fullPlacement} onChange={e => { setFull(e.target.checked); if (e.target.checked) setKoSize(null) }} />
+            <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
+            <span>Classement complet — chaque équipe joue pour sa place</span>
+          </label>
         )}
 
         {format === 'swiss' && (

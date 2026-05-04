@@ -131,12 +131,54 @@ export function advanceKnockout(rounds, roundIdx, matchIdx) {
   })
 }
 
-export function mkTournament({ name, format, teams, numGroups, knockoutSize, numSwissRounds }) {
+// ── Classement complet : chaque rang de toutes les poules s'affronte ────────
+// Ex : 2 poules de 4 → 4 matchs : 1A vs 1B (1re/2e place), 2A vs 2B (3e/4e)…
+export function genPlacementMatches(groups) {
+  const standings = groups.map(g => calcStandings(g.teams, g.matches))
+  const maxRank   = Math.max(...standings.map(s => s.length))
+  const rounds    = []
+  let pos = 1
+
+  for (let rank = 0; rank < maxRank; rank++) {
+    const teamsAtRank = standings.map(s => s[rank]?.team).filter(Boolean)
+    for (let i = 0; i + 1 < teamsAtRank.length; i += 2) {
+      rounds.push({
+        id:     newId(),
+        label:  `${pos}e / ${pos + 1}e place`,
+        forPos: [pos, pos + 1],
+        match:  mkMatch(teamsAtRank[i], teamsAtRank[i + 1]),
+      })
+      pos += 2
+    }
+    if (teamsAtRank.length % 2 !== 0) pos++ // bye si nombre impair de poules
+  }
+  return rounds
+}
+
+export function canStartFullPlacement(t) {
+  return !!(t.fullPlacement && !t.placementRounds && t.format === 'groups'
+    && t.groups.every(g => g.matches.every(m => m.score1 !== null)))
+}
+
+export function startFullPlacement(tournament) {
+  return { ...tournament, placementRounds: genPlacementMatches(tournament.groups) }
+}
+
+export function setPlacementScore(tournament, roundIdx, score1, score2) {
+  return {
+    ...tournament,
+    placementRounds: tournament.placementRounds.map((r, ri) =>
+      ri !== roundIdx ? r : { ...r, match: { ...r.match, score1, score2 } }
+    ),
+  }
+}
+
+export function mkTournament({ name, format, teams, numGroups, knockoutSize, fullPlacement, numSwissRounds }) {
   const base = { id: newId(), name, format, teams, createdAt: new Date().toISOString() }
   if (format === 'roundrobin')
     return { ...base, matches: genRoundRobinMatches(teams), knockoutSize: knockoutSize || null, knockoutRounds: null }
   if (format === 'groups')
-    return { ...base, groups: genGroups(teams, numGroups || 2), knockoutSize: knockoutSize || null, knockoutRounds: null }
+    return { ...base, groups: genGroups(teams, numGroups || 2), knockoutSize: knockoutSize || null, knockoutRounds: null, fullPlacement: !!fullPlacement, placementRounds: null }
   if (format === 'swiss') {
     const standings = teams.map(t => ({ team: t, pts: 0, gd: 0 }))
     return {

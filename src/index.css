@@ -2728,3 +2728,46 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   padding: 4px 2px 0;
   font-style: italic;
 }
+
+/* ── Toggle switch (classement complet) ── */
+.trn-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--txt);
+  font-weight: 500;
+}
+.trn-toggle input { display: none; }
+.trn-toggle-track {
+  flex-shrink: 0;
+  width: 40px; height: 22px;
+  background: var(--s3);
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.2s;
+}
+.trn-toggle input:checked ~ .trn-toggle-track { background: var(--acc); }
+.trn-toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.trn-toggle input:checked ~ .trn-toggle-track .trn-toggle-thumb { left: 21px; }
+
+/* ── Matchs de classement ── */
+.trn-placement-list { display: flex; flex-direction: column; gap: 8px; }
+.trn-placement-row  { display: flex; flex-direction: column; gap: 4px; }
+.trn-placement-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--acc);
+  padding-left: 2px;
+}
