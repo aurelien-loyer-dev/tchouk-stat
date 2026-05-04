@@ -2712,3 +2712,19 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   background: color-mix(in srgb, var(--warn) 14%, var(--s1));
   color: var(--warn);
 }
+
+/* Classement final — mise en valeur des rangs */
+.trn-table tbody tr.trn-rank-first  td { background: color-mix(in srgb, #eab308 12%, transparent); }
+.trn-table tbody tr.trn-rank-second td { background: color-mix(in srgb, #9ca3af 10%, transparent); }
+.trn-table tbody tr.trn-rank-third  td { background: color-mix(in srgb, #d97706 10%, transparent); }
+.trn-table tbody tr.trn-rank-first  .trn-rank  { color: #eab308; font-weight: 900; }
+.trn-table tbody tr.trn-rank-second .trn-rank  { color: #9ca3af; font-weight: 900; }
+.trn-table tbody tr.trn-rank-third  .trn-rank  { color: #d97706; font-weight: 900; }
+
+.trn-ranking-note {
+  font-size: 11px;
+  color: var(--dim);
+  text-align: right;
+  padding: 4px 2px 0;
+  font-style: italic;
+}

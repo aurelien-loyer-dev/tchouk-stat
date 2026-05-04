@@ -172,18 +172,54 @@ function isAllPlayed(matches) {
   return matches.length > 0 && matches.every(m => m.score1 !== null && m.score2 !== null)
 }
 
-function getWinnerFromKnockout(rounds) {
-  const finalRound = rounds?.[rounds.length - 1]
-  const finalMatch = finalRound?.matches?.[0]
-  if (!finalMatch || finalMatch.score1 === null || finalMatch.score2 === null || finalMatch.score1 === finalMatch.score2) return null
-  return finalMatch.score1 > finalMatch.score2 ? finalMatch.team1 : finalMatch.team2
+// Construit le classement final basé sur la phase finale (knockout).
+// Ordre : vainqueur finale → finaliste → perdants demies → perdants quarts → … → éliminés de poules.
+// À chaque tour, les ex-aequo sont départagés par leur classement de poule.
+function buildFinalRanking(tournament) {
+  const allGroupMatches = getTournamentMatches(tournament)
+  const groupStandings  = calcStandings(tournament.teams, allGroupMatches)
+
+  const rounds = tournament.knockoutRounds
+  if (!rounds || rounds.length === 0) return groupStandings
+
+  const finalMatch = rounds[rounds.length - 1]?.matches?.[0]
+  const koComplete = finalMatch?.score1 !== null && finalMatch?.score2 !== null
+    && finalMatch.score1 !== finalMatch.score2
+  if (!koComplete) return groupStandings
+
+  const placed = new Set()
+  const ranked = []
+
+  const groupRankOf = t => groupStandings.findIndex(s => s.team === t)
+  const groupStatsOf = t => groupStandings.find(s => s.team === t) ?? { pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
+
+  const add = t => { if (!placed.has(t)) { ranked.push({ ...groupStatsOf(t), team: t }); placed.add(t) } }
+
+  // 1er : vainqueur de la finale
+  add(finalMatch.score1 > finalMatch.score2 ? finalMatch.team1 : finalMatch.team2)
+  // 2ème : finaliste
+  add(finalMatch.score1 < finalMatch.score2 ? finalMatch.team1 : finalMatch.team2)
+
+  // 3ème+ : perdants de chaque tour précédent (du plus récent au plus ancien)
+  for (let ri = rounds.length - 2; ri >= 0; ri--) {
+    const losers = rounds[ri].matches
+      .filter(m => m.score1 !== null && m.score2 !== null && m.score1 !== m.score2)
+      .map(m => m.score1 < m.score2 ? m.team1 : m.team2)
+      .filter(t => !placed.has(t))
+      .sort((a, b) => groupRankOf(a) - groupRankOf(b))
+    losers.forEach(add)
+  }
+
+  // Restants : équipes éliminées en phase de poules, ordre classement de poule
+  groupStandings.forEach(s => { if (!placed.has(s.team)) add(s.team) })
+
+  return ranked
 }
 
 function getTournamentEndState(tournament) {
   const allMatches = getTournamentMatches(tournament)
-  const standings = calcStandings(tournament.teams, allMatches)
   const knockoutDone = tournament.knockoutRounds
-    ? tournament.knockoutRounds.every(round => round.matches.every(match => match.score1 !== null && match.score2 !== null && match.score1 !== match.score2))
+    ? tournament.knockoutRounds.every(r => r.matches.every(m => m.score1 !== null && m.score2 !== null && m.score1 !== m.score2))
     : false
   const finished = tournament.format === 'swiss'
     ? isRoundComplete(tournament.rounds?.[tournament.rounds.length - 1]) && tournament.rounds.length >= tournament.numSwissRounds
@@ -191,17 +227,49 @@ function getTournamentEndState(tournament) {
     ? isAllPlayed(allMatches) && knockoutDone
     : isAllPlayed(allMatches)
 
-  const winner = tournament.knockoutRounds
-    ? getWinnerFromKnockout(tournament.knockoutRounds)
-    : standings[0]?.team || null
+  const finalRanking = buildFinalRanking(tournament)
+  const winner = finalRanking[0]?.team || null
 
-  return { finished, standings, winner, allMatches }
+  return { finished, finalRanking, winner, allMatches }
+}
+
+function FinalRankingTable({ ranking, hasKnockout }) {
+  return (
+    <div className="trn-table-wrap">
+      <table className="trn-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th className="trn-th-team">Équipe</th>
+            <th title="Points de poule">Pts</th>
+            <th title="Différence de buts">Diff</th>
+            <th title="Buts pour">BP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ranking.map((r, i) => (
+            <tr key={r.team} className={i === 0 ? 'trn-rank-first' : i === 1 ? 'trn-rank-second' : i === 2 ? 'trn-rank-third' : ''}>
+              <td className="trn-rank">{i + 1}</td>
+              <td className="trn-th-team">{r.team}</td>
+              <td className="trn-pts">{r.pts}</td>
+              <td className={r.gd > 0 ? 'trn-pos' : r.gd < 0 ? 'trn-neg' : ''}>{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
+              <td>{r.gf}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {hasKnockout && (
+        <div className="trn-ranking-note">Ordre basé sur la phase finale · pts/diff = stats de poule</div>
+      )}
+    </div>
+  )
 }
 
 function TournamentEnd({ tournament, onBack }) {
-  const { standings, winner, allMatches } = getTournamentEndState(tournament)
-  const topThree = standings.slice(0, 3)
+  const { finalRanking, winner, allMatches } = getTournamentEndState(tournament)
+  const topThree   = finalRanking.slice(0, 3)
   const totalPlayed = allMatches.filter(m => m.score1 !== null && m.score2 !== null).length
+  const hasKnockout = !!tournament.knockoutRounds
 
   return (
     <div className="trn-end">
@@ -228,7 +296,7 @@ function TournamentEnd({ tournament, onBack }) {
       </div>
 
       <div className="trn-section">Classement final</div>
-      <Standings teams={tournament.teams} matches={allMatches} />
+      <FinalRankingTable ranking={finalRanking} hasKnockout={hasKnockout} />
 
       <button className="btn-acc trn-end-btn" onClick={onBack}>← Retour à la liste</button>
     </div>
