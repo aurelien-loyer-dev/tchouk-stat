@@ -7,6 +7,20 @@ import {
 } from '../lib/tournament'
 import { fmtDateTime, fileSafeName } from '../lib/format'
 
+const TOURNAMENT_UI_KEY = 'tchouk_tournament_ui'
+
+function loadTournamentUi() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TOURNAMENT_UI_KEY) || '{}')
+    return {
+      view: parsed.view === 'setup' || parsed.view === 'detail' || parsed.view === 'list' ? parsed.view : 'list',
+      activeId: typeof parsed.activeId === 'string' ? parsed.activeId : null,
+    }
+  } catch {
+    return { view: 'list', activeId: null }
+  }
+}
+
 // ── Score input pour un match ─────────────────────────────────────────────────
 function MatchRow({ match, onScore, compact }) {
   const [s1, setS1] = useState(match.score1 !== null ? String(match.score1) : '')
@@ -812,8 +826,9 @@ function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated 
 
 // ── Écran principal Tournois ──────────────────────────────────────────────────
 export default function Tournament({ tournaments, onSave, onBack, theme, onToggleTheme }) {
-  const [view, setView]       = useState('list')
-  const [active, setActive]   = useState(null)
+  const initialUi = loadTournamentUi()
+  const [view, setView]       = useState(initialUi.view)
+  const [active, setActive]   = useState(() => tournaments.find(t => t.id === initialUi.activeId) || null)
   const [validatedIds, setValidatedIds] = useState([])
 
   useEffect(() => {
@@ -827,6 +842,21 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
     }
     if (nextActive !== active) setActive(nextActive)
   }, [tournaments, active])
+
+  useEffect(() => {
+    if (view !== 'detail' || active) return
+    const restored = tournaments.find(t => t.id === initialUi.activeId)
+    if (restored) setActive(restored)
+  }, [view, active, tournaments, initialUi.activeId])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TOURNAMENT_UI_KEY, JSON.stringify({
+        view,
+        activeId: active?.id || null,
+      }))
+    } catch {}
+  }, [view, active])
 
   function handleStart(t) {
     const next = [t, ...tournaments]

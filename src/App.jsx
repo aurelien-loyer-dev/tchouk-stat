@@ -48,6 +48,7 @@ const HISTORY_KEY     = 'tchouk_match_history'
 const THEME_KEY       = 'tchouk_theme'
 const TOURNAMENTS_KEY = 'tchouk_tournaments'
 const TOURNAMENTS_BACKUP_KEY = 'tchouk_tournaments_backup'
+const SCREEN_KEY      = 'tchouk_screen'
 
 function loadTheme() {
   try {
@@ -55,6 +56,14 @@ function loadTheme() {
     if (saved === 'light' || saved === 'dark') return saved
   } catch {}
   return 'light'
+}
+
+function loadScreen() {
+  try {
+    const saved = localStorage.getItem(SCREEN_KEY)
+    if (saved === 'tournament') return 'tournament'
+  } catch {}
+  return 'setup'
 }
 
 function loadHistory() {
@@ -121,7 +130,7 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
 }
 
 export default function App() {
-  const [screen, setScreen]         = useState('setup')
+  const [screen, setScreen]         = useState(loadScreen)
   const [appMode, setAppMode]       = useState('stats') // 'stats' | 'scorer' | 'player'
   const [numTeams, setNumTeams]     = useState(2)
   const [teams, setTeams]           = useState([])
@@ -174,6 +183,13 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     try { localStorage.setItem(THEME_KEY, theme) } catch {}
   }, [theme])
+
+  useEffect(() => {
+    try {
+      if (screen === 'tournament') localStorage.setItem(SCREEN_KEY, screen)
+      else localStorage.removeItem(SCREEN_KEY)
+    } catch {}
+  }, [screen])
 
   useEffect(() => {
     function handleStorage(e) {
