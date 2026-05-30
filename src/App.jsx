@@ -47,6 +47,7 @@ const DEFAULT_SETTINGS = {
 const HISTORY_KEY     = 'tchouk_match_history'
 const THEME_KEY       = 'tchouk_theme'
 const TOURNAMENTS_KEY = 'tchouk_tournaments'
+const TOURNAMENTS_BACKUP_KEY = 'tchouk_tournaments_backup'
 
 function loadTheme() {
   try {
@@ -67,12 +68,30 @@ function saveHistory(history) {
 }
 
 function loadTournaments() {
-  try { return JSON.parse(localStorage.getItem(TOURNAMENTS_KEY) || '[]') }
-  catch { return [] }
+  try {
+    const raw = localStorage.getItem(TOURNAMENTS_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch {}
+
+  try {
+    const backup = localStorage.getItem(TOURNAMENTS_BACKUP_KEY)
+    if (!backup) return []
+    const parsed = JSON.parse(backup)
+    return Array.isArray(parsed) ? parsed : (parsed?.tournaments || [])
+  } catch {
+    return []
+  }
 }
 
 function saveTournaments(list) {
-  try { localStorage.setItem(TOURNAMENTS_KEY, JSON.stringify(list.slice(0, 50))) }
+  try {
+    const trimmed = list.slice(0, 50)
+    localStorage.setItem(TOURNAMENTS_KEY, JSON.stringify(trimmed))
+    localStorage.setItem(TOURNAMENTS_BACKUP_KEY, JSON.stringify({
+      updatedAt: new Date().toISOString(),
+      tournaments: trimmed,
+    }))
+  }
   catch {}
 }
 
@@ -155,6 +174,16 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     try { localStorage.setItem(THEME_KEY, theme) } catch {}
   }, [theme])
+
+  useEffect(() => {
+    function handleStorage(e) {
+      if (e.key !== TOURNAMENTS_KEY && e.key !== TOURNAMENTS_BACKUP_KEY) return
+      setTournaments(loadTournaments())
+    }
+
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
 
   // ── Sauvegarde cloud ─────────────────────────────────────────────────────
   async function saveMatchToCloud(summary) {

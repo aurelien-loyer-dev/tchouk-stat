@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
+import { jsPDF } from 'jspdf'
 import {
   mkTournament, calcStandings, setMatchScore, setKnockoutScore,
   startKnockout, canStartKnockout, addSwissRound, isRoundComplete,
   canStartFullPlacement, startFullPlacement, setPlacementScore,
 } from '../lib/tournament'
-import { fmtDateTime } from '../lib/format'
+import { fmtDateTime, fileSafeName } from '../lib/format'
 
 // ── Score input pour un match ─────────────────────────────────────────────────
 function MatchRow({ match, onScore, compact }) {
@@ -264,6 +265,143 @@ function getTournamentEndState(tournament) {
   return { finished, finalRanking, winner, allMatches }
 }
 
+function downloadTournamentPdf(tournament) {
+  const { finalRanking, winner, allMatches } = getTournamentEndState(tournament)
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const left = 14
+  const maxW = pageW - left * 2
+  let y = 0
+
+  function ensurePage(need = 0) {
+    if (y + need > pageH - 14) {
+      doc.addPage()
+      y = 14
+    }
+  }
+
+  function section(title, gap = 6) {
+    ensurePage(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    doc.setTextColor(70, 80, 100)
+    doc.text(title, left, y)
+    y += gap
+  }
+
+  doc.setFillColor(20, 30, 48)
+  doc.rect(0, 0, pageW, 28, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(15)
+  doc.text('Tournoi · tableau final', left, 12)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Export : ${fmtDateTime(new Date().toISOString())}  ·  Tournoi : ${tournament.name}`, left, 19)
+  doc.text(`${tournament.teams.length} équipes  ·  ${tournament.format === 'groups' ? 'Poules' : tournament.format === 'swiss' ? 'Ronde suisse' : 'Tous vs tous'}`, left, 25)
+  doc.setTextColor(15, 23, 42)
+  y = 34
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(12)
+  doc.text(tournament.name, left, y)
+  y += 6
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  doc.setTextColor(90, 100, 120)
+  doc.text(`Vainqueur : ${winner || '—'}  ·  ${allMatches.filter(m => m.score1 !== null && m.score2 !== null).length}/${allMatches.length} matchs joués`, left, y)
+  doc.setTextColor(15, 23, 42)
+  y += 10
+
+  section(finalRanking.length > 0 && (tournament.knockoutRounds || tournament.placementRounds)
+    ? 'Classement final'
+    : 'Classement actuel')
+
+  const cols = [
+    { label: '#', w: 12 },
+    { label: 'Équipe', w: 72 },
+    { label: 'Pts', w: 16 },
+    { label: 'Diff', w: 18 },
+    { label: 'BP', w: 16 },
+  ]
+  const scale = maxW / cols.reduce((sum, col) => sum + col.w, 0)
+  const sc = cols.map(col => ({ ...col, w: col.w * scale }))
+  const rowH = 7
+  function xOf(idx) { let x = left; for (let i = 0; i < idx; i++) x += sc[i].w; return x }
+
+  ensurePage(12 + (finalRanking.length + 1) * rowH)
+  doc.setFillColor(235, 240, 250)
+  doc.rect(left, y - 4, maxW, rowH, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(7)
+  doc.setTextColor(70, 80, 100)
+  sc.forEach((col, i) => doc.text(col.label, i === 1 ? xOf(i) + 2 : xOf(i) + col.w / 2, y + 1, { align: i === 1 ? 'left' : 'center' }))
+  y += rowH
+
+  finalRanking.forEach((row, index) => {
+    ensurePage(rowH)
+    doc.setFillColor(...(index % 2 === 0 ? [255, 255, 255] : [248, 250, 254]))
+    doc.rect(left, y - 4, maxW, rowH, 'F')
+    doc.setFont('helvetica', index < 3 ? 'bold' : 'normal')
+    doc.setFontSize(index < 3 ? 8.5 : 8)
+    doc.setTextColor(15, 23, 42)
+    const values = [String(index + 1), row.team, String(row.pts ?? 0), row.gd > 0 ? `+${row.gd}` : String(row.gd ?? 0), String(row.gf ?? 0)]
+    values.forEach((value, i) => {
+      const align = i === 1 ? 'left' : 'center'
+      const x = i === 1 ? xOf(i) + 2 : xOf(i) + sc[i].w / 2
+      doc.text(value, x, y + 1, { align, maxWidth: sc[i].w - 3 })
+    })
+    doc.setDrawColor(230, 235, 245)
+    doc.line(left, y + rowH - 4, left + maxW, y + rowH - 4)
+    y += rowH
+  })
+
+  if (tournament.knockoutRounds?.length) {
+    y += 6
+    section('Phase finale')
+    tournament.knockoutRounds.forEach(round => {
+      ensurePage(10)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(15, 23, 42)
+      doc.text(round.name, left, y)
+      y += 5
+      round.matches.forEach(match => {
+        ensurePage(8)
+        const played = match.score1 !== null && match.score2 !== null
+        const label = match.team1 === 'TBD' || match.team2 === 'TBD'
+          ? `${match.team1}  –  ${match.team2}`
+          : `${match.team1} ${played ? `${match.score1} - ${match.score2}` : '–'} ${match.team2}`
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.setTextColor(50, 60, 80)
+        doc.text(label, left + 2, y)
+        y += 5.5
+      })
+      y += 2
+    })
+  }
+
+  if (tournament.placementRounds?.length) {
+    y += 6
+    section('Matchs de classement')
+    tournament.placementRounds.forEach(({ label, match }) => {
+      ensurePage(8)
+      const played = match.score1 !== null && match.score2 !== null
+      const matchLabel = `${label} : ${match.team1} ${played ? `${match.score1} - ${match.score2}` : '–'} ${match.team2}`
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      doc.setTextColor(50, 60, 80)
+      doc.text(matchLabel, left + 2, y)
+      y += 5.5
+    })
+  }
+
+  const safeName = fileSafeName(tournament.name) || 'tournoi'
+  doc.save(`${safeName}_${String(tournament.createdAt || new Date().toISOString()).slice(0, 10)}.pdf`)
+}
+
 function FinalRankingTable({ ranking, hasKnockout }) {
   return (
     <div className="trn-table-wrap">
@@ -329,7 +467,10 @@ function TournamentEnd({ tournament, onBack }) {
       <div className="trn-section">Classement final</div>
       <FinalRankingTable ranking={finalRanking} hasKnockout={hasKnockout} />
 
-      <button className="btn-acc trn-end-btn" onClick={onBack}>← Retour à la liste</button>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button className="btn-mini" onClick={() => downloadTournamentPdf(tournament)}>PDF ↓</button>
+        <button className="btn-acc trn-end-btn" onClick={onBack}>← Retour à la liste</button>
+      </div>
     </div>
   )
 }
@@ -675,6 +816,18 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
   const [active, setActive]   = useState(null)
   const [validatedIds, setValidatedIds] = useState([])
 
+  useEffect(() => {
+    if (!active) return
+    const nextActive = tournaments.find(t => t.id === active.id)
+    if (!nextActive) {
+      setActive(null)
+      setView('list')
+      setValidatedIds(ids => ids.filter(id => id !== active.id))
+      return
+    }
+    if (nextActive !== active) setActive(nextActive)
+  }, [tournaments, active])
+
   function handleStart(t) {
     const next = [t, ...tournaments]
     onSave(next); setActive(t); setView('detail')
@@ -715,7 +868,10 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
     <div className="trn-list-screen">
       <div className="trn-topbar">
         <button className="btn-mini" onClick={onBack}>← Accueil</button>
-        <div className="trn-topbar-title">Tournois</div>
+        <div>
+          <div className="trn-topbar-title">Tournois</div>
+          <div className="trn-topbar-meta">Sauvegarde locale et synchro entre pages actives</div>
+        </div>
         <button className="btn-mini trn-theme-btn" onClick={onToggleTheme}>
           {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
         </button>
