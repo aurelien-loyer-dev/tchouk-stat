@@ -210,7 +210,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 }
 
 // ── Écran de configuration ────────────────────────────────────────────────────
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament, theme, onToggleTheme }) {
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament }) {
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player' | 'tournament'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
@@ -309,9 +309,6 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
     <>
       <div className="setup-head">
         <h1>Tchoukball Assistant</h1>
-        <button className="btn-mini setup-theme-btn" onClick={onToggleTheme}>
-          {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
-        </button>
       </div>
 
       {/* ── Mode ── */}
@@ -501,10 +498,6 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
           <div className="setup-actions">
             <button className="btn-acc setup-start-btn" onClick={handleStart}>
               {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
-            </button>
-
-            <button className="btn-ghost setup-secondary-btn" onClick={onViewTournament}>
-              🏆 Tournois
             </button>
           </div>
         </>

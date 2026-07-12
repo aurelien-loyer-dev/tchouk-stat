@@ -39,24 +39,15 @@ function teamBtnTxt(hex) {
 }
 
 const DEFAULT_SETTINGS = {
-  teamColors: ['#e88c0b', '#b016ee'],
-  halfDurationMin: 12,
-  halfCount: 2,
+  teamColors: ['#0000b6', '#ae0000'],
+  halfDurationMin: 15,
+  halfCount: 3,
 }
 
 const HISTORY_KEY     = 'tchouk_match_history'
-const THEME_KEY       = 'tchouk_theme'
 const TOURNAMENTS_KEY = 'tchouk_tournaments'
 const TOURNAMENTS_BACKUP_KEY = 'tchouk_tournaments_backup'
 const SCREEN_KEY      = 'tchouk_screen'
-
-function loadTheme() {
-  try {
-    const saved = localStorage.getItem(THEME_KEY)
-    if (saved === 'light' || saved === 'dark') return saved
-  } catch {}
-  return 'light'
-}
 
 function loadScreen() {
   try {
@@ -139,7 +130,6 @@ export default function App() {
   const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
-  const [theme, setTheme]           = useState(loadTheme)
   const [tournaments, setTournaments] = useState(loadTournaments)
 
   // Chargement depuis Supabase au démarrage
@@ -178,11 +168,6 @@ export default function App() {
     document.documentElement.style.setProperty('--c1-btn-txt', teamBtnTxt(c1))
     document.documentElement.style.setProperty('--c2-btn-txt', teamBtnTxt(c2))
   }, [matchSettings])
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    try { localStorage.setItem(THEME_KEY, theme) } catch {}
-  }, [theme])
 
   useEffect(() => {
     try {
@@ -369,15 +354,6 @@ export default function App() {
 
   return (
     <>
-      {screen !== 'setup' && screen !== 'tournament' && (
-        <button
-          className="theme-toggle"
-          onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
-        >
-          {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
-        </button>
-      )}
-
       {screen === 'setup' && (
         <Setup
           numTeams={numTeams}
@@ -388,8 +364,6 @@ export default function App() {
           onClearHistory={clearHistory}
           onViewHistory={() => setScreen('history')}
           onViewTournament={() => setScreen('tournament')}
-          theme={theme}
-          onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
         />
       )}
       {screen === 'match' && (
@@ -456,8 +430,6 @@ export default function App() {
           tournaments={tournaments}
           onSave={handleSaveTournaments}
           onBack={() => setScreen('setup')}
-          theme={theme}
-          onToggleTheme={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
         />
       )}
       <Analytics />

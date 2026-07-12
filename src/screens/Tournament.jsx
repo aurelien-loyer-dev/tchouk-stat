@@ -825,7 +825,7 @@ function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated 
 }
 
 // ── Écran principal Tournois ──────────────────────────────────────────────────
-export default function Tournament({ tournaments, onSave, onBack, theme, onToggleTheme }) {
+export default function Tournament({ tournaments, onSave, onBack }) {
   const initialUi = loadTournamentUi()
   const [view, setView]       = useState(initialUi.view)
   const [active, setActive]   = useState(() => tournaments.find(t => t.id === initialUi.activeId) || null)
@@ -902,9 +902,6 @@ export default function Tournament({ tournaments, onSave, onBack, theme, onToggl
           <div className="trn-topbar-title">Tournois</div>
           <div className="trn-topbar-meta">Sauvegarde locale et synchro entre pages actives</div>
         </div>
-        <button className="btn-mini trn-theme-btn" onClick={onToggleTheme}>
-          {theme === 'dark' ? 'Theme clair' : 'Theme sombre'}
-        </button>
         <button className="btn-acc trn-new-btn" onClick={() => setView('setup')}>+ Nouveau</button>
       </div>
 
