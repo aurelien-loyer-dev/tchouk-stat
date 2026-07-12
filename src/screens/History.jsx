@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
-import { buildShotSeries } from '../lib/shotSeries'
+import { buildPointsSeries } from '../lib/shotSeries'
 import { playerTirsTotal, playerDerivedStats, playerTeamScore } from '../lib/playerStats'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
@@ -237,7 +237,7 @@ function downloadMatchPdf(match) {
 
 // ── MiniTimeline ──────────────────────────────────────────────────────────────
 function MiniTimeline({ timeline, settings, teams }) {
-  const { series, maxT, maxV } = buildShotSeries(teams || [], timeline || [])
+  const { series, maxT, maxV } = buildPointsSeries(teams || [], timeline || [])
   const w = 800, h = 160, pl = 32, pr = 12, pt = 10, pb = 28
   const x = t => pl + (t / Math.max(1, maxT)) * (w - pl - pr)
   const y = v => h - pb - (v / Math.max(1, maxV)) * (h - pt - pb)
@@ -339,7 +339,7 @@ function MatchDetail({ match, onClose }) {
 
       {!isScorerOnly && (
         <div className="card" style={{ marginBottom: 12 }}>
-          <div className="ctitle">Timeline des tirs</div>
+          <div className="ctitle">Timeline des points</div>
           <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((t, i) => ({ ...t, name: teams[i]?.name || t.name }))} />
           <div className="tg-legend" style={{ marginTop: 8 }}>
             {teams.map((t, i) => (

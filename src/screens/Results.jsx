@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../lib/stats'
-import { buildShotSeries } from '../lib/shotSeries'
+import { buildPointsSeries } from '../lib/shotSeries'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
 
@@ -13,7 +13,7 @@ const SHOT_LABELS = {
 }
 
 function TimelineGraph({ teams, timeline, settings }) {
-  const { series, maxT, maxV, hasData } = buildShotSeries(teams, timeline)
+  const { series, maxT, maxV, hasData } = buildPointsSeries(teams, timeline)
   const w = 980
   const h = 260
   const pl = 58
@@ -26,7 +26,7 @@ function TimelineGraph({ teams, timeline, settings }) {
 
   return (
     <div className="tg-wrap">
-      <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg" role="img" aria-label="Timeline des tirs">
+      <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg" role="img" aria-label="Timeline des points">
         <line x1={pl} y1={h - pb} x2={w - pr} y2={h - pb} className="tg-axis" />
         <line x1={pl} y1={pt} x2={pl} y2={h - pb} className="tg-axis" />
 
@@ -75,7 +75,7 @@ function TimelineGraph({ teams, timeline, settings }) {
         })}
       </div>
 
-      {!hasData && <div className="tl-empty">Aucun tir enregistre pour le moment.</div>}
+      {!hasData && <div className="tl-empty">Aucun point enregistré pour le moment.</div>}
     </div>
   )
 }
@@ -196,7 +196,7 @@ export default function Results({
     const pageH = doc.internal.pageSize.getHeight()
     const c1 = hexToRgb(settings?.teamColors?.[0] || '#0e9f8f')
     const c2 = hexToRgb(settings?.teamColors?.[1] || '#d14343')
-    const { series, maxT, maxV } = buildShotSeries(teams, timeline)
+    const { series, maxT, maxV } = buildPointsSeries(teams, timeline)
 
     let y = 12
     const left = 14
@@ -274,7 +274,7 @@ export default function Results({
     ensurePage(70)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
-    doc.text('Timeline des tirs (graphique)', left, y)
+    doc.text('Timeline des points (graphique)', left, y)
     y += 4
 
     const gx = left
@@ -425,8 +425,8 @@ export default function Results({
         </Row>
       </Card>
 
-      {/* ── Timeline des tirs ── */}
-      <Card title="Timeline des tirs (graphique)">
+      {/* ── Timeline des points ── */}
+      <Card title="Timeline des points (graphique)">
         <TimelineGraph teams={teams} timeline={timeline} settings={settings} />
 
         {shotEvents.length > 0 && (
