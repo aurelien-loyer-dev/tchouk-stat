@@ -276,6 +276,7 @@ const SHOT_LABELS = { tGagne: 'Tir gagné', tDonne: 'Tir donné', tCatche: 'Tir 
 function MatchDetail({ match, onClose }) {
   const { teams, timeline, settings } = match
   const shotEvents = (timeline || []).filter(e => e.category === 'tirs')
+  const isScorerOnly = match.mode === 'scorer'
 
   return (
     <div className="hist-detail">
@@ -304,14 +305,16 @@ function MatchDetail({ match, onClose }) {
         ))}
       </div>
 
-      <div className="card" style={{ marginBottom: 12 }}>
+      <div className="card" style={{ marginBottom: isScorerOnly ? 0 : 12 }}>
         <div className="ctitle">Résumé</div>
         <div className="si"><div className="si-l">Format</div><span className="si-v" style={{ fontSize: 14 }}>{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span></div>
         <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(match.durationSec)}</span></div>
-        <div className="si"><div className="si-l">Événements tir</div><span className="si-v" style={{ fontSize: 14 }}>{match.shotEvents}</span></div>
+        {!isScorerOnly && (
+          <div className="si"><div className="si-l">Événements tir</div><span className="si-v" style={{ fontSize: 14 }}>{match.shotEvents}</span></div>
+        )}
       </div>
 
-      {teams.map((t, i) => (
+      {!isScorerOnly && teams.map((t, i) => (
         <div className="card" key={i} style={{ marginBottom: 12, borderTop: `3px solid ${settings?.teamColors?.[i] || 'var(--acc)'}` }}>
           <div className="ctitle">
             {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
@@ -334,20 +337,22 @@ function MatchDetail({ match, onClose }) {
         </div>
       ))}
 
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div className="ctitle">Timeline des tirs</div>
-        <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((t, i) => ({ ...t, name: teams[i]?.name || t.name }))} />
-        <div className="tg-legend" style={{ marginTop: 8 }}>
-          {teams.map((t, i) => (
-            <div className="tg-leg-item" key={i}>
-              <span className="tg-leg-dot" style={settings?.teamColors?.[i] ? teamSwatchStyle(settings.teamColors[i]) : { background: 'var(--dim)' }} />
-              <span>{t.name}</span>
-            </div>
-          ))}
+      {!isScorerOnly && (
+        <div className="card" style={{ marginBottom: 12 }}>
+          <div className="ctitle">Timeline des tirs</div>
+          <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((t, i) => ({ ...t, name: teams[i]?.name || t.name }))} />
+          <div className="tg-legend" style={{ marginTop: 8 }}>
+            {teams.map((t, i) => (
+              <div className="tg-leg-item" key={i}>
+                <span className="tg-leg-dot" style={settings?.teamColors?.[i] ? teamSwatchStyle(settings.teamColors[i]) : { background: 'var(--dim)' }} />
+                <span>{t.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {shotEvents.length > 0 && (
+      {!isScorerOnly && shotEvents.length > 0 && (
         <div className="card">
           <div className="ctitle">Événements ({shotEvents.length})</div>
           <div className="tl-list">
@@ -523,12 +528,14 @@ export default function History({ history, onBack, onClear }) {
                     </span>
                   ))}
                 </div>
-                <div className="mr-foot">
-                  {m.mode === 'player'
-                    ? `${m.players?.length || 0} joueurs · stats joueurs`
-                    : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
-                  }
-                </div>
+                {m.mode !== 'scorer' && (
+                  <div className="mr-foot">
+                    {m.mode === 'player'
+                      ? `${m.players?.length || 0} joueurs · stats joueurs`
+                      : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
+                    }
+                  </div>
+                )}
               </button>
             ))}
           </div>

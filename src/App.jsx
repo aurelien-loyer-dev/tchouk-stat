@@ -70,12 +70,13 @@ function saveTournaments(list) {
   catch {}
 }
 
-function buildMatchSummary(teams, numTeams, startedAt, timeline, settings) {
+function buildMatchSummary(teams, numTeams, startedAt, timeline, settings, mode) {
   const now = Date.now()
   return {
     id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(now),
     playedAt: new Date(now).toISOString(),
     durationSec: startedAt ? Math.max(0, Math.round((now - startedAt) / 1000)) : 0,
+    mode,
     numTeams,
     shotEvents: timeline.filter(e => e.category === 'tirs').length,
     settings,
@@ -257,7 +258,7 @@ export default function App() {
 
   // ── Fin du match (mode stats) ─────────────────────────────────────────────
   function endMatch() {
-    const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings)
+    const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings, appMode)
     setLastSummary(summary)
     const newHistory = [summary, ...history]
     setHistory(newHistory)
