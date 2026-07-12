@@ -211,7 +211,8 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 
 // ── Écran de configuration ────────────────────────────────────────────────────
 export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament }) {
-  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player' | 'tournament'
+  const [step, setStep]   = useState('home') // 'home' | 'stats-choice' | 'form'
+  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -303,59 +304,100 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
     if (e.key === 'Enter') handleStart()
   }
 
+  function chooseScorer()      { setMode('scorer'); setStep('form') }
+  function chooseStatsHome()   { setStep('stats-choice') }
+  function chooseStatsSheet()  { setMode('stats');  setStep('form') }
+  function chooseStatsPlayers(){ setMode('player'); setStep('form') }
+  function backToHome()        { setStep('home') }
+  function backFromForm()      { setStep(mode === 'scorer' ? 'home' : 'stats-choice') }
+
   const recentHistory = (history || []).slice(0, 3)
 
   return (
     <>
-      <div className="setup-head">
-        <h1>Tchoukball Assistant</h1>
-      </div>
+      {/* ── Accueil : 3 choix ── */}
+      {step === 'home' && (
+        <>
+          <div className="setup-head">
+            <h1>Tchoukball Assistant</h1>
+          </div>
 
-      {/* ── Mode ── */}
-      <section className="setup-section">
-        <div className="section-title">Mode</div>
-        <div className="seg mode-seg">
-          <button className={mode === 'stats' ? 'on' : ''} onClick={() => setMode('stats')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
-              <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-            </svg>
-            Feuille de stats
-          </button>
-          <button className={mode === 'scorer' ? 'on' : ''} onClick={() => setMode('scorer')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
-              <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-            </svg>
-            Scoreur
-          </button>
-          <button className={mode === 'player' ? 'on' : ''} onClick={() => setMode('player')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
-              <circle cx="9" cy="7" r="4" />
-              <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
-            </svg>
-            Stats joueurs
-          </button>
-          <button className={mode === 'tournament' ? 'on' : ''} onClick={() => setMode('tournament')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 style={{ marginRight: 6, verticalAlign: 'middle' }}>
-              <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
-              <path d="M8 20h8" />
-              <path d="M12 12v5" />
-              <path d="M9 20h6" />
-              <path d="M6 6H4a2 2 0 0 0 2 2" />
-              <path d="M18 6h2a2 2 0 0 1-2 2" />
-            </svg>
-            Tournois
-          </button>
-        </div>
-      </section>
+          <section className="setup-section">
+            <div className="section-title">Que veux-tu faire ?</div>
+            <div className="home-choices">
+              <button className="home-card" onClick={chooseStatsHome}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                </svg>
+                <span className="home-card-label">Stats</span>
+                <span className="home-card-desc">Feuille de stats ou suivi joueur par joueur</span>
+              </button>
+              <button className="home-card" onClick={chooseScorer}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+                </svg>
+                <span className="home-card-label">Scoreur</span>
+                <span className="home-card-desc">Grand tableau de score plein écran</span>
+              </button>
+              <button className="home-card" onClick={onViewTournament}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
+                  <path d="M8 20h8" />
+                  <path d="M12 12v5" />
+                  <path d="M9 20h6" />
+                  <path d="M6 6H4a2 2 0 0 0 2 2" />
+                  <path d="M18 6h2a2 2 0 0 1-2 2" />
+                </svg>
+                <span className="home-card-label">Tournois</span>
+                <span className="home-card-desc">Créer et suivre un tournoi</span>
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* ── Sous-choix Stats : feuille de stats ou joueurs ── */}
+      {step === 'stats-choice' && (
+        <>
+          <div className="setup-head">
+            <button className="btn-mini" onClick={backToHome}>← Retour</button>
+            <h1>Stats</h1>
+          </div>
+
+          <section className="setup-section">
+            <div className="section-title">Quel type de suivi ?</div>
+            <div className="home-choices home-choices-2">
+              <button className="home-card" onClick={chooseStatsSheet}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                </svg>
+                <span className="home-card-label">Feuille de stats</span>
+                <span className="home-card-desc">Stats d'équipe complètes pendant le match</span>
+              </button>
+              <button className="home-card" onClick={chooseStatsPlayers}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
+                </svg>
+                <span className="home-card-label">Stats joueurs</span>
+                <span className="home-card-desc">Suivi individuel, joueur par joueur</span>
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+
+      {step === 'form' && (
+      <div className="setup-head">
+        <button className="btn-mini" onClick={backFromForm}>← Retour</button>
+        <h1>{mode === 'scorer' ? 'Scoreur' : mode === 'player' ? 'Stats joueurs' : 'Feuille de stats'}</h1>
+      </div>
+      )}
 
       {/* ── Équipes (stats & scorer) ── */}
-      {mode !== 'player' && mode !== 'tournament' && (
+      {step === 'form' && mode !== 'player' && (
         <section className="setup-section">
           <div className="section-title">Configuration des équipes</div>
           <div className="flabel" style={{ marginBottom: 10 }}>Format fixe : 2 équipes</div>
@@ -395,7 +437,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       )}
 
       {/* ── Mode joueurs : noms des équipes + joueurs ── */}
-      {mode === 'player' && (
+      {step === 'form' && mode === 'player' && (
         <section className="setup-section">
           <div className="section-title">Équipes &amp; joueurs</div>
 
@@ -463,19 +505,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
         </section>
       )}
 
-      {mode === 'tournament' && (
-        <section className="setup-section">
-          <div className="section-title">Tournois</div>
-          <div className="setup-mode-info">
-            Crée, consulte et gère tes tournois depuis un seul endroit.
-          </div>
-          <button className="btn-acc" onClick={onViewTournament}>
-            Ouvrir les tournois →
-          </button>
-        </section>
-      )}
-
-      {mode !== 'tournament' && (
+      {step === 'form' && (
         <>
           {/* ── Mi-temps ── */}
           <section className="setup-section">
@@ -504,7 +534,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       )}
 
       {/* ── Historique récent ── */}
-      {recentHistory.length > 0 && (
+      {step === 'home' && recentHistory.length > 0 && (
         <section className="setup-section">
           <div className="history-head">
             <div className="section-title">Matchs récents</div>

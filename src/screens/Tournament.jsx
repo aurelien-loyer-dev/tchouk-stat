@@ -457,7 +457,6 @@ function TournamentEnd({ tournament, onBack }) {
   return (
     <div className="trn-end">
       <div className="trn-end-hero">
-        <div className="trn-end-badge">🏆</div>
         <div className="trn-end-title">Tournoi terminé</div>
         <div className="trn-end-subtitle">
           {winner ? `Vainqueur : ${winner}` : 'Classement final disponible'}
@@ -907,7 +906,6 @@ export default function Tournament({ tournaments, onSave, onBack }) {
 
       {tournaments.length === 0 ? (
         <div className="trn-empty">
-          <div className="trn-empty-icon">🏆</div>
           <div>Aucun tournoi créé pour l'instant.</div>
           <button className="btn-acc" onClick={() => setView('setup')}>Créer un tournoi</button>
         </div>
