@@ -554,6 +554,17 @@ button.mr-card:hover {
   border-top: 1px solid var(--bdr);
 }
 
+/* Variante horizontale de .mr-name pour les en-têtes de détail (au-dessus
+   d'un gros score .rf) : noms côte à côte, mais jamais accolés au score. */
+.mr-detail-names {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
 /* results timeline + history */
 .tl-empty {
   color: var(--dim);
