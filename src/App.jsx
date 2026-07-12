@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
@@ -11,7 +12,18 @@ import History from './screens/History'
 import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
 import Tournament from './screens/Tournament'
+import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
+
+function AppFooter() {
+  const { t } = useTranslation()
+  return (
+    <footer className="app-footer">
+      <img src={logoAl} alt="AL" className="app-footer-logo" />
+      <span>{t('common.copyright', { year: new Date().getFullYear() })}</span>
+    </footer>
+  )
+}
 
 const DEFAULT_SETTINGS = {
   teamColors: ['#0000b6', '#ae0000'],
@@ -414,6 +426,7 @@ export default function App() {
           onBack={() => setScreen('setup')}
         />
       )}
+      <AppFooter />
       <Analytics />
     </>
   )

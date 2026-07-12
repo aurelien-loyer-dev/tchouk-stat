@@ -2,6 +2,7 @@ export default {
   common: {
     back: '← Back',
     langToggle: 'FR',
+    copyright: '© {{year}} Aurélien Loyer. All rights reserved.',
   },
   setup: {
     appTitle: 'Tchoukball Assistant',

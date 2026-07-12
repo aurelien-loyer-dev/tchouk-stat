@@ -37,7 +37,7 @@ body {
 #root {
   width: 100%;
   max-width: 960px;
-  padding: 22px 14px 60px;
+  padding: 22px 14px 52px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -115,11 +115,18 @@ body {
 }
 
 .app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 0 4px;
+  padding: 9px 14px;
+  background: var(--s1);
+  border-top: 1px solid var(--bdr);
   color: var(--dim);
   font-size: 12px;
 }
