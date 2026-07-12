@@ -17,7 +17,7 @@ function AnimScore({ value, color }) {
   return <div ref={ref} className="sc-score" style={teamTextStyle(color)}>{value}</div>
 }
 
-export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, settings, logos }) {
+export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, settings, logos }) {
   const two = numTeams === 2
   const [elapsedSec, setElapsedSec] = useState(0)
   const [running, setRunning] = useState(false)
@@ -97,6 +97,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
   function handleEnd() {
     setRunning(false)
     setMatchEnded(true)
+    onFinish?.()
   }
 
   function handleResetCurrentHalf() {
@@ -185,8 +186,8 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
             </div>
           )}
 
-          <button className="btn-acc sc-end-cta" onClick={onEnd}>
-            Voir les résultats
+          <button className="btn-acc sc-end-cta" onClick={onNewMatch}>
+            Nouveau match
           </button>
         </div>
       </div>

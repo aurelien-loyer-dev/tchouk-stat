@@ -129,8 +129,6 @@ export default function Results({
   timeline,
   settings,
   summary,
-  mode,
-  logos,
   onNew,
 }) {
   const [tab, setTab] = useState(0)
@@ -150,39 +148,6 @@ export default function Results({
   const ft  = fautesTotal(t)
 
   const shotEvents = (timeline || []).filter(e => e.teamIdx === tab && e.category === 'tirs')
-
-  if (mode === 'scorer') {
-    return (
-      <>
-        <div className="res-simple-msg">Bien joué !</div>
-
-        <div className="res-simple-board">
-          {teams.slice(0, 2).map((team, i) => (
-            <div className="res-simple-team" key={team.name + i}>
-              <div className="res-simple-logo-wrap">
-                {logos?.[i]
-                  ? <img src={logos[i]} alt={team.name} className="res-simple-logo" />
-                  : <div className="res-simple-logo-ph">{(team.name || 'E')[0].toUpperCase()}</div>
-                }
-              </div>
-              <div className="res-simple-name">{team.name}</div>
-              <div className="res-simple-score" style={teamTextStyle(i === 0 ? c1 : c2)}>
-                {score(teams, numTeams, i)}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          className="btn-ghost"
-          style={{ alignSelf: 'center', minWidth: 220, marginTop: 10 }}
-          onClick={onNew}
-        >
-          ← Nouveau match
-        </button>
-      </>
-    )
-  }
 
   function handleDownloadSheet() {
     if (!summary) return

@@ -257,14 +257,18 @@ export default function App() {
     setPlayers(next)
   }
 
-  // ── Fin du match (mode stats) ─────────────────────────────────────────────
-  function endMatch() {
+  // ── Fin du match (mode stats / scorer) ────────────────────────────────────
+  function saveMatchToHistory() {
     const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings, appMode)
     setLastSummary(summary)
     const newHistory = [summary, ...history]
     setHistory(newHistory)
     saveHistory(newHistory)
     saveMatchToCloud(summary)
+  }
+
+  function endMatch() {
+    saveMatchToHistory()
     setScreen('results')
   }
 
@@ -358,7 +362,8 @@ export default function App() {
           teams={teams}
           numTeams={numTeams}
           onAdj={handleAdj}
-          onEnd={endMatch}
+          onFinish={saveMatchToHistory}
+          onNewMatch={newMatch}
           onReset={resetScorer}
           settings={matchSettings}
           logos={teamLogos}
@@ -381,8 +386,6 @@ export default function App() {
           timeline={timeline}
           settings={matchSettings}
           summary={lastSummary}
-          mode={appMode}
-          logos={teamLogos}
           onNew={newMatch}
         />
       )}
