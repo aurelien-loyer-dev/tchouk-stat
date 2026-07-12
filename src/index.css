@@ -471,45 +471,87 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   color: var(--dim);
 }
 
-.history-list {
+/* ── Match row — carte compacte utilisée par l'aperçu "Matchs récents"
+   et par la liste complète de l'historique. Hiérarchie volontaire :
+   méta en gris discret, noms d'équipe en gris moyen, score en blanc vif —
+   pour éviter le tout-blanc plat et laisser les infos respirer. ── */
+.mr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mr-card {
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--s1);
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+button.mr-card {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+button.mr-card:hover {
+  border-color: var(--acc);
+  background: var(--s2);
+}
+
+.mr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.mr-teams {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.history-item {
-  border: 1px solid var(--bdr);
-  border-radius: 10px;
-  padding: 9px 10px;
-  background: rgba(255, 255, 255, 0.01);
+.mr-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.history-btn {
-  width: 100%;
-  text-align: left;
-  border: 1px solid var(--bdr);
-  cursor: pointer;
+.mr-team-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.history-btn:hover {
-  background: rgba(124, 111, 255, 0.08);
+.mr-team-score {
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--txt);
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
 }
 
-.history-date {
+.mr-foot {
   font-size: 11px;
   color: var(--dim);
-  margin-bottom: 2px;
-}
-
-.history-score {
-  font-size: 14px;
-  color: var(--txt);
-  font-weight: 700;
-}
-
-.history-meta {
-  font-size: 12px;
-  color: var(--dim);
+  padding-top: 9px;
+  border-top: 1px solid var(--bdr);
 }
 
 /* results timeline + history */
@@ -639,49 +681,6 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 }
 
 .tl-score {
-  font-size: 12px;
-  color: var(--dim);
-}
-
-.hist-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hist-item {
-  border: 1px solid var(--bdr);
-  border-radius: 10px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.01);
-}
-
-.hist-btn {
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-
-.hist-btn:hover {
-  background: rgba(124, 111, 255, 0.08);
-}
-
-.hist-top {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--dim);
-}
-
-.hist-scoreline {
-  margin-top: 4px;
-  font-size: 15px;
-  color: var(--txt);
-  font-weight: 700;
-}
-
-.hist-stats {
-  margin-top: 3px;
   font-size: 12px;
   color: var(--dim);
 }

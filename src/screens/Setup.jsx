@@ -543,21 +543,23 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             <div className="section-title">Matchs récents</div>
             <button className="btn-mini" onClick={onViewHistory}>Voir tout →</button>
           </div>
-          <div className="history-list">
+          <div className="mr-list">
             {recentHistory.map(m => (
-              <div className="history-item" key={m.id}>
-                <div className="history-date">{fmtDateTime(m.playedAt)}</div>
-                <div className="history-score">
-                  {m.teams.map((t, i) => (
-                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200, marginRight: 6 }}> – </span>}
-                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                      <span>{t.name} {t.score}</span>
-                    </span>
-                  ))}
+              <div className="mr-card" key={m.id}>
+                <div className="mr-head">
+                  <span>{fmtDateTime(m.playedAt)}</span>
+                  <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
                 </div>
-                <div className="history-meta">
-                  {m.settings?.halfCount}×{m.settings?.halfDurationMin}min · {m.teams[0]?.tirs ?? 0} tirs
+                <div className="mr-teams">
+                  {m.teams.map((t, i) => (
+                    <div className="mr-team" key={i}>
+                      <span className="mr-team-name">
+                        {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                        {t.name}
+                      </span>
+                      <span className="mr-team-score">{t.score}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

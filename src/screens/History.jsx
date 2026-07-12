@@ -485,10 +485,10 @@ export default function History({ history, onBack, onClear }) {
         </div>
       ) : (
         <>
-          <div className="hist-list">
+          <div className="mr-list">
             {history.map(m => (
-              <button className="hist-btn hist-item" key={m.id} onClick={() => setSelected(m)}>
-                <div className="hist-top">
+              <button className="mr-card" key={m.id} onClick={() => setSelected(m)}>
+                <div className="mr-head">
                   <span>{fmtDateTime(m.playedAt)}</span>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
@@ -501,16 +501,18 @@ export default function History({ history, onBack, onClear }) {
                     </span>
                   </div>
                 </div>
-                <div className="hist-scoreline">
+                <div className="mr-teams">
                   {(m.teams || []).map((t, i) => (
-                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200, marginRight: 6 }}> – </span>}
-                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                      <span>{t.name} {t.score}</span>
-                    </span>
+                    <div className="mr-team" key={i}>
+                      <span className="mr-team-name">
+                        {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                        {t.name}
+                      </span>
+                      <span className="mr-team-score">{t.score}</span>
+                    </div>
                   ))}
                 </div>
-                <div className="hist-stats">
+                <div className="mr-foot">
                   {m.mode === 'player'
                     ? `${m.players?.length || 0} joueurs · stats joueurs`
                     : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
