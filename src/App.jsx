@@ -106,6 +106,7 @@ export default function App() {
   const [lastSummary, setLastSummary] = useState(null)
   const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
+  const [historyInitialMatch, setHistoryInitialMatch] = useState(null)
   const [tournaments, setTournaments] = useState(loadTournaments)
 
   // Chargement depuis Supabase au démarrage
@@ -338,7 +339,8 @@ export default function App() {
           defaultSettings={matchSettings}
           history={history}
           onClearHistory={clearHistory}
-          onViewHistory={() => setScreen('history')}
+          onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
+          onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
           onViewTournament={() => setScreen('tournament')}
         />
       )}
@@ -399,6 +401,7 @@ export default function App() {
           history={history}
           onBack={() => setScreen('setup')}
           onClear={clearHistory}
+          initialMatch={historyInitialMatch}
         />
       )}
       {screen === 'tournament' && (

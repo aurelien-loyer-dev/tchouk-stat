@@ -214,7 +214,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 }
 
 // ── Écran de configuration ────────────────────────────────────────────────────
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onViewTournament }) {
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament }) {
   const [step, setStep]   = useState('home') // 'home' | 'stats-choice' | 'form'
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
@@ -544,30 +544,34 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             <button className="btn-mini" onClick={onViewHistory}>Voir tout →</button>
           </div>
           <div className="mr-list">
-            {recentHistory.map(m => (
-              <div className="mr-card" key={m.id}>
-                <div className="mr-head">
-                  <span>{fmtDateTime(m.playedAt)}</span>
-                  <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
-                </div>
-                <div className="mr-names">
-                  {m.teams.map((t, i) => (
-                    <div className="mr-name" key={i}>
-                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                      {t.name}
-                    </div>
-                  ))}
-                </div>
-                <div className="mr-score">
-                  {m.teams.map((t, i) => (
-                    <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
-                      {i > 0 && <span className="mr-score-sep">–</span>}
-                      {t.score}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {recentHistory.map(m => {
+              const clickable = m.mode !== 'scorer'
+              const CardTag = clickable ? 'button' : 'div'
+              return (
+                <CardTag className="mr-card" key={m.id} {...(clickable ? { onClick: () => onOpenMatch(m) } : {})}>
+                  <div className="mr-head">
+                    <span>{fmtDateTime(m.playedAt)}</span>
+                    <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
+                  </div>
+                  <div className="mr-names">
+                    {m.teams.map((t, i) => (
+                      <div className="mr-name" key={i}>
+                        {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                        {t.name}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mr-score">
+                    {m.teams.map((t, i) => (
+                      <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
+                        {i > 0 && <span className="mr-score-sep">–</span>}
+                        {t.score}
+                      </span>
+                    ))}
+                  </div>
+                </CardTag>
+              )
+            })}
           </div>
         </section>
       )}

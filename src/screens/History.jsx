@@ -474,8 +474,8 @@ function PlayerMatchDetail({ match, onClose }) {
 }
 
 // ── Liste historique ──────────────────────────────────────────────────────────
-export default function History({ history, onBack, onClear }) {
-  const [selected, setSelected] = useState(null)
+export default function History({ history, onBack, onClear, initialMatch }) {
+  const [selected, setSelected] = useState(initialMatch || null)
 
   if (selected) {
     return selected.mode === 'player'
@@ -497,47 +497,51 @@ export default function History({ history, onBack, onClear }) {
       ) : (
         <>
           <div className="mr-list">
-            {history.map(m => (
-              <button className="mr-card" key={m.id} onClick={() => setSelected(m)}>
-                <div className="mr-head">
-                  <span>{fmtDateTime(m.playedAt)}</span>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
-                    <span
-                      className="hist-pdf-btn"
-                      role="button"
-                      onClick={e => { e.stopPropagation(); downloadMatchPdf(m) }}
-                    >
-                      PDF ↓
-                    </span>
-                  </div>
-                </div>
-                <div className="mr-names">
-                  {(m.teams || []).map((t, i) => (
-                    <div className="mr-name" key={i}>
-                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                      {t.name}
+            {history.map(m => {
+              const clickable = m.mode !== 'scorer'
+              const CardTag = clickable ? 'button' : 'div'
+              return (
+                <CardTag className="mr-card" key={m.id} {...(clickable ? { onClick: () => setSelected(m) } : {})}>
+                  <div className="mr-head">
+                    <span>{fmtDateTime(m.playedAt)}</span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span>{m.settings?.halfCount}×{m.settings?.halfDurationMin}min</span>
+                      <span
+                        className="hist-pdf-btn"
+                        role="button"
+                        onClick={e => { e.stopPropagation(); downloadMatchPdf(m) }}
+                      >
+                        PDF ↓
+                      </span>
                     </div>
-                  ))}
-                </div>
-                <div className="mr-score">
-                  {(m.teams || []).map((t, i) => (
-                    <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
-                      {i > 0 && <span className="mr-score-sep">–</span>}
-                      {t.score}
-                    </span>
-                  ))}
-                </div>
-                {m.mode !== 'scorer' && (
-                  <div className="mr-foot">
-                    {m.mode === 'player'
-                      ? `${m.players?.length || 0} joueurs · stats joueurs`
-                      : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
-                    }
                   </div>
-                )}
-              </button>
-            ))}
+                  <div className="mr-names">
+                    {(m.teams || []).map((t, i) => (
+                      <div className="mr-name" key={i}>
+                        {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                        {t.name}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mr-score">
+                    {(m.teams || []).map((t, i) => (
+                      <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
+                        {i > 0 && <span className="mr-score-sep">–</span>}
+                        {t.score}
+                      </span>
+                    ))}
+                  </div>
+                  {m.mode !== 'scorer' && (
+                    <div className="mr-foot">
+                      {m.mode === 'player'
+                        ? `${m.players?.length || 0} joueurs · stats joueurs`
+                        : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
+                      }
+                    </div>
+                  )}
+                </CardTag>
+              )
+            })}
           </div>
 
           <button
