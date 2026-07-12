@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { mkPlayer } from '../lib/playerStats'
 import { fmtDateTime } from '../lib/format'
+import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 
 const COMPOS_KEY = 'tchouk_compos'
 function loadComposFromStorage() {
@@ -108,7 +109,7 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                     </div>
                   ) : (
                     <div className="ps-compo-item">
-                      <span className="ps-compo-dot" style={{ background: c.color }} />
+                      <span className="ps-compo-dot" style={teamSwatchStyle(c.color)} />
                       <span className="ps-compo-lbl">
                         <span className="ps-compo-name">{c.name}</span>
                         <span className="ps-compo-meta">{c.teamName} · {c.players.length}j</span>
@@ -182,7 +183,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 
   return (
     <div className="ps-team-col">
-      <div className="ps-team-hd" style={{ color: teamColor }}>{teamLabel}</div>
+      <div className="ps-team-hd" style={teamTextStyle(teamColor)}>{teamLabel}</div>
       <CompoLoader
         compos={compos}
         onLoad={onLoadCompo}
@@ -323,7 +324,6 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
           </div>
 
           <section className="setup-section">
-            <div className="section-title">Que veux-tu faire ?</div>
             <div className="home-choices">
               <button className="home-card" onClick={chooseStatsHome}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -548,7 +548,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                   {m.teams.map((t, i) => (
                     <span key={i}>
                       {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200 }}> – </span>}
-                      <span style={{ color: m.settings?.teamColors?.[i] || 'var(--txt)' }}>{t.name} {t.score}</span>
+                      <span style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
                     </span>
                   ))}
                 </div>

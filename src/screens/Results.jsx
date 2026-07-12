@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../lib/stats'
 import { buildShotSeries } from '../lib/shotSeries'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName } from '../lib/format'
+import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
 
 const SHOT_LABELS = {
   tGagne: 'Tir gagné',
@@ -51,8 +52,14 @@ function TimelineGraph({ teams, timeline, settings }) {
 
         {series.map((pts, i) => {
           const color = settings?.teamColors?.[i] || (i === 0 ? '#0e9f8f' : '#d14343')
+          const needsHalo = colorLum(color) < 0.22
           const d = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${x(p.t)} ${y(p.v)}`).join(' ')
-          return <path key={`line-${i}`} d={d} fill="none" stroke={color} strokeWidth="3" />
+          return (
+            <g key={`line-${i}`}>
+              {needsHalo && <path d={d} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="6" />}
+              <path d={d} fill="none" stroke={color} strokeWidth="3" />
+            </g>
+          )
         })}
       </svg>
 
@@ -61,7 +68,7 @@ function TimelineGraph({ teams, timeline, settings }) {
           const color = settings?.teamColors?.[i] || (i === 0 ? '#0e9f8f' : '#d14343')
           return (
             <div className="tg-leg-item" key={team.name + i}>
-              <span className="tg-leg-dot" style={{ background: color }} />
+              <span className="tg-leg-dot" style={teamSwatchStyle(color)} />
               <span>{team.name}</span>
             </div>
           )
@@ -130,6 +137,9 @@ export default function Results({
 
   if (!teams || teams.length === 0) return null
 
+  const c1 = settings?.teamColors?.[0] || '#0e9f8f'
+  const c2 = settings?.teamColors?.[1] || '#d14343'
+
   const t   = teams[tab]
   const n   = numTeams
   const ti  = tirs(teams, n, tab)
@@ -156,7 +166,7 @@ export default function Results({
                 }
               </div>
               <div className="res-simple-name">{team.name}</div>
-              <div className="res-simple-score" style={{ color: i === 0 ? 'var(--c1)' : 'var(--c2)' }}>
+              <div className="res-simple-score" style={teamTextStyle(i === 0 ? c1 : c2)}>
                 {score(teams, numTeams, i)}
               </div>
             </div>
@@ -313,12 +323,12 @@ export default function Results({
       {/* Score final */}
       <div className="rf">
         {n === 1 ? (
-          <span style={{ color: 'var(--c1)' }}>{score(teams, n, 0)}</span>
+          <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
         ) : (
           <>
-            <span style={{ color: 'var(--c1)' }}>{score(teams, n, 0)}</span>
+            <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
             <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={{ color: 'var(--c2)' }}>{score(teams, n, 1)}</span>
+            <span style={teamTextStyle(c2)}>{score(teams, n, 1)}</span>
           </>
         )}
       </div>

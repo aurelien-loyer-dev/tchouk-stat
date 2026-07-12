@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../lib/playerStats'
 import { fmtClock } from '../lib/format'
+import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 
 // ── Carte joueur ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
@@ -33,7 +34,7 @@ function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
 function TeamColumn({ teamName, teamColor, players, selectedStat, dimmed, onAdj }) {
   return (
     <div className={`pm-team-col${dimmed ? ' pm-col-dimmed' : ''}`}>
-      <div className="pm-team-hd" style={{ color: teamColor }}>{teamName}</div>
+      <div className="pm-team-hd" style={teamTextStyle(teamColor)}>{teamName}</div>
       {players.length === 0 && <div className="pm-no-players">Aucun joueur</div>}
       <div className="pm-players-grid-inner">
         {players.map(p => (
@@ -58,6 +59,9 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
   const [running, setRunning]             = useState(false)
 
   const n = numTeams ?? 2
+
+  const c1 = settings?.teamColors?.[0] || '#0e9f8f'
+  const c2 = settings?.teamColors?.[1] || '#d14343'
 
   const halfDurationMin = Math.max(1, Number(settings?.halfDurationMin) || 12)
   const halfCount       = Math.max(1, Number(settings?.halfCount) || 2)
@@ -135,19 +139,19 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
           {n === 2 ? (
             <>
               <div className="sb-t">
-                <div className="sb-name" style={{ color: 'var(--c1)' }}>{teams[0]?.name}</div>
-                <div className="sb-score" style={{ color: 'var(--c1)' }}>{score0}</div>
+                <div className="sb-name" style={teamTextStyle(c1)}>{teams[0]?.name}</div>
+                <div className="sb-score" style={teamTextStyle(c1)}>{score0}</div>
               </div>
               <div className="sb-sep">–</div>
               <div className="sb-t">
-                <div className="sb-score" style={{ color: 'var(--c2)' }}>{score1}</div>
-                <div className="sb-name" style={{ color: 'var(--c2)' }}>{teams[1]?.name}</div>
+                <div className="sb-score" style={teamTextStyle(c2)}>{score1}</div>
+                <div className="sb-name" style={teamTextStyle(c2)}>{teams[1]?.name}</div>
               </div>
             </>
           ) : (
             <div className="sb-t">
-              <div className="sb-name" style={{ color: 'var(--c1)' }}>{teams[0]?.name}</div>
-              <div className="sb-score" style={{ color: 'var(--c1)' }}>{score0}</div>
+              <div className="sb-name" style={teamTextStyle(c1)}>{teams[0]?.name}</div>
+              <div className="sb-score" style={teamTextStyle(c1)}>{score0}</div>
             </div>
           )}
         </div>
@@ -215,10 +219,10 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
         <div className="pm-team-selector">
           <button
             className={`pm-team-sel-btn${focusedTeam === 0 ? ' pm-team-sel-active' : ''}`}
-            style={focusedTeam === 0 ? { borderColor: 'var(--c1)', color: 'var(--c1)' } : {}}
+            style={focusedTeam === 0 ? { borderColor: c1, ...teamTextStyle(c1) } : {}}
             onClick={() => handleTeamFocus(0)}
           >
-            <span className="pm-team-sel-dot" style={{ background: 'var(--c1)' }} />
+            <span className="pm-team-sel-dot" style={teamSwatchStyle(c1)} />
             {teams[0]?.name}
           </button>
 
@@ -228,10 +232,10 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
 
           <button
             className={`pm-team-sel-btn${focusedTeam === 1 ? ' pm-team-sel-active' : ''}`}
-            style={focusedTeam === 1 ? { borderColor: 'var(--c2)', color: 'var(--c2)' } : {}}
+            style={focusedTeam === 1 ? { borderColor: c2, ...teamTextStyle(c2) } : {}}
             onClick={() => handleTeamFocus(1)}
           >
-            <span className="pm-team-sel-dot" style={{ background: 'var(--c2)' }} />
+            <span className="pm-team-sel-dot" style={teamSwatchStyle(c2)} />
             {teams[1]?.name}
           </button>
         </div>
@@ -241,7 +245,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
       <div className={`pm-players-wrap${n === 1 ? ' pm-single-team' : ''}`}>
         <TeamColumn
           teamName={teams[0]?.name}
-          teamColor="var(--c1)"
+          teamColor={c1}
           players={team1Players}
           selectedStat={selectedStat}
           dimmed={selectedStat && n === 2 && focusedTeam === 1}
@@ -250,7 +254,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
         {n === 2 && (
           <TeamColumn
             teamName={teams[1]?.name}
-            teamColor="var(--c2)"
+            teamColor={c2}
             players={team2Players}
             selectedStat={selectedStat}
             dimmed={selectedStat && focusedTeam === 0}

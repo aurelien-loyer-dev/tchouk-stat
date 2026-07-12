@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score } from '../lib/stats'
 import { fmtClock } from '../lib/format'
+import { teamTextStyle } from '../lib/teamColor'
 
 function AnimScore({ value, color }) {
   const ref  = useRef(null)
@@ -13,7 +14,7 @@ function AnimScore({ value, color }) {
     }
     prev.current = value
   }, [value])
-  return <div ref={ref} className="sc-score" style={{ color }}>{value}</div>
+  return <div ref={ref} className="sc-score" style={teamTextStyle(color)}>{value}</div>
 }
 
 export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, settings, logos }) {
@@ -140,22 +141,22 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
               <div className="sc-end-logo-wrap">
                 {logos?.[0]
                   ? <img src={logos[0]} className="sc-logo" alt={teams[0]?.name} />
-                  : <div className="sc-logo-placeholder" style={{ background: c1 + '22', color: c1 }}>{(teams[0]?.name || 'E')[0].toUpperCase()}</div>
+                  : <div className="sc-logo-placeholder" style={{ background: c1 + '22', ...teamTextStyle(c1) }}>{(teams[0]?.name || 'E')[0].toUpperCase()}</div>
                 }
               </div>
-              <div className="sc-end-name" style={{ color: c1 }}>{teams[0]?.name}</div>
-              <div className="sc-end-score" style={{ color: c1 }}>{s0}</div>
+              <div className="sc-end-name" style={teamTextStyle(c1)}>{teams[0]?.name}</div>
+              <div className="sc-end-score" style={teamTextStyle(c1)}>{s0}</div>
             </div>
             {two && (
               <div className="sc-end-team">
                 <div className="sc-end-logo-wrap">
                   {logos?.[1]
                     ? <img src={logos[1]} className="sc-logo" alt={teams[1]?.name} />
-                    : <div className="sc-logo-placeholder" style={{ background: c2 + '22', color: c2 }}>{(teams[1]?.name || 'E')[0].toUpperCase()}</div>
+                    : <div className="sc-logo-placeholder" style={{ background: c2 + '22', ...teamTextStyle(c2) }}>{(teams[1]?.name || 'E')[0].toUpperCase()}</div>
                   }
                 </div>
-                <div className="sc-end-name" style={{ color: c2 }}>{teams[1]?.name}</div>
-                <div className="sc-end-score" style={{ color: c2 }}>{s1}</div>
+                <div className="sc-end-name" style={teamTextStyle(c2)}>{teams[1]?.name}</div>
+                <div className="sc-end-score" style={teamTextStyle(c2)}>{s1}</div>
               </div>
             )}
           </div>
@@ -166,20 +167,20 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
               <div className="sc-halves-title">Score par mi-temps</div>
               <div className="sc-end-halves-grid">
                 <span className="sc-halves-label" />
-                <span className="sc-end-col-hd" style={{ color: c1 }}>{teams[0]?.name}</span>
-                {two && <span className="sc-end-col-hd" style={{ color: c2 }}>{teams[1]?.name}</span>}
+                <span className="sc-end-col-hd" style={teamTextStyle(c1)}>{teams[0]?.name}</span>
+                {two && <span className="sc-end-col-hd" style={teamTextStyle(c2)}>{teams[1]?.name}</span>}
               </div>
               {endRows.map(({ half, t0, t1 }) => (
                 <div key={half} className="sc-end-halves-grid">
                   <span className="sc-halves-label">MT{half}</span>
-                  <span className="sc-end-half-val" style={{ color: c1 }}>+{t0}</span>
-                  {two && <span className="sc-end-half-val" style={{ color: c2 }}>+{t1}</span>}
+                  <span className="sc-end-half-val" style={teamTextStyle(c1)}>+{t0}</span>
+                  {two && <span className="sc-end-half-val" style={teamTextStyle(c2)}>+{t1}</span>}
                 </div>
               ))}
               <div className="sc-end-halves-grid sc-end-total-row">
                 <span className="sc-halves-label">Total</span>
-                <span className="sc-end-half-val" style={{ color: c1 }}>{s0}</span>
-                {two && <span className="sc-end-half-val" style={{ color: c2 }}>{s1}</span>}
+                <span className="sc-end-half-val" style={teamTextStyle(c1)}>{s0}</span>
+                {two && <span className="sc-end-half-val" style={teamTextStyle(c2)}>{s1}</span>}
               </div>
             </div>
           )}
@@ -220,14 +221,14 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
           <div className="sc-logo-wrap">
             {logos?.[0]
               ? <img src={logos[0]} className="sc-logo" alt={teams[0]?.name} />
-              : <div className="sc-logo-placeholder" style={{ background: c1 + '22', color: c1 }}>
+              : <div className="sc-logo-placeholder" style={{ background: c1 + '22', ...teamTextStyle(c1) }}>
                   {(teams[0]?.name || 'E')[0].toUpperCase()}
                 </div>
             }
           </div>
           <div className="sc-team-name">{teams[0]?.name}</div>
           <AnimScore value={s0} color={c1} />
-          <div className="sc-half-score" style={{ color: c1 }}>+{halfScore0}</div>
+          <div className="sc-half-score" style={teamTextStyle(c1)}>+{halfScore0}</div>
           <div className="sc-actions">
             <button className="sc-btn-score" style={{ background: c1 }} onClick={() => adjScore(0, 1)}>+1</button>
             <button className="sc-btn-neg" onClick={() => adjScore(0, -1)}>-1</button>
@@ -239,14 +240,14 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
             <div className="sc-logo-wrap">
               {logos?.[1]
                 ? <img src={logos[1]} className="sc-logo" alt={teams[1]?.name} />
-                : <div className="sc-logo-placeholder" style={{ background: c2 + '22', color: c2 }}>
+                : <div className="sc-logo-placeholder" style={{ background: c2 + '22', ...teamTextStyle(c2) }}>
                     {(teams[1]?.name || 'E')[0].toUpperCase()}
                   </div>
               }
             </div>
             <div className="sc-team-name">{teams[1]?.name}</div>
             <AnimScore value={s1} color={c2} />
-            <div className="sc-half-score" style={{ color: c2 }}>+{halfScore1}</div>
+            <div className="sc-half-score" style={teamTextStyle(c2)}>+{halfScore1}</div>
             <div className="sc-actions">
               <button className="sc-btn-score" style={{ background: c2 }} onClick={() => adjScore(1, 1)}>+1</button>
               <button className="sc-btn-neg" onClick={() => adjScore(1, -1)}>-1</button>

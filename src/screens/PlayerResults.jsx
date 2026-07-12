@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { jsPDF } from 'jspdf'
 import { PLAYER_STATS, playerTeamScore, playerDerivedStats, playerTirsTotal } from '../lib/playerStats'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
+import { teamTextStyle } from '../lib/teamColor'
 
 // ── Algorithmes de scoring automatique ───────────────────────────────────────
 //
@@ -95,6 +96,9 @@ const AWARDS = [
 // ── Écran résultats joueurs ───────────────────────────────────────────────────
 export default function PlayerResults({ teams, players, numTeams, settings, summary, onNew }) {
   const n = numTeams ?? 2
+
+  const c1 = settings?.teamColors?.[0] || '#0e9f8f'
+  const c2 = settings?.teamColors?.[1] || '#d14343'
 
   const score0       = playerTeamScore(players, 0, n)
   const score1       = n === 2 ? playerTeamScore(players, 1, n) : null
@@ -458,12 +462,12 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       <div className="rf">
         {n === 2 ? (
           <>
-            <span style={{ color: 'var(--c1)' }}>{score0}</span>
+            <span style={teamTextStyle(c1)}>{score0}</span>
             <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={{ color: 'var(--c2)' }}>{score1}</span>
+            <span style={teamTextStyle(c2)}>{score1}</span>
           </>
         ) : (
-          <span style={{ color: 'var(--c1)' }}>{score0}</span>
+          <span style={teamTextStyle(c1)}>{score0}</span>
         )}
       </div>
 

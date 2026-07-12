@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score, tirs } from '../lib/stats'
 import { fmtClock } from '../lib/format'
+import { teamTextStyle } from '../lib/teamColor'
 
 // ── Définition des catégories et boutons ──────────────────────────────────────
 const CATEGORIES = [
@@ -139,6 +140,9 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
   const totalHalfSec = halfDurationMin * 60
   const totalMatchSec = totalHalfSec * halfCount
 
+  const c1 = settings?.teamColors?.[0] || '#0e9f8f'
+  const c2 = settings?.teamColors?.[1] || '#d14343'
+
   useEffect(() => {
     if (!running) return undefined
     const id = window.setInterval(() => {
@@ -190,19 +194,19 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
           {two ? (
             <>
               <div className="sb-t">
-                <div className="sb-name" style={{ color: 'var(--c1)' }}>{teams[0].name}</div>
-                <Animated value={score(teams, numTeams, 0)} className="sb-score" style={{ color: 'var(--c1)' }} />
+                <div className="sb-name" style={teamTextStyle(c1)}>{teams[0].name}</div>
+                <Animated value={score(teams, numTeams, 0)} className="sb-score" style={teamTextStyle(c1)} />
               </div>
               <div className="sb-sep">–</div>
               <div className="sb-t">
-                <Animated value={score(teams, numTeams, 1)} className="sb-score" style={{ color: 'var(--c2)' }} />
-                <div className="sb-name" style={{ color: 'var(--c2)' }}>{teams[1].name}</div>
+                <Animated value={score(teams, numTeams, 1)} className="sb-score" style={teamTextStyle(c2)} />
+                <div className="sb-name" style={teamTextStyle(c2)}>{teams[1].name}</div>
               </div>
             </>
           ) : (
             <div className="sb-t">
               <div className="sb-name">{teams[0].name}</div>
-              <Animated value={score(teams, numTeams, 0)} className="sb-score" style={{ color: 'var(--c1)' }} />
+              <Animated value={score(teams, numTeams, 0)} className="sb-score" style={teamTextStyle(c1)} />
             </div>
           )}
         </div>

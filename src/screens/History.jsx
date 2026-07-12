@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf'
 import { buildShotSeries } from '../lib/shotSeries'
 import { playerTirsTotal, playerDerivedStats, playerTeamScore } from '../lib/playerStats'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
+import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
 
 // ── PDF : match stats / scoreur ───────────────────────────────────────────────
 function generateStatsPdf(match) {
@@ -256,8 +257,14 @@ function MiniTimeline({ timeline, settings, teams }) {
       })}
       {series.map((pts, i) => {
         const color = settings?.teamColors?.[i] || (i === 0 ? '#0e9f8f' : '#d14343')
+        const needsHalo = colorLum(color) < 0.22
         const d = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${x(p.t)} ${y(p.v)}`).join(' ')
-        return <path key={i} d={d} fill="none" stroke={color} strokeWidth="2.5" />
+        return (
+          <g key={i}>
+            {needsHalo && <path d={d} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="5.5" />}
+            <path d={d} fill="none" stroke={color} strokeWidth="2.5" />
+          </g>
+        )
       })}
     </svg>
   )
@@ -284,7 +291,7 @@ function MatchDetail({ match, onClose }) {
         {teams.map((t, i) => (
           <span key={i}>
             {i > 0 && <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>}
-            <span style={{ color: settings?.teamColors?.[i] || 'var(--txt)' }}>{t.name} {t.score}</span>
+            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
           </span>
         ))}
       </div>
@@ -298,7 +305,7 @@ function MatchDetail({ match, onClose }) {
 
       {teams.map((t, i) => (
         <div className="card" key={i} style={{ marginBottom: 12, borderTop: `3px solid ${settings?.teamColors?.[i] || 'var(--acc)'}` }}>
-          <div className="ctitle" style={{ color: settings?.teamColors?.[i] }}>{t.name}</div>
+          <div className="ctitle" style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : undefined}>{t.name}</div>
           <div className="si"><div className="si-l">Score</div><span className="si-v">{t.score}</span></div>
           <div className="si"><div className="si-l">Tirs</div><span className="si-v" style={{ fontSize: 16 }}>{t.tirs}</span></div>
           <div className="si"><div className="si-l">Gagnés</div><span className="si-v" style={{ fontSize: 16 }}>{t.tGagne}</span></div>
@@ -322,7 +329,7 @@ function MatchDetail({ match, onClose }) {
         <div className="tg-legend" style={{ marginTop: 8 }}>
           {teams.map((t, i) => (
             <div className="tg-leg-item" key={i}>
-              <span className="tg-leg-dot" style={{ background: settings?.teamColors?.[i] || 'var(--dim)' }} />
+              <span className="tg-leg-dot" style={settings?.teamColors?.[i] ? teamSwatchStyle(settings.teamColors[i]) : { background: 'var(--dim)' }} />
               <span>{t.name}</span>
             </div>
           ))}
@@ -334,13 +341,14 @@ function MatchDetail({ match, onClose }) {
           <div className="ctitle">Événements ({shotEvents.length})</div>
           <div className="tl-list">
             {shotEvents.map((ev, i) => {
-              const color = settings?.teamColors?.[ev.teamIdx] || 'var(--dim)'
+              const color = settings?.teamColors?.[ev.teamIdx]
+              const style = color ? { ...teamTextStyle(color), fontWeight: 700, marginRight: 4 } : { color: 'var(--dim)', fontWeight: 700, marginRight: 4 }
               return (
                 <div className="tl-item" key={`${ev.at}-${i}`}>
                   <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
                   <div className="tl-main">
                     <div className="tl-label">
-                      <span style={{ color, fontWeight: 700, marginRight: 4 }}>{ev.teamName}</span>
+                      <span style={style}>{ev.teamName}</span>
                       {SHOT_LABELS[ev.id] || ev.id}
                       <span className={`tl-delta ${ev.d > 0 ? 'pos' : 'neg'}`}>{ev.d > 0 ? '+1' : '-1'}</span>
                     </div>
@@ -381,12 +389,12 @@ function PlayerMatchDetail({ match, onClose }) {
       <div className="rf" style={{ marginBottom: 8 }}>
         {n === 2 ? (
           <>
-            <span style={{ color: settings?.teamColors?.[0] || 'var(--txt)' }}>{teams[0]?.name} {score0}</span>
+            <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{teams[0]?.name} {score0}</span>
             <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={{ color: settings?.teamColors?.[1] || 'var(--txt)' }}>{score1} {teams[1]?.name}</span>
+            <span style={settings?.teamColors?.[1] ? teamTextStyle(settings.teamColors[1]) : { color: 'var(--txt)' }}>{score1} {teams[1]?.name}</span>
           </>
         ) : (
-          <span style={{ color: settings?.teamColors?.[0] || 'var(--txt)' }}>{teams[0]?.name} : {score0} pts</span>
+          <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{teams[0]?.name} : {score0} pts</span>
         )}
       </div>
 
@@ -399,7 +407,7 @@ function PlayerMatchDetail({ match, onClose }) {
 
       {teamGroups.map(({ name, color, grp }) => (
         <div className="card" key={name} style={{ marginBottom: 12, borderTop: `3px solid ${color || 'var(--acc)'}` }}>
-          <div className="ctitle" style={{ color }}>{name}</div>
+          <div className="ctitle" style={color ? teamTextStyle(color) : undefined}>{name}</div>
           {grp.length === 0
             ? <div style={{ color: 'var(--dim)', fontSize: 13 }}>Aucun joueur.</div>
             : (
@@ -477,7 +485,7 @@ export default function History({ history, onBack, onClear }) {
                   {(m.teams || []).map((t, i) => (
                     <span key={i}>
                       {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200 }}> – </span>}
-                      <span style={{ color: m.settings?.teamColors?.[i] || 'var(--txt)' }}>{t.name} {t.score}</span>
+                      <span style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
                     </span>
                   ))}
                 </div>
@@ -493,7 +501,7 @@ export default function History({ history, onBack, onClear }) {
 
           <button
             className="btn-ghost"
-            style={{ alignSelf: 'center', marginTop: 8, color: 'var(--c2)' }}
+            style={{ alignSelf: 'center', marginTop: 8, color: 'var(--err)' }}
             onClick={() => { if (window.confirm('Effacer tout l\'historique ?')) onClear() }}
           >
             Effacer l'historique

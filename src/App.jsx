@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
+import { teamHalo, teamBtnTxt } from './lib/teamColor'
 import Setup from './screens/Setup'
 import Match from './screens/Match'
 import Results from './screens/Results'
@@ -11,32 +12,6 @@ import PlayerMatch from './screens/PlayerMatch'
 import PlayerResults from './screens/PlayerResults'
 import Tournament from './screens/Tournament'
 import { Analytics } from "@vercel/analytics/react"
-
-function colorLum(hex) {
-  const clean = String(hex || '').replace('#', '')
-  const full  = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
-  const n     = Number.parseInt(full, 16)
-  if (Number.isNaN(n)) return 0.5
-  const r = (n >> 16) & 255
-  const g = (n >> 8)  & 255
-  const b =  n        & 255
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255
-}
-
-// Contour texte pour couleurs très claires ou très sombres
-function teamHalo(hex) {
-  const lum = colorLum(hex)
-  if (lum > 0.75)
-    return '-1px -1px 0 rgba(0,0,0,0.28), 1px -1px 0 rgba(0,0,0,0.28), -1px 1px 0 rgba(0,0,0,0.28), 1px 1px 0 rgba(0,0,0,0.28), 0 0 8px rgba(0,0,0,0.18)'
-  if (lum < 0.22)
-    return '-1px -1px 0 rgba(255,255,255,0.38), 1px -1px 0 rgba(255,255,255,0.38), -1px 1px 0 rgba(255,255,255,0.38), 1px 1px 0 rgba(255,255,255,0.38), 0 0 8px rgba(255,255,255,0.25)'
-  return 'none'
-}
-
-// Couleur du texte sur fond coloré (bouton +1, etc.)
-function teamBtnTxt(hex) {
-  return colorLum(hex) > 0.55 ? '#111111' : '#ffffff'
-}
 
 const DEFAULT_SETTINGS = {
   teamColors: ['#0000b6', '#ae0000'],

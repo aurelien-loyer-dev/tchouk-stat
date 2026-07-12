@@ -2240,38 +2240,14 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
 
 /* ── Contours automatiques pour les couleurs très claires ou très sombres ──
    --c1-halo / --c2-halo sont calculés en JS (App.jsx) selon la luminance.
-   Aucune retouche dans les composants : tout passe par les sélecteurs CSS.
+   Utilisé ici pour les rares endroits qui n'ont pas accès à la couleur en JS
+   (le style inline via teamTextStyle()/lib/teamColor.js est la référence
+   partout ailleurs — voir Scorer/Match/PlayerMatch/Results/History).
 ────────────────────────────────────────────────────────────────────────────── */
-
-/* Scoreboard match & player-match — équipe gauche / droite */
-.sb-scores > div:first-of-type .sb-score,
-.sb-scores > div:first-of-type .sb-name  { text-shadow: var(--c1-halo); }
-.sb-scores > div:last-of-type  .sb-score,
-.sb-scores > div:last-of-type  .sb-name  { text-shadow: var(--c2-halo); }
-
-/* Scorer plein écran — grands chiffres + initiale logo + score mi-temps */
-.sc-team-left  .sc-score,
-.sc-team-left  .sc-logo-placeholder,
-.sc-team-left  .sc-half-score { text-shadow: var(--c1-halo); }
-.sc-team-right .sc-score,
-.sc-team-right .sc-logo-placeholder,
-.sc-team-right .sc-half-score { text-shadow: var(--c2-halo); }
-
-/* Score final résultats (.rf) */
-.rf > span:first-child { text-shadow: var(--c1-halo); }
-.rf > span:last-child  { text-shadow: var(--c2-halo); }
-
-/* Résultats scorer — grands scores */
-.res-simple-board > :first-child .res-simple-score { text-shadow: var(--c1-halo); }
-.res-simple-board > :last-child  .res-simple-score { text-shadow: var(--c2-halo); }
 
 /* Panneaux statistiques */
 .panel.p0 .ph { text-shadow: var(--c1-halo); }
 .panel.p1 .ph { text-shadow: var(--c2-halo); }
-
-/* PlayerMatch — en-têtes de colonnes équipe */
-.pm-players-wrap > .pm-team-col:first-child .pm-team-hd { text-shadow: var(--c1-halo); }
-.pm-players-wrap > .pm-team-col:last-child  .pm-team-hd { text-shadow: var(--c2-halo); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TOURNOI
