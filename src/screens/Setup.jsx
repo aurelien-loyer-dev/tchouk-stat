@@ -4,6 +4,7 @@ import { mkPlayer } from '../lib/playerStats'
 import { fmtDateTime } from '../lib/format'
 import { teamSwatchStyle, teamTextStyle } from '../lib/teamColor'
 import LanguageToggle from '../i18n/LanguageToggle'
+import logoAl from '../public/logo_al.png'
 
 const COMPOS_KEY = 'tchouk_compos'
 function loadComposFromStorage() {
@@ -581,6 +582,13 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             })}
           </div>
         </section>
+      )}
+
+      {step === 'home' && (
+        <footer className="app-footer">
+          <img src={logoAl} alt="AL" className="app-footer-logo" />
+          <span>© {new Date().getFullYear()} Aurélien Loyer</span>
+        </footer>
       )}
     </>
   )

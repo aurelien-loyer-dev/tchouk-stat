@@ -114,6 +114,25 @@ body {
   line-height: 1.45;
 }
 
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 4px;
+  color: var(--dim);
+  font-size: 12px;
+}
+
+.app-footer-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+  background: #f5f5f0;
+  padding: 2px;
+}
+
 .setup-start-btn {
   flex: 1 1 260px;
 }
