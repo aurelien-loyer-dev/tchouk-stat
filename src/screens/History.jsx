@@ -501,15 +501,20 @@ export default function History({ history, onBack, onClear }) {
                     </span>
                   </div>
                 </div>
-                <div className="mr-teams">
+                <div className="mr-names">
                   {(m.teams || []).map((t, i) => (
-                    <div className="mr-team" key={i}>
-                      <span className="mr-team-name">
-                        {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                        {t.name}
-                      </span>
-                      <span className="mr-team-score">{t.score}</span>
+                    <div className="mr-name" key={i}>
+                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                      {t.name}
                     </div>
+                  ))}
+                </div>
+                <div className="mr-score">
+                  {(m.teams || []).map((t, i) => (
+                    <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
+                      {i > 0 && <span className="mr-score-sep">–</span>}
+                      {t.score}
+                    </span>
                   ))}
                 </div>
                 <div className="mr-foot">

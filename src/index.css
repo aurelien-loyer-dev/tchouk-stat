@@ -514,20 +514,15 @@ button.mr-card:hover {
   color: var(--dim);
 }
 
-.mr-teams {
+/* Noms d'équipe groupés — jamais accolés au score, qui vit dans .mr-score
+   juste en dessous, comme le score final de l'écran de résultats (.rf). */
+.mr-names {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
-.mr-team {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.mr-team-name {
+.mr-name {
   display: flex;
   align-items: center;
   min-width: 0;
@@ -539,12 +534,17 @@ button.mr-card:hover {
   white-space: nowrap;
 }
 
-.mr-team-score {
-  font-size: 19px;
+.mr-score {
+  text-align: center;
+  font-size: 26px;
   font-weight: 900;
-  color: var(--txt);
   letter-spacing: -0.5px;
-  flex-shrink: 0;
+}
+
+.mr-score-sep {
+  color: var(--s3);
+  font-weight: 200;
+  margin: 0 10px;
 }
 
 .mr-foot {
