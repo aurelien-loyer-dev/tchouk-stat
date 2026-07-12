@@ -569,6 +569,19 @@ input[type=number]:focus, .sel:focus { border-color: var(--acc); }
   border-radius: 999px;
 }
 
+/* Pastille de couleur d'équipe accolée à du texte simple : à petite taille,
+   le texte coloré + contour devient illisible, on préfère un point + texte
+   normal (voir teamSwatchStyle / lib/teamColor.js). */
+.team-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
 .tl-list {
   display: flex;
   flex-direction: column;

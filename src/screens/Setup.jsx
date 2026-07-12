@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { mkPlayer } from '../lib/playerStats'
 import { fmtDateTime } from '../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
+import { teamSwatchStyle } from '../lib/teamColor'
 
 const COMPOS_KEY = 'tchouk_compos'
 function loadComposFromStorage() {
@@ -183,7 +183,10 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
 
   return (
     <div className="ps-team-col">
-      <div className="ps-team-hd" style={teamTextStyle(teamColor)}>{teamLabel}</div>
+      <div className="ps-team-hd">
+        <span className="team-dot" style={teamSwatchStyle(teamColor)} />
+        {teamLabel}
+      </div>
       <CompoLoader
         compos={compos}
         onLoad={onLoadCompo}
@@ -546,9 +549,10 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                 <div className="history-date">{fmtDateTime(m.playedAt)}</div>
                 <div className="history-score">
                   {m.teams.map((t, i) => (
-                    <span key={i}>
-                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200 }}> – </span>}
-                      <span style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200, marginRight: 6 }}> – </span>}
+                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                      <span>{t.name} {t.score}</span>
                     </span>
                   ))}
                 </div>

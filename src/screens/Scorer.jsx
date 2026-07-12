@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score } from '../lib/stats'
 import { fmtClock } from '../lib/format'
-import { teamTextStyle } from '../lib/teamColor'
+import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 
 function AnimScore({ value, color }) {
   const ref  = useRef(null)
@@ -144,7 +144,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
                   : <div className="sc-logo-placeholder" style={{ background: c1 + '22', ...teamTextStyle(c1) }}>{(teams[0]?.name || 'E')[0].toUpperCase()}</div>
                 }
               </div>
-              <div className="sc-end-name" style={teamTextStyle(c1)}>{teams[0]?.name}</div>
+              <div className="sc-end-name">{teams[0]?.name}</div>
               <div className="sc-end-score" style={teamTextStyle(c1)}>{s0}</div>
             </div>
             {two && (
@@ -155,7 +155,7 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
                     : <div className="sc-logo-placeholder" style={{ background: c2 + '22', ...teamTextStyle(c2) }}>{(teams[1]?.name || 'E')[0].toUpperCase()}</div>
                   }
                 </div>
-                <div className="sc-end-name" style={teamTextStyle(c2)}>{teams[1]?.name}</div>
+                <div className="sc-end-name">{teams[1]?.name}</div>
                 <div className="sc-end-score" style={teamTextStyle(c2)}>{s1}</div>
               </div>
             )}
@@ -167,8 +167,8 @@ export default function Scorer({ teams, numTeams, onAdj, onEnd, onReset, setting
               <div className="sc-halves-title">Score par mi-temps</div>
               <div className="sc-end-halves-grid">
                 <span className="sc-halves-label" />
-                <span className="sc-end-col-hd" style={teamTextStyle(c1)}>{teams[0]?.name}</span>
-                {two && <span className="sc-end-col-hd" style={teamTextStyle(c2)}>{teams[1]?.name}</span>}
+                <span className="sc-end-col-hd"><span className="team-dot" style={teamSwatchStyle(c1)} />{teams[0]?.name}</span>
+                {two && <span className="sc-end-col-hd"><span className="team-dot" style={teamSwatchStyle(c2)} />{teams[1]?.name}</span>}
               </div>
               {endRows.map(({ half, t0, t1 }) => (
                 <div key={half} className="sc-end-halves-grid">

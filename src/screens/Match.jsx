@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { score, tirs } from '../lib/stats'
 import { fmtClock } from '../lib/format'
-import { teamTextStyle } from '../lib/teamColor'
+import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 
 // ── Définition des catégories et boutons ──────────────────────────────────────
 const CATEGORIES = [
@@ -194,13 +194,13 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
           {two ? (
             <>
               <div className="sb-t">
-                <div className="sb-name" style={teamTextStyle(c1)}>{teams[0].name}</div>
+                <div className="sb-name"><span className="team-dot" style={teamSwatchStyle(c1)} />{teams[0].name}</div>
                 <Animated value={score(teams, numTeams, 0)} className="sb-score" style={teamTextStyle(c1)} />
               </div>
               <div className="sb-sep">–</div>
               <div className="sb-t">
                 <Animated value={score(teams, numTeams, 1)} className="sb-score" style={teamTextStyle(c2)} />
-                <div className="sb-name" style={teamTextStyle(c2)}>{teams[1].name}</div>
+                <div className="sb-name"><span className="team-dot" style={teamSwatchStyle(c2)} />{teams[1].name}</div>
               </div>
             </>
           ) : (

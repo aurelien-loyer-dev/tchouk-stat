@@ -289,9 +289,11 @@ function MatchDetail({ match, onClose }) {
 
       <div className="rf" style={{ marginBottom: 8 }}>
         {teams.map((t, i) => (
-          <span key={i}>
-            {i > 0 && <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>}
-            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+            {i > 0 && <span style={{ color: 'var(--s3)', fontWeight: 200, margin: '0 6px' }}> – </span>}
+            {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
+            <span style={{ color: 'var(--txt)', marginRight: 8 }}>{t.name}</span>
+            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.score}</span>
           </span>
         ))}
       </div>
@@ -305,7 +307,10 @@ function MatchDetail({ match, onClose }) {
 
       {teams.map((t, i) => (
         <div className="card" key={i} style={{ marginBottom: 12, borderTop: `3px solid ${settings?.teamColors?.[i] || 'var(--acc)'}` }}>
-          <div className="ctitle" style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : undefined}>{t.name}</div>
+          <div className="ctitle">
+            {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
+            {t.name}
+          </div>
           <div className="si"><div className="si-l">Score</div><span className="si-v">{t.score}</span></div>
           <div className="si"><div className="si-l">Tirs</div><span className="si-v" style={{ fontSize: 16 }}>{t.tirs}</span></div>
           <div className="si"><div className="si-l">Gagnés</div><span className="si-v" style={{ fontSize: 16 }}>{t.tGagne}</span></div>
@@ -342,13 +347,13 @@ function MatchDetail({ match, onClose }) {
           <div className="tl-list">
             {shotEvents.map((ev, i) => {
               const color = settings?.teamColors?.[ev.teamIdx]
-              const style = color ? { ...teamTextStyle(color), fontWeight: 700, marginRight: 4 } : { color: 'var(--dim)', fontWeight: 700, marginRight: 4 }
               return (
                 <div className="tl-item" key={`${ev.at}-${i}`}>
                   <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
                   <div className="tl-main">
                     <div className="tl-label">
-                      <span style={style}>{ev.teamName}</span>
+                      {color && <span className="team-dot" style={teamSwatchStyle(color)} />}
+                      <span style={{ fontWeight: 700, marginRight: 4 }}>{ev.teamName}</span>
                       {SHOT_LABELS[ev.id] || ev.id}
                       <span className={`tl-delta ${ev.d > 0 ? 'pos' : 'neg'}`}>{ev.d > 0 ? '+1' : '-1'}</span>
                     </div>
@@ -389,12 +394,24 @@ function PlayerMatchDetail({ match, onClose }) {
       <div className="rf" style={{ marginBottom: 8 }}>
         {n === 2 ? (
           <>
-            <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{teams[0]?.name} {score0}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              {settings?.teamColors?.[0] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[0])} />}
+              <span style={{ color: 'var(--txt)', marginRight: 8 }}>{teams[0]?.name}</span>
+              <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{score0}</span>
+            </span>
             <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={settings?.teamColors?.[1] ? teamTextStyle(settings.teamColors[1]) : { color: 'var(--txt)' }}>{score1} {teams[1]?.name}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <span style={settings?.teamColors?.[1] ? teamTextStyle(settings.teamColors[1]) : { color: 'var(--txt)' }}>{score1}</span>
+              <span style={{ color: 'var(--txt)', marginLeft: 8, marginRight: 6 }}>{teams[1]?.name}</span>
+              {settings?.teamColors?.[1] && <span className="team-dot" style={{ ...teamSwatchStyle(settings.teamColors[1]), marginRight: 0 }} />}
+            </span>
           </>
         ) : (
-          <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{teams[0]?.name} : {score0} pts</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            {settings?.teamColors?.[0] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[0])} />}
+            <span style={{ color: 'var(--txt)', marginRight: 8 }}>{teams[0]?.name} :</span>
+            <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : { color: 'var(--txt)' }}>{score0} pts</span>
+          </span>
         )}
       </div>
 
@@ -407,7 +424,10 @@ function PlayerMatchDetail({ match, onClose }) {
 
       {teamGroups.map(({ name, color, grp }) => (
         <div className="card" key={name} style={{ marginBottom: 12, borderTop: `3px solid ${color || 'var(--acc)'}` }}>
-          <div className="ctitle" style={color ? teamTextStyle(color) : undefined}>{name}</div>
+          <div className="ctitle">
+            {color && <span className="team-dot" style={teamSwatchStyle(color)} />}
+            {name}
+          </div>
           {grp.length === 0
             ? <div style={{ color: 'var(--dim)', fontSize: 13 }}>Aucun joueur.</div>
             : (
@@ -483,9 +503,10 @@ export default function History({ history, onBack, onClear }) {
                 </div>
                 <div className="hist-scoreline">
                   {(m.teams || []).map((t, i) => (
-                    <span key={i}>
-                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200 }}> – </span>}
-                      <span style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.name} {t.score}</span>
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {i > 0 && <span style={{ color: 'var(--dim)', fontWeight: 200, marginRight: 6 }}> – </span>}
+                      {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
+                      <span>{t.name} {t.score}</span>
                     </span>
                   ))}
                 </div>
