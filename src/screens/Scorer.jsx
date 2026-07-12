@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { score } from '../lib/stats'
 import { fmtClock } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
@@ -18,6 +19,7 @@ function AnimScore({ value, color }) {
 }
 
 export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, settings, logos }) {
+  const { t } = useTranslation()
   const two = numTeams === 2
   const [elapsedSec, setElapsedSec] = useState(0)
   const [running, setRunning] = useState(false)
@@ -129,9 +131,9 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
     return (
       <div className="sc-root sc-end-root">
         <div className="sc-topbar">
-          <div className="sc-half-badge">Fin du match</div>
+          <div className="sc-half-badge">{t('scorer.matchEnded')}</div>
           <button className="sc-ctrl-btn" style={{ fontSize: 13 }} onClick={handleResetScorer}>
-            Rejouer
+            {t('scorer.replay')}
           </button>
         </div>
 
@@ -165,7 +167,7 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
           {/* Per-half breakdown */}
           {endRows.length > 0 && (
             <div className="sc-end-halves">
-              <div className="sc-halves-title">Score par mi-temps</div>
+              <div className="sc-halves-title">{t('scorer.halfScores')}</div>
               <div className="sc-end-halves-grid">
                 <span className="sc-halves-label" />
                 <span className="sc-end-col-hd"><span className="team-dot" style={teamSwatchStyle(c1)} />{teams[0]?.name}</span>
@@ -173,13 +175,13 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
               </div>
               {endRows.map(({ half, t0, t1 }) => (
                 <div key={half} className="sc-end-halves-grid">
-                  <span className="sc-halves-label">MT{half}</span>
+                  <span className="sc-halves-label">{t('scorer.halfRowLabel', { n: half })}</span>
                   <span className="sc-end-half-val" style={teamTextStyle(c1)}>+{t0}</span>
                   {two && <span className="sc-end-half-val" style={teamTextStyle(c2)}>+{t1}</span>}
                 </div>
               ))}
               <div className="sc-end-halves-grid sc-end-total-row">
-                <span className="sc-halves-label">Total</span>
+                <span className="sc-halves-label">{t('scorer.total')}</span>
                 <span className="sc-end-half-val" style={teamTextStyle(c1)}>{s0}</span>
                 {two && <span className="sc-end-half-val" style={teamTextStyle(c2)}>{s1}</span>}
               </div>
@@ -187,7 +189,7 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
           )}
 
           <button className="btn-acc sc-end-cta" onClick={onNewMatch}>
-            Nouveau match
+            {t('scorer.newMatch')}
           </button>
         </div>
       </div>
@@ -200,8 +202,8 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
 
       {/* Top bar */}
       <div className="sc-topbar">
-        <div className="sc-half-badge">MT {currentHalf}/{halfCount}</div>
-        <button className="sc-end-btn" onClick={handleEnd}>Fin</button>
+        <div className="sc-half-badge">{t('scorer.halfBadge', { current: currentHalf, total: halfCount })}</div>
+        <button className="sc-end-btn" onClick={handleEnd}>{t('scorer.end')}</button>
       </div>
 
       {/* Clock progress bar */}
@@ -211,7 +213,7 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
 
       {/* Big centered clock */}
       <div className="sc-clock-wrap">
-        <div className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}`} onClick={() => setRunning(v => !v)} title="Cliquer pour pause/reprise">
+        <div className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}`} onClick={() => setRunning(v => !v)} title={t('scorer.clockTitle')}>
           {fmtClock(remainingHalfSec)}
         </div>
       </div>
@@ -264,21 +266,21 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
             ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
             : <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
           }
-          {running ? 'Pause' : elapsedSec > 0 ? 'Reprendre' : 'Démarrer'}
+          {running ? t('scorer.pause') : elapsedSec > 0 ? t('scorer.resume') : t('scorer.start')}
         </button>
         {currentHalf < halfCount && (
-          <button className="sc-ctrl-btn" onClick={handleSkipHalf} title="Passer à la mi-temps suivante">
+          <button className="sc-ctrl-btn" onClick={handleSkipHalf} title={t('scorer.nextHalfTitle')}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 15,12 5,21"/><rect x="16" y="3" width="3" height="18"/></svg>
-            MT suivante
+            {t('scorer.nextHalf')}
           </button>
         )}
-        <button className="sc-ctrl-btn" onClick={handleResetCurrentHalf} title="Remet le chrono de cette mi-temps à zéro">
+        <button className="sc-ctrl-btn" onClick={handleResetCurrentHalf} title={t('scorer.resetHalfTitle')}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          Reset MT
+          {t('scorer.resetHalf')}
         </button>
-        <button className="sc-ctrl-btn" onClick={handleResetScorer} title="Remet le scoreur complet à zéro">
+        <button className="sc-ctrl-btn" onClick={handleResetScorer} title={t('scorer.resetAllTitle')}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          Reset tout
+          {t('scorer.resetAll')}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { score, tirs } from '../lib/stats'
 import { fmtClock } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
@@ -7,29 +8,29 @@ import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 const CATEGORIES = [
   {
     id: 'tirs',
-    title: 'Tirs',
-    deriveTotal: t => t.tGagne + t.tDonne + t.tCatche + t.tFaute,
+    titleKey: 'match.categories.shots',
+    deriveTotal: team => team.tGagne + team.tDonne + team.tCatche + team.tFaute,
     items: [
-      { id: 'tGagne',  label: 'Gagné',           hl: true },
-      { id: 'tDonne',  label: 'Donné',            color: 'red' },
-      { id: 'tCatche', label: 'Catché' },
-      { id: 'tFaute',  label: 'Cadre',            color: 'amber' },
+      { id: 'tGagne',  labelKey: 'match.stats.won',   hl: true },
+      { id: 'tDonne',  labelKey: 'match.stats.given', color: 'red' },
+      { id: 'tCatche', labelKey: 'match.stats.caught' },
+      { id: 'tFaute',  labelKey: 'match.stats.frame', color: 'amber' },
     ],
   },
   {
     id: 'passes',
-    title: 'Passes',
+    titleKey: 'match.categories.passes',
     deriveTotal: null,
     items: [
-      { id: 'pRatee', label: 'Ratée', color: 'amber' },
+      { id: 'pRatee', labelKey: 'match.stats.missed', color: 'amber' },
     ],
   },
   {
     id: 'fautes',
-    title: 'Fautes techniques',
+    titleKey: 'match.categories.fouls',
     deriveTotal: null,
     items: [
-      { id: 'fTech', label: 'Faute technique', color: 'red' },
+      { id: 'fTech', labelKey: 'match.stats.techFoul', color: 'red' },
     ],
   },
 ]
@@ -76,6 +77,7 @@ function CatHeader({ title, total }) {
 
 // ── Panel : une équipe ────────────────────────────────────────────────────────
 function Panel({ team, teamIdx, numTeams, onAdj }) {
+  const { t } = useTranslation()
   const cls = numTeams === 2 ? `p${teamIdx}` : 'ps'
 
   return (
@@ -83,9 +85,9 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
       <div className="ph">{team.name}</div>
 
       {/* Possession */}
-      <div className="cat-hd cat-first"><span>Possession</span></div>
+      <div className="cat-hd cat-first"><span>{t('match.categories.possession')}</span></div>
       <StatRow
-        label="Ballons"
+        label={t('match.stats.balls')}
         count={team.pos}
         onInc={() => onAdj(teamIdx, 'pos', 1)}
         onDec={() => onAdj(teamIdx, 'pos', -1)}
@@ -95,13 +97,13 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
       {CATEGORIES.map(cat => (
         <div key={cat.id}>
           <CatHeader
-            title={cat.title}
+            title={t(cat.titleKey)}
             total={cat.deriveTotal ? cat.deriveTotal(team) : null}
           />
           {cat.items.map(item => (
             <StatRow
               key={item.id}
-              label={item.label}
+              label={t(item.labelKey)}
               count={team[item.id]}
               hl={item.hl}
               color={item.color}
@@ -115,9 +117,9 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
       {/* Score adverse (1 équipe uniquement) */}
       {numTeams === 1 && (
         <>
-          <div className="cat-hd"><span>Adversaire</span></div>
+          <div className="cat-hd"><span>{t('match.categories.opponent')}</span></div>
           <StatRow
-            label="Score adverse"
+            label={t('match.stats.opponentScore')}
             count={team.padv}
             onInc={() => onAdj(teamIdx, 'padv', 1)}
             onDec={() => onAdj(teamIdx, 'padv', -1)}
@@ -130,6 +132,7 @@ function Panel({ team, teamIdx, numTeams, onAdj }) {
 
 // ── Match screen ──────────────────────────────────────────────────────────────
 export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
+  const { t } = useTranslation()
   const two = numTeams === 2
   const [elapsedSec, setElapsedSec] = useState(0)
   const [running, setRunning] = useState(false)
@@ -184,7 +187,7 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
   }
 
   function handleEnd() {
-    if (window.confirm('Terminer le match et voir les statistiques ?')) onEnd()
+    if (window.confirm(t('match.endConfirm'))) onEnd()
   }
 
   return (
@@ -214,22 +217,22 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
         <div className="clock-wrap">
           <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
           <div className="clock-meta">
-            Mi-temps {currentHalf}/{halfCount} · Restant match {fmtClock(remainingMatchSec)}
+            {t('match.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
           </div>
           <div className="clock-ctrl">
             <button className="btn-mini" onClick={() => setRunning(v => !v)}>
-              {running ? 'Pause' : elapsedSec > 0 ? 'Reprendre' : 'Démarrer'}
+              {running ? t('match.pause') : elapsedSec > 0 ? t('match.resume') : t('match.start')}
             </button>
             {currentHalf < halfCount && (
-              <button className="btn-mini" onClick={handleSkipHalf} title="Passer à la mi-temps suivante">
-                MT suiv.
+              <button className="btn-mini" onClick={handleSkipHalf} title={t('match.nextHalfTitle')}>
+                {t('match.nextHalfShort')}
               </button>
             )}
-            <button className="btn-mini" onClick={handleResetCurrentHalf} title="Remet le chrono de cette mi-temps à zéro">
-              Reset MT
+            <button className="btn-mini" onClick={handleResetCurrentHalf} title={t('match.resetHalfTitle')}>
+              {t('match.resetHalfShort')}
             </button>
-            <button className="btn-mini" onClick={handleResetAll} title="Remet le chrono complet à zéro">
-              Reset tout
+            <button className="btn-mini" onClick={handleResetAll} title={t('match.resetAllTitle')}>
+              {t('match.resetAllShort')}
             </button>
           </div>
         </div>
@@ -242,7 +245,7 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
       </div>
 
       <button className="btn-end" onClick={handleEnd}>
-        Fin du match →
+        {t('match.endButton')}
       </button>
     </>
   )

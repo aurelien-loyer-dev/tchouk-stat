@@ -1,4 +1,5 @@
 import { newId } from './format'
+import i18n from '../i18n'
 
 export function mkMatch(team1, team2) {
   return { id: newId(), team1, team2, score1: null, score2: null }
@@ -36,7 +37,7 @@ export function genGroups(teams, numGroups) {
   const shuffled = [...teams].sort(() => Math.random() - 0.5)
   const groups = Array.from({ length: numGroups }, (_, i) => ({
     id: newId(),
-    name: `Poule ${String.fromCharCode(65 + i)}`,
+    name: i18n.t('tournamentGen.group', { letter: String.fromCharCode(65 + i) }),
     teams: [],
     matches: [],
   }))
@@ -158,13 +159,15 @@ export function pairSwissRound(standings, allMatches) {
   return pairs
 }
 
-const ROUND_NAMES = { 32: '16èmes de finale', 16: '8èmes de finale', 8: 'Quarts de finale', 4: 'Demi-finales', 2: 'Finale' }
+function roundNames() {
+  return { 32: i18n.t('tournamentGen.roundOf16'), 16: i18n.t('tournamentGen.roundOf8'), 8: i18n.t('tournamentGen.quarterFinals'), 4: i18n.t('tournamentGen.semiFinals'), 2: i18n.t('tournamentGen.final') }
+}
 
 export function genKnockoutBracket(seededTeams, size) {
   const rounds = []
   let n = size
   while (n >= 2) {
-    const name = ROUND_NAMES[n] || `Tour de ${n}`
+    const name = roundNames()[n] || i18n.t('tournamentGen.roundOf', { n })
     const isFirst = rounds.length === 0
     const matches = Array.from({ length: n / 2 }, (_, i) =>
       isFirst
@@ -204,7 +207,7 @@ export function genPlacementMatches(groups) {
     for (let i = 0; i + 1 < teamsAtRank.length; i += 2) {
       rounds.push({
         id:     newId(),
-        label:  `${pos}e / ${pos + 1}e place`,
+        label:  i18n.t('tournamentGen.placementLabel', { pos1: pos, pos2: pos + 1 }),
         forPos: [pos, pos + 1],
         match:  mkMatch(teamsAtRank[i], teamsAtRank[i + 1]),
       })
@@ -244,7 +247,7 @@ export function mkTournament({ name, format, teams, numGroups, knockoutSize, ful
     return {
       ...base,
       numSwissRounds: numSwissRounds || Math.max(5, Math.ceil(Math.log2(teams.length)) + 1),
-      rounds: [{ name: 'Ronde 1', matches: pairSwissRound(standings, []) }],
+      rounds: [{ name: i18n.t('tournamentGen.round', { n: 1 }), matches: pairSwissRound(standings, []) }],
     }
   }
   return base
@@ -294,7 +297,7 @@ export function addSwissRound(tournament) {
   const allMatches = tournament.rounds.flatMap(r => r.matches)
   const standings = calcStandings(tournament.teams, allMatches)
   const n = tournament.rounds.length + 1
-  return { ...tournament, rounds: [...tournament.rounds, { name: `Ronde ${n}`, matches: pairSwissRound(standings, allMatches) }] }
+  return { ...tournament, rounds: [...tournament.rounds, { name: i18n.t('tournamentGen.round', { n }), matches: pairSwissRound(standings, allMatches) }] }
 }
 
 export function isRoundComplete(round) {

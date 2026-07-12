@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../lib/playerStats'
 import { fmtClock } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
 
 // ── Carte joueur ──────────────────────────────────────────────────────────────
 function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
+  const { t } = useTranslation()
   const statVal = selectedStat ? (player[selectedStat] ?? 0) : null
 
   return (
@@ -16,7 +18,7 @@ function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
         <div className="pm-player-name">{player.name}</div>
         <div className="pm-player-pts">
           {player.pointsMarques}
-          <span className="pm-player-pts-lbl"> pts</span>
+          <span className="pm-player-pts-lbl"> {t('playerMatch.ptsShort')}</span>
         </div>
       </div>
       {selectedStat && (
@@ -32,10 +34,11 @@ function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
 
 // ── Colonne d'équipe avec grille de joueurs ───────────────────────────────────
 function TeamColumn({ teamName, teamColor, players, selectedStat, dimmed, onAdj }) {
+  const { t } = useTranslation()
   return (
     <div className={`pm-team-col${dimmed ? ' pm-col-dimmed' : ''}`}>
       <div className="pm-team-hd"><span className="team-dot" style={teamSwatchStyle(teamColor)} />{teamName}</div>
-      {players.length === 0 && <div className="pm-no-players">Aucun joueur</div>}
+      {players.length === 0 && <div className="pm-no-players">{t('playerMatch.noPlayers')}</div>}
       <div className="pm-players-grid-inner">
         {players.map(p => (
           <PlayerCard
@@ -53,6 +56,7 @@ function TeamColumn({ teamName, teamColor, players, selectedStat, dimmed, onAdj 
 
 // ── Écran match joueurs ───────────────────────────────────────────────────────
 export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onEnd, settings }) {
+  const { t } = useTranslation()
   const [selectedStat, setSelectedStat]   = useState(null)
   const [focusedTeam, setFocusedTeam]     = useState(null) // null = les deux, 0 = équipe 1, 1 = équipe 2
   const [elapsedSec, setElapsedSec]       = useState(0)
@@ -128,7 +132,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
   }
 
   function handleEnd() {
-    if (window.confirm('Terminer le match et voir les statistiques ?')) onEnd()
+    if (window.confirm(t('match.endConfirm'))) onEnd()
   }
 
   return (
@@ -158,22 +162,22 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
         <div className="clock-wrap">
           <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
           <div className="clock-meta">
-            Mi-temps {currentHalf}/{halfCount} · Restant {fmtClock(remainingMatchSec)}
+            {t('playerMatch.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
           </div>
           <div className="clock-ctrl">
             <button className="btn-mini" onClick={() => setRunning(v => !v)}>
-              {running ? 'Pause' : elapsedSec > 0 ? 'Reprendre' : 'Démarrer'}
+              {running ? t('match.pause') : elapsedSec > 0 ? t('match.resume') : t('match.start')}
             </button>
             {currentHalf < halfCount && (
-              <button className="btn-mini" onClick={handleSkipHalf} title="Passer à la mi-temps suivante">
-                MT suiv.
+              <button className="btn-mini" onClick={handleSkipHalf} title={t('match.nextHalfTitle')}>
+                {t('match.nextHalfShort')}
               </button>
             )}
-            <button className="btn-mini" onClick={handleResetCurrentHalf} title="Remet le chrono de cette mi-temps à zéro">
-              Reset MT
+            <button className="btn-mini" onClick={handleResetCurrentHalf} title={t('match.resetHalfTitle')}>
+              {t('match.resetHalfShort')}
             </button>
-            <button className="btn-mini" onClick={handleResetAll} title="Remet le chrono complet à zéro">
-              Reset tout
+            <button className="btn-mini" onClick={handleResetAll} title={t('match.resetAllTitle')}>
+              {t('match.resetAllShort')}
             </button>
           </div>
         </div>
@@ -183,15 +187,15 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
       <div className="pm-stats-panel">
         <div className={`pm-stats-hint${selectedDef ? ' pm-hint-active' : ''}`}>
           {selectedDef
-            ? <>Stat : <strong>{selectedDef.label}</strong> — touche un joueur</>
-            : 'Sélectionne une stat à affecter à un joueur'}
+            ? <>{t('playerMatch.statHintPrefix')}<strong>{t(selectedDef.labelKey)}</strong>{t('playerMatch.statHintSuffix')}</>
+            : t('playerMatch.statHintDefault')}
         </div>
         <div className="pm-stat-groups">
           {STAT_GROUPS.map(group => {
             const stats = PLAYER_STATS.filter(s => s.group === group.id)
             return (
               <div key={group.id} className="pm-stat-group">
-                <div className="pm-stat-group-label">{group.label}</div>
+                <div className="pm-stat-group-label">{t(group.labelKey)}</div>
                 <div className="pm-stat-grid">
                   {stats.map(stat => (
                     <button
@@ -203,8 +207,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
                       ].filter(Boolean).join(' ')}
                       onClick={() => handleStatClick(stat.id)}
                     >
-                      <span className="pm-stat-label">{stat.label}</span>
-                      {stat.sub && <span className="pm-stat-sub">{stat.sub}</span>}
+                      <span className="pm-stat-label">{t(stat.labelKey)}</span>
                     </button>
                   ))}
                 </div>
@@ -227,7 +230,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
           </button>
 
           <button className="pm-team-adv-btn" onClick={() => handleTeamFocus(focusedTeam === 0 ? 1 : 0)}>
-            ⇄ Adverse
+            {t('playerMatch.opponent')}
           </button>
 
           <button
@@ -264,7 +267,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
       </div>
 
       <button className="btn-end" onClick={handleEnd}>
-        Fin du match →
+        {t('match.endButton')}
       </button>
     </>
   )

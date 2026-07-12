@@ -1,18 +1,13 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
+import { useTranslation } from 'react-i18next'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../lib/stats'
 import { buildPointsSeries } from '../lib/shotSeries'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName } from '../lib/format'
 import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
 
-const SHOT_LABELS = {
-  tGagne: 'Tir gagné',
-  tDonne: 'Tir donné',
-  tCatche: 'Tir catché',
-  tFaute: 'Faute sur tir',
-}
-
 function TimelineGraph({ teams, timeline, settings }) {
+  const { t } = useTranslation()
   const { series, maxT, maxV, hasData } = buildPointsSeries(teams, timeline)
   const w = 980
   const h = 260
@@ -26,7 +21,7 @@ function TimelineGraph({ teams, timeline, settings }) {
 
   return (
     <div className="tg-wrap">
-      <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg" role="img" aria-label="Timeline des points">
+      <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg" role="img" aria-label={t('results.ui.timelineTitle')}>
         <line x1={pl} y1={h - pb} x2={w - pr} y2={h - pb} className="tg-axis" />
         <line x1={pl} y1={pt} x2={pl} y2={h - pb} className="tg-axis" />
 
@@ -75,7 +70,7 @@ function TimelineGraph({ teams, timeline, settings }) {
         })}
       </div>
 
-      {!hasData && <div className="tl-empty">Aucun point enregistré pour le moment.</div>}
+      {!hasData && <div className="tl-empty">{t('results.ui.noPoints')}</div>}
     </div>
   )
 }
@@ -131,6 +126,7 @@ export default function Results({
   summary,
   onNew,
 }) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState(0)
 
   if (!teams || teams.length === 0) return null
@@ -138,14 +134,14 @@ export default function Results({
   const c1 = settings?.teamColors?.[0] || '#0e9f8f'
   const c2 = settings?.teamColors?.[1] || '#d14343'
 
-  const t   = teams[tab]
+  const activeTeam = teams[tab]
   const n   = numTeams
   const ti  = tirs(teams, n, tab)
   const pa  = pointAdv(teams, n, tab)
   const tam = tirAdvMarques(teams, n, tab)
   const ta  = tirsAdv(teams, n, tab)   // tirs adverses total (2-team only)
   const cn  = catchsNous(teams, n, tab) // nos catches défensifs
-  const ft  = fautesTotal(t)
+  const ft  = fautesTotal(activeTeam)
 
   const shotEvents = (timeline || []).filter(e => e.teamIdx === tab && e.category === 'tirs')
 
@@ -155,6 +151,8 @@ export default function Results({
     const team1 = fileSafeName(teams?.[0]?.name) || 'equipe1'
     const team2 = fileSafeName(teams?.[1]?.name) || 'equipe2'
     const pdfName = `${team1}vs${team2}.pdf`
+    const pdf = t('results.pdf', { returnObjects: true })
+    const pdfShotLabels = pdf.shotLabels
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const pageW = doc.internal.pageSize.getWidth()
@@ -209,29 +207,29 @@ export default function Results({
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
-    doc.text('Feuille de match', left, 12)
+    doc.text(pdf.sheetTitle, left, 12)
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    doc.text(`Export: ${fmtDateTime(new Date().toISOString())}`, left, 19)
+    doc.text(t('results.pdf.exportLabel', { date: fmtDateTime(new Date().toISOString()) }), left, 19)
     doc.text(summary.teams.map(team => `${team.name} ${team.score}`).join(' - '), left, 24)
     doc.setTextColor(15, 23, 42)
     y = 34
 
-    addCard('Resume', [
-      `Date du match: ${fmtDateTime(summary.playedAt)}`,
-      `Duree: ${fmtClock(summary.durationSec)}`,
-      `Format: ${summary.numTeams} equipe(s)`,
-      `Mi-temps: ${settings?.halfCount || '-'} x ${settings?.halfDurationMin || '-'} min`,
+    addCard(pdf.summaryTitle, [
+      t('results.pdf.matchDate', { date: fmtDateTime(summary.playedAt) }),
+      t('results.pdf.duration', { time: fmtClock(summary.durationSec) }),
+      t('results.pdf.format', { count: summary.numTeams }),
+      t('results.pdf.halves', { count: settings?.halfCount || '-', duration: settings?.halfDurationMin || '-' }),
     ])
 
     if (Array.isArray(summary.teams)) {
       summary.teams.forEach((team, idx) => {
-        addCard(`Stats - ${team.name}`, [
-          `Score: ${team.score}`,
-          `Tirs: ${team.tirs} | Gagnes: ${team.tGagne} | Donnes: ${team.tDonne}`,
-          `Catches: ${team.tCatche} | Fautes tir: ${team.tFaute}`,
-          `Fautes total: ${team.fautes} | Possessions: ${team.pos}`,
-          `Couleur equipe: ${idx === 0 ? '#' + ((1 << 24) + (c1.r << 16) + (c1.g << 8) + c1.b).toString(16).slice(1) : '#' + ((1 << 24) + (c2.r << 16) + (c2.g << 8) + c2.b).toString(16).slice(1)}`,
+        addCard(t('results.pdf.statsTitle', { name: team.name }), [
+          t('results.pdf.score', { score: team.score }),
+          t('results.pdf.shotsLine', { total: team.tirs, won: team.tGagne, given: team.tDonne }),
+          t('results.pdf.caughtLine', { caught: team.tCatche, shotFouls: team.tFaute }),
+          t('results.pdf.foulsLine', { fouls: team.fautes, pos: team.pos }),
+          t('results.pdf.teamColor', { color: idx === 0 ? '#' + ((1 << 24) + (c1.r << 16) + (c1.g << 8) + c1.b).toString(16).slice(1) : '#' + ((1 << 24) + (c2.r << 16) + (c2.g << 8) + c2.b).toString(16).slice(1) }),
         ])
       })
     }
@@ -239,7 +237,7 @@ export default function Results({
     ensurePage(70)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
-    doc.text('Timeline des points (graphique)', left, y)
+    doc.text(pdf.timelineTitle, left, y)
     y += 4
 
     const gx = left
@@ -250,7 +248,7 @@ export default function Results({
     const gpr = gx + gw - 4
     const gpt = gy + 4
     const gpb = gy + gh - 8
-    const mapX = t => gpl + (t / Math.max(1, maxT)) * (gpr - gpl)
+    const mapX = xt => gpl + (xt / Math.max(1, maxT)) * (gpr - gpl)
     const mapY = v => gpb - (v / Math.max(1, maxV)) * (gpb - gpt)
 
     doc.setDrawColor(220, 226, 235)
@@ -268,14 +266,14 @@ export default function Results({
     })
     y += gh + 8
 
-    addLine('Details des evenements de tir', 11, 'bold', 6)
+    addLine(pdf.eventsDetailTitle, 11, 'bold', 6)
     const events = (timeline || []).filter(ev => ev.category === 'tirs')
     if (events.length === 0) {
-      addLine('Aucun evenement enregistre.', 10, 'normal', 5)
+      addLine(pdf.noEvents, 10, 'normal', 5)
     } else {
       events.forEach(ev => {
-        const label = SHOT_LABELS[ev.id] || ev.id
-        const scoreLine = Array.isArray(ev.scores) ? ` | Score: ${ev.scores.join(' - ')}` : ''
+        const label = pdfShotLabels[ev.id] || ev.id
+        const scoreLine = Array.isArray(ev.scores) ? `${pdf.scoreSep}${ev.scores.join(' - ')}` : ''
         addLine(`${fmtClock(ev.elapsedSec)} - ${ev.teamName} - ${label} (${ev.d > 0 ? '+1' : '-1'})${scoreLine}`, 9, 'normal', 4.5)
       })
     }
@@ -315,83 +313,83 @@ export default function Results({
 
       {/* ── Resume ── */}
       {summary && (
-        <Card title="Resume du match">
-          <Row label="Date">
+        <Card title={t('results.ui.summaryTitle')}>
+          <Row label={t('results.ui.date')}>
             <span className="si-v sub">{fmtDateTime(summary.playedAt)}</span>
           </Row>
-          <Row label="Duree totale">
+          <Row label={t('results.ui.totalDuration')}>
             <span className="si-v sub">{fmtClock(summary.durationSec)}</span>
           </Row>
-          <Row label="Format">
-            <span className="si-v sub">{summary.numTeams} equipes</span>
+          <Row label={t('results.ui.format')}>
+            <span className="si-v sub">{t('results.ui.formatTeams', { count: summary.numTeams })}</span>
           </Row>
-          <Row label="Mi-temps">
+          <Row label={t('results.ui.halves')}>
             <span className="si-v sub">{settings?.halfCount || '-'} x {settings?.halfDurationMin || '-'} min</span>
           </Row>
-          <Row label="Evenements tirs enregistres">
+          <Row label={t('results.ui.shotEventsRecorded')}>
             <span className="si-v sub">{summary.shotEvents ?? 0}</span>
           </Row>
         </Card>
       )}
 
       {/* ── Tirs ── */}
-      <Card title="Tirs">
-        <Row label="Tirs total"><N v={ti} /></Row>
-        <Row label="Gagnés" sub="points marqués"><N v={t.tGagne} /></Row>
-        <Row label="Donnés" sub="points adverses offerts"><N v={t.tDonne} /></Row>
-        <Row label="Catchés" sub="possession perdue"><N v={t.tCatche} /></Row>
-        <Row label="Fautes sur tir" sub="hors catégorie fautes techniques"><N v={t.tFaute} /></Row>
+      <Card title={t('results.ui.shotsTitle')}>
+        <Row label={t('results.ui.totalShots')}><N v={ti} /></Row>
+        <Row label={t('results.ui.won')} sub={t('results.ui.wonSub')}><N v={activeTeam.tGagne} /></Row>
+        <Row label={t('results.ui.given')} sub={t('results.ui.givenSub')}><N v={activeTeam.tDonne} /></Row>
+        <Row label={t('results.ui.caught')} sub={t('results.ui.caughtSub')}><N v={activeTeam.tCatche} /></Row>
+        <Row label={t('results.ui.shotFouls')} sub={t('results.ui.shotFoulsSub')}><N v={activeTeam.tFaute} /></Row>
       </Card>
 
       {/* ── Passes ── */}
-      <Card title="Passes">
-        <Row label="Passes total"><N v={t.pReussie + t.pRatee} /></Row>
-        <Row label="Ratées"><N v={t.pRatee} /></Row>
+      <Card title={t('results.ui.passesTitle')}>
+        <Row label={t('results.ui.totalPasses')}><N v={activeTeam.pReussie + activeTeam.pRatee} /></Row>
+        <Row label={t('results.ui.missedPasses')}><N v={activeTeam.pRatee} /></Row>
       </Card>
 
       {/* ── Fautes techniques ── */}
-      <Card title="Fautes techniques">
-        <Row label="Total fautes"><N v={ft} /></Row>
-        <Row label="Fautes sur tir"><span className="si-v sub">{t.tFaute}</span></Row>
-        <Row label="Fautes techniques"><span className="si-v sub">{(t.fTech ?? 0) + (t.fZone ?? 0) + (t.fMarche ?? 0) + (t.fAutre ?? 0)}</span></Row>
+      <Card title={t('results.ui.techFoulsTitle')}>
+        <Row label={t('results.ui.totalFouls')}><N v={ft} /></Row>
+        <Row label={t('results.ui.shotFouls')}><span className="si-v sub">{activeTeam.tFaute}</span></Row>
+        <Row label={t('results.ui.techFouls')}><span className="si-v sub">{(activeTeam.fTech ?? 0) + (activeTeam.fZone ?? 0) + (activeTeam.fMarche ?? 0) + (activeTeam.fAutre ?? 0)}</span></Row>
       </Card>
 
       {/* ── Données adverses ── */}
-      <Card title="Données adverses">
-        <Row label="Score adverse total"><N v={pa} /></Row>
-        <Row label="Tirs adverses marqués" sub="score adv. − points donnés">
+      <Card title={t('results.ui.opponentDataTitle')}>
+        <Row label={t('results.ui.opponentScoreTotal')}><N v={pa} /></Row>
+        <Row label={t('results.ui.opponentShotsScored')} sub={t('results.ui.opponentShotsScoredSub')}>
           <N v={tam} />
         </Row>
         {n === 2 && (
-          <Row label="Tirs adverses total"><N v={ta} /></Row>
+          <Row label={t('results.ui.opponentShotsTotal')}><N v={ta} /></Row>
         )}
         <Row
-          label="Nos catches défensifs"
-          sub={n === 2 ? 'tirs adverses que nous avons catchés' : null}
+          label={t('results.ui.ourCatches')}
+          sub={n === 2 ? t('results.ui.ourCatchesSub2') : null}
         >
           <N v={cn} />
         </Row>
-        <Row label="Possessions"><N v={t.pos} /></Row>
+        <Row label={t('results.ui.possessions')}><N v={activeTeam.pos} /></Row>
       </Card>
 
       {/* ── Ratios ── */}
-      <Card title="Ratios &amp; efficacité">
-        <Row label="Efficacité offensive" sub="gagnés / tirs total">
-          <Pct num={t.tGagne} den={ti} />
+      <Card title={t('results.ui.ratiosTitle')}>
+        <Row label={t('results.ui.offEff')} sub={t('results.ui.offEffSub')}>
+          <Pct num={activeTeam.tGagne} den={ti} />
         </Row>
-        <Row label="Efficacité défensive" sub={n === 2 ? 'nos catches / tirs adverses total' : 'nos catches / tirs adverses marqués'}>
+        <Row label={t('results.ui.defEff')} sub={n === 2 ? t('results.ui.defEffSub2') : t('results.ui.defEffSub1')}>
           <Pct num={cn} den={n === 2 ? ta : tam} />
         </Row>
-        <Row label="Conversion d'action" sub="tirs / possessions">
-          <Ratio num={ti} den={t.pos} />
+        <Row label={t('results.ui.actionConversion')} sub={t('results.ui.actionConversionSub')}>
+          <Ratio num={ti} den={activeTeam.pos} />
         </Row>
-        <Row label="Points offerts (tirs donnés)" sub="donnés / tirs total">
-          <Pct num={t.tDonne} den={ti} />
+        <Row label={t('results.ui.pointsGiven')} sub={t('results.ui.pointsGivenSub')}>
+          <Pct num={activeTeam.tDonne} den={ti} />
         </Row>
       </Card>
 
       {/* ── Timeline des points ── */}
-      <Card title="Timeline des points (graphique)">
+      <Card title={t('results.ui.timelineTitle')}>
         <TimelineGraph teams={teams} timeline={timeline} settings={settings} />
 
         {shotEvents.length > 0 && (
@@ -401,7 +399,7 @@ export default function Results({
                 <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
                 <div className="tl-main">
                   <div className="tl-label">
-                    {SHOT_LABELS[ev.id] || ev.id}
+                    {t(`shotLabels.${ev.id}`, ev.id)}
                     <span className={`tl-delta ${ev.d > 0 ? 'pos' : 'neg'}`}>{ev.d > 0 ? '+1' : '-1'}</span>
                   </div>
                 </div>
@@ -416,7 +414,7 @@ export default function Results({
         style={{ alignSelf: 'center', minWidth: 260, marginTop: 4 }}
         onClick={handleDownloadSheet}
       >
-        Télécharger la feuille de match (PDF)
+        {t('results.ui.downloadPdf')}
       </button>
 
       <button
@@ -424,7 +422,7 @@ export default function Results({
         style={{ alignSelf: 'center', minWidth: 200, marginTop: 8 }}
         onClick={onNew}
       >
-        ← Nouveau match
+        {t('results.ui.newMatch')}
       </button>
     </>
   )

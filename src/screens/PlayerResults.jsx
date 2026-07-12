@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
+import { useTranslation } from 'react-i18next'
 import { PLAYER_STATS, playerTeamScore, playerDerivedStats, playerTirsTotal } from '../lib/playerStats'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
 import { teamTextStyle } from '../lib/teamColor'
@@ -56,45 +57,46 @@ function topPlayers(players, scoreFn, limit = 3) {
 
 const AWARDS = [
   {
-    key:    'bopm',
-    label:  'BOPM',
-    full:   'Best Offensive Player of the Match',
-    desc:   'Meilleur attaquant du match',
-    fn:     offScore,
-    color:  '#d97706',
-    pdfRgb: [217, 119, 6],
-    hint: (p, pctFn) => {
+    key:      'bopm',
+    labelKey: 'awards.bopmLabel',
+    full:     'Best Offensive Player of the Match',
+    descKey:  'awards.bopmDesc',
+    fn:       offScore,
+    color:    '#d97706',
+    pdfRgb:   [217, 119, 6],
+    hint: (p, pctFn, t) => {
       const tt = p.pointsMarques + p.pointsDonnes + p.fautesTir
-      return `${p.pointsMarques} pts marqués · ${pctFn(p.pointsMarques, tt)} eff. · ${p.pointsDonnes} pts donnés`
+      return t('awards.hintBopm', { scored: p.pointsMarques, eff: pctFn(p.pointsMarques, tt), given: p.pointsDonnes })
     },
   },
   {
-    key:    'bdpm',
-    label:  'BDPM',
-    full:   'Best Defensive Player of the Match',
-    desc:   'Meilleur défenseur du match',
-    fn:     defScore,
-    color:  '#1f6feb',
-    pdfRgb: [31, 111, 235],
-    hint: (p) => `${p.defenseSolo} déf. solo · ${p.participationDef} part. déf.`,
+    key:      'bdpm',
+    labelKey: 'awards.bdpmLabel',
+    full:     'Best Defensive Player of the Match',
+    descKey:  'awards.bdpmDesc',
+    fn:       defScore,
+    color:    '#1f6feb',
+    pdfRgb:   [31, 111, 235],
+    hint: (p, pctFn, t) => t('awards.hintBdpm', { solo: p.defenseSolo, part: p.participationDef }),
   },
   {
-    key:    'mvp',
-    label:  'MVP',
-    full:   'Most Valuable Player',
-    desc:   'Joueur le plus complet du match',
-    fn:     mvpScore,
-    color:  '#eab308',
-    pdfRgb: [234, 179, 8],
-    hint: (p, pctFn) => {
+    key:      'mvp',
+    labelKey: 'awards.mvpLabel',
+    full:     'Most Valuable Player',
+    descKey:  'awards.mvpDesc',
+    fn:       mvpScore,
+    color:    '#eab308',
+    pdfRgb:   [234, 179, 8],
+    hint: (p, pctFn, t) => {
       const tt = p.pointsMarques + p.pointsDonnes + p.fautesTir
-      return `${p.pointsMarques} pts · ${pctFn(p.pointsMarques, tt)} eff. · ${p.defenseSolo + p.participationDef} déf. · ${p.fautesTir + p.fautesTech} fautes`
+      return t('awards.hintMvp', { pts: p.pointsMarques, eff: pctFn(p.pointsMarques, tt), def: p.defenseSolo + p.participationDef, fouls: p.fautesTir + p.fautesTech })
     },
   },
 ]
 
 // ── Écran résultats joueurs ───────────────────────────────────────────────────
 export default function PlayerResults({ teams, players, numTeams, settings, summary, onNew }) {
+  const { t } = useTranslation()
   const n = numTeams ?? 2
 
   const c1 = settings?.teamColors?.[0] || '#0e9f8f'
@@ -115,7 +117,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
   }
 
   function teamName(p) {
-    return p.teamIdx === 0 ? (teams[0]?.name || 'Équipe 1') : (teams[1]?.name || 'Équipe 2')
+    return p.teamIdx === 0 ? (teams[0]?.name || t('playerResults.defaultTeam1')) : (teams[1]?.name || t('playerResults.defaultTeam2'))
   }
 
   // ── PDF d'un seul joueur ──────────────────────────────────────────────────
@@ -133,13 +135,13 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(16)
-    doc.text('Stats Joueur', left, 12)
+    doc.text(t('playerResults.pdfPlayerTitle'), left, 12)
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    doc.text(`Export : ${fmtDateTime(new Date().toISOString())}`, left, 19)
+    doc.text(t('playerResults.exportLabel', { date: fmtDateTime(new Date().toISOString()) }), left, 19)
     const hdrScore = n === 2
-      ? `${teams[0]?.name || ''} ${score0} — ${score1} ${teams[1]?.name || ''}`
-      : `${teams[0]?.name || ''} : ${score0} pts`
+      ? t('playerResults.scoreLineTwo', { team1: teams[0]?.name || '', score1: score0, score2: score1, team2: teams[1]?.name || '' })
+      : t('playerResults.scoreLineOne', { team: teams[0]?.name || '', score: score0 })
     doc.text(hdrScore, left, 24)
     doc.setTextColor(15, 23, 42)
     y = 36
@@ -159,7 +161,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.roundedRect(left, y - 5, maxW, 14, 2, 2, 'F')
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(12)
-    doc.text('Points marqués', left + 4, y + 4)
+    doc.text(t('playerResults.pointsMarquesTitle'), left + 4, y + 4)
     doc.setFontSize(14)
     doc.text(String(player.pointsMarques), left + maxW - 4, y + 4, { align: 'right' })
     y += 18
@@ -196,19 +198,19 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       return y0 + rh
     }
 
-    y = sectionHeader('Statistiques', y)
+    y = sectionHeader(t('playerResults.statsSectionTitle'), y)
     PLAYER_STATS.forEach((stat, idx) => {
-      y = statRow(stat.label, player[stat.id] ?? 0, stat.sub, idx, y)
+      y = statRow(t(stat.labelKey), player[stat.id] ?? 0, null, idx, y)
     })
 
     y += 6
-    y = sectionHeader('Totaux & ratios', y)
+    y = sectionHeader(t('playerResults.totalsSectionTitle'), y)
     const derived = [
-      { label: 'Tirs total',           val: d.tirsTotal,                            sub: 'pts marqués + donnés + fautes tir' },
-      { label: 'Efficacité offensive', val: pct(player.pointsMarques, d.tirsTotal), sub: 'pts marqués / tirs total' },
-      { label: '% points offerts',     val: pct(player.pointsDonnes,  d.tirsTotal), sub: 'pts donnés / tirs total' },
-      { label: 'Actions défensives',   val: d.defTotal,                             sub: 'défense solo + participation' },
-      { label: 'Total fautes',         val: d.fautesTotal,                          sub: 'fautes de tir + techniques' },
+      { label: t('playerResults.totalShots'), val: d.tirsTotal,                            sub: t('playerResults.totalShotsSub') },
+      { label: t('playerResults.offEff'),     val: pct(player.pointsMarques, d.tirsTotal), sub: t('playerResults.offEffSub') },
+      { label: t('playerResults.pctGiven'),   val: pct(player.pointsDonnes,  d.tirsTotal), sub: t('playerResults.pctGivenSub') },
+      { label: t('playerResults.defActions'), val: d.defTotal,                             sub: t('playerResults.defActionsSub') },
+      { label: t('playerResults.totalFouls'), val: d.fautesTotal,                          sub: t('playerResults.totalFoulsSub') },
     ]
     derived.forEach((row, idx) => {
       y = statRow(row.label, row.val, row.sub, idx, y)
@@ -237,13 +239,13 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(15)
-    doc.text('Feuille de match', left, 12)
+    doc.text(t('playerResults.fullSheetTitle'), left, 12)
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
-    doc.text(`Export : ${fmtDateTime(new Date().toISOString())}`, left, 19)
+    doc.text(t('playerResults.exportLabel', { date: fmtDateTime(new Date().toISOString()) }), left, 19)
     const hdrScore = n === 2
-      ? `${teams[0]?.name || ''} ${score0}  —  ${score1} ${teams[1]?.name || ''}`
-      : `${teams[0]?.name || ''} : ${score0} pts`
+      ? t('playerResults.scoreLineTwo', { team1: teams[0]?.name || '', score1: score0, score2: score1, team2: teams[1]?.name || '' })
+      : t('playerResults.scoreLineOne', { team: teams[0]?.name || '', score: score0 })
     doc.text(hdrScore, left, 24)
     doc.setTextColor(15, 23, 42)
     y = 34
@@ -253,28 +255,34 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       doc.setFontSize(9)
       doc.setTextColor(90, 100, 120)
       doc.text(
-        `Date : ${fmtDateTime(summary.playedAt)}  ·  Durée : ${fmtClock(summary.durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`,
+        t('playerResults.dateDurationFormat', {
+          date: fmtDateTime(summary.playedAt),
+          time: fmtClock(summary.durationSec),
+          halfCount: settings?.halfCount,
+          halfDuration: settings?.halfDurationMin,
+        }),
         left, y
       )
       doc.setTextColor(15, 23, 42)
       y += 8
     }
 
+    const cc = t('playerResults.columns', { returnObjects: true })
     const cols = [
-      { label: 'Joueur',   w: 30, key: null },
-      { label: 'Pts',      w: 9,  key: 'pointsMarques' },
-      { label: 'Tirs Tot', w: 12, key: '__tirsTotal' },
-      { label: 'T.N.Tr',   w: 11, key: 'tirsNonTransformes' },
-      { label: 'Pt Dn',    w: 11, key: 'pointsDonnes' },
-      { label: 'F.Tir',    w: 9,  key: 'fautesTir' },
-      { label: 'Def Sol',  w: 12, key: 'defenseSolo' },
-      { label: 'Part Df',  w: 11, key: 'participationDef' },
-      { label: 'Def Rat',  w: 11, key: 'defenseRatee' },
-      { label: 'P.Rat',    w: 9,  key: 'passesRatees' },
-      { label: 'F.Tech',   w: 10, key: 'fautesTech' },
-      { label: 'Sanct',    w: 10, key: 'sanctions' },
-      { label: 'Eff Off',  w: 13, key: '__effOff' },
-      { label: '% Don',    w: 10, key: '__pctDon' },
+      { label: cc.player,      w: 30, key: null },
+      { label: cc.pts,         w: 9,  key: 'pointsMarques' },
+      { label: cc.totalShots,  w: 12, key: '__tirsTotal' },
+      { label: cc.missedShots, w: 11, key: 'tirsNonTransformes' },
+      { label: cc.pointsGiven, w: 11, key: 'pointsDonnes' },
+      { label: cc.shotFouls,   w: 9,  key: 'fautesTir' },
+      { label: cc.soloDef,     w: 12, key: 'defenseSolo' },
+      { label: cc.defAssist,   w: 11, key: 'participationDef' },
+      { label: cc.failedDef,   w: 11, key: 'defenseRatee' },
+      { label: cc.missedPass,  w: 9,  key: 'passesRatees' },
+      { label: cc.techFoul,    w: 10, key: 'fautesTech' },
+      { label: cc.sanctions,   w: 10, key: 'sanctions' },
+      { label: cc.offEff,      w: 13, key: '__effOff' },
+      { label: cc.pctGiven,    w: 10, key: '__pctDon' },
     ]
     const totalW = cols.reduce((s, c) => s + c.w, 0)
     const scale  = maxW / totalW
@@ -331,10 +339,10 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
 
     const teamGroups = n === 2
       ? [
-          { grp: team1Players, name: teams[0]?.name || 'Équipe 1', c: c1 },
-          { grp: team2Players, name: teams[1]?.name || 'Équipe 2', c: c2 },
+          { grp: team1Players, name: teams[0]?.name || t('playerResults.defaultTeam1'), c: c1 },
+          { grp: team2Players, name: teams[1]?.name || t('playerResults.defaultTeam2'), c: c2 },
         ]
-      : [{ grp: team1Players, name: teams[0]?.name || 'Équipe 1', c: c1 }]
+      : [{ grp: team1Players, name: teams[0]?.name || t('playerResults.defaultTeam1'), c: c1 }]
 
     teamGroups.forEach(({ grp, name, c }) => {
       ensurePage(22 + (grp.length + 2) * rowH)
@@ -354,7 +362,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       doc.setFontSize(8)
       doc.setTextColor(90, 100, 120)
       doc.text(
-        `Tirs total : ${totTirs}  ·  Pts marqués : ${totPM}  ·  Pts donnés : ${totPD}  ·  Déf. : ${totDef}  ·  Eff. off. : ${pct(totPM, totTirs)}`,
+        t('playerResults.teamSummaryLine', { totalShots: totTirs, scored: totPM, given: totPD, def: totDef, eff: pct(totPM, totTirs) }),
         left + 8, y + 14
       )
       doc.setTextColor(15, 23, 42)
@@ -363,7 +371,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       if (grp.length === 0) {
         doc.setFont('helvetica', 'italic')
         doc.setFontSize(9)
-        doc.text('Aucun joueur enregistré.', left + 4, y)
+        doc.text(t('playerResults.noPlayers'), left + 4, y)
         y += 8
         return
       }
@@ -386,7 +394,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
       doc.setTextColor(70, 80, 100)
-      doc.text('DISTINCTIONS DU MATCH', left + 4, y + 5.5)
+      doc.text(t('awards.pdfSectionTitle'), left + 4, y + 5.5)
       doc.setTextColor(15, 23, 42)
       y += 12
 
@@ -400,7 +408,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(9)
         doc.setTextColor(...award.pdfRgb)
-        doc.text(award.label, left + 6, y + 4)
+        doc.text(t(award.labelKey), left + 6, y + 4)
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(8)
         doc.setTextColor(90, 100, 120)
@@ -433,14 +441,14 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
               doc.setFontSize(7)
               doc.setTextColor(150, 160, 175)
               const nameW = doc.getTextWidth(p.name)
-              doc.text('ex æquo', left + 14 + nameW + 3, y + 3)
+              doc.text(t('awards.exAequo'), left + 14 + nameW + 3, y + 3)
             }
 
             // Stats hint (droite)
             doc.setFont('helvetica', 'normal')
             doc.setFontSize(7.5)
             doc.setTextColor(90, 100, 120)
-            doc.text(award.hint(p, pct), left + maxW, y + 3, { align: 'right' })
+            doc.text(award.hint(p, pct, t), left + maxW, y + 3, { align: 'right' })
 
             doc.setDrawColor(235, 240, 250)
             doc.line(left + 10, y + 6, left + maxW, y + 6)
@@ -474,17 +482,17 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
       {/* ── Distinctions automatiques ── */}
       {players.length > 0 && (
         <div className="card awards-card">
-          <div className="ctitle">Distinctions du match</div>
+          <div className="ctitle">{t('awards.sectionTitle')}</div>
           {AWARDS.map(award => {
             const groups = computedAwards[award.key]
             if (!groups || groups.length === 0) return null
             return (
               <div key={award.key} className="award-section">
                 <div className="award-header">
-                  <span className="award-badge" style={{ background: award.color }}>{award.label}</span>
+                  <span className="award-badge" style={{ background: award.color }}>{t(award.labelKey)}</span>
                   <div className="award-info">
                     <span className="award-full">{award.full}</span>
-                    <span className="award-desc">{award.desc}</span>
+                    <span className="award-desc">{t(award.descKey)}</span>
                   </div>
                 </div>
                 <div className="award-ranking">
@@ -503,8 +511,8 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
                         >
                           {p.name}
                         </span>
-                        {i > 0 && <span className="award-eq-badge">ex æquo</span>}
-                        <span className="award-rank-hint">{award.hint(p, pct)}</span>
+                        {i > 0 && <span className="award-eq-badge">{t('awards.exAequo')}</span>}
+                        <span className="award-rank-hint">{award.hint(p, pct, t)}</span>
                       </div>
                     ))
                   )}
@@ -522,7 +530,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
             className="btn-ghost player-pdf-btn"
             onClick={() => setShowPicker(s => !s)}
           >
-            PDF stats joueur {showPicker ? '▲' : '▼'}
+            {t('playerResults.pdfPlayerStatsBtn')} {showPicker ? '▲' : '▼'}
           </button>
           {showPicker && (
             <div className="player-pdf-panel">
@@ -546,7 +554,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         style={{ alignSelf: 'center', minWidth: 280, marginTop: 4 }}
         onClick={generateFullPdf}
       >
-        Télécharger feuille complète (PDF)
+        {t('playerResults.downloadFullPdf')}
       </button>
 
       <button
@@ -554,7 +562,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         style={{ alignSelf: 'center', minWidth: 200, marginTop: 8 }}
         onClick={onNew}
       >
-        ← Nouveau match
+        {t('playerResults.newMatch')}
       </button>
     </>
   )

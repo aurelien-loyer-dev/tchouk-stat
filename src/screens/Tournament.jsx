@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { jsPDF } from 'jspdf'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import {
   mkTournament, calcStandings, setMatchScore, setKnockoutScore,
   startKnockout, canStartKnockout, addSwissRound, isRoundComplete,
@@ -63,17 +65,19 @@ function MatchRow({ match, onScore, compact }) {
 
 // ── Tableau de classement ─────────────────────────────────────────────────────
 function Standings({ teams, matches, qualifyN }) {
+  const { t } = useTranslation()
+  const s = t('tournament.standings', { returnObjects: true })
   const rows = calcStandings(teams, matches)
   return (
     <div className="trn-table-wrap">
       <table className="trn-table">
         <thead>
           <tr>
-            <th>#</th><th className="trn-th-team">Équipe</th>
-            <th title="Joués">J</th><th title="Victoires">V</th>
-            <th title="Nuls">N</th><th title="Défaites">D</th>
-            <th title="Buts pour">BP</th><th title="Buts contre">BC</th>
-            <th title="Différence">Diff</th><th className="trn-th-pts">Pts</th>
+            <th>#</th><th className="trn-th-team">{s.team}</th>
+            <th title={s.playedTitle}>{s.played}</th><th title={s.wonTitle}>{s.won}</th>
+            <th title={s.drawnTitle}>{s.drawn}</th><th title={s.lostTitle}>{s.lost}</th>
+            <th title={s.gfTitle}>{s.gf}</th><th title={s.gaTitle}>{s.ga}</th>
+            <th title={s.diffTitle}>{s.diff}</th><th className="trn-th-pts">{s.pts}</th>
           </tr>
         </thead>
         <tbody>
@@ -169,10 +173,11 @@ function CrossTable({ teams, matches }) {
 
 // ── Barre de progression ──────────────────────────────────────────────────────
 function Progress({ done, total, label }) {
+  const { t } = useTranslation()
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
   return (
     <div className="trn-prog">
-      <div className="trn-prog-label">{label || `${done} / ${total} matchs joués`}</div>
+      <div className="trn-prog-label">{label || t('tournament.matchesPlayed', { done, total })}</div>
       <div className="trn-prog-track"><div className="trn-prog-fill" style={{ width: `${pct}%` }} /></div>
     </div>
   )
@@ -280,6 +285,7 @@ function getTournamentEndState(tournament) {
 }
 
 function downloadTournamentPdf(tournament) {
+  const t = i18n.t
   const { finalRanking, winner, allMatches } = getTournamentEndState(tournament)
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
@@ -309,11 +315,11 @@ function downloadTournamentPdf(tournament) {
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
-  doc.text('Tournoi · tableau final', left, 12)
+  doc.text(t('tournament.pdf.title'), left, 12)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
-  doc.text(`Export : ${fmtDateTime(new Date().toISOString())}  ·  Tournoi : ${tournament.name}`, left, 19)
-  doc.text(`${tournament.teams.length} équipes  ·  ${tournament.format === 'groups' ? 'Poules' : tournament.format === 'swiss' ? 'Ronde suisse' : 'Tous vs tous'}`, left, 25)
+  doc.text(t('tournament.pdf.exportLabel', { date: fmtDateTime(new Date().toISOString()), name: tournament.name }), left, 19)
+  doc.text(t('tournament.pdf.teamsFormat', { count: tournament.teams.length, format: t(`tournament.formatLabel.${tournament.format === 'groups' ? 'groups' : tournament.format === 'swiss' ? 'swiss' : 'roundrobin'}`) }), left, 25)
   doc.setTextColor(15, 23, 42)
   y = 34
 
@@ -324,20 +330,20 @@ function downloadTournamentPdf(tournament) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(90, 100, 120)
-  doc.text(`Vainqueur : ${winner || '—'}  ·  ${allMatches.filter(m => m.score1 !== null && m.score2 !== null).length}/${allMatches.length} matchs joués`, left, y)
+  doc.text(t('tournament.pdf.winnerLine', { winner: winner || t('tournament.pdf.noWinner'), played: allMatches.filter(m => m.score1 !== null && m.score2 !== null).length, total: allMatches.length }), left, y)
   doc.setTextColor(15, 23, 42)
   y += 10
 
   section(finalRanking.length > 0 && (tournament.knockoutRounds || tournament.placementRounds)
-    ? 'Classement final'
-    : 'Classement actuel')
+    ? t('tournament.pdf.finalRanking')
+    : t('tournament.pdf.currentRanking'))
 
   const cols = [
     { label: '#', w: 12 },
-    { label: 'Équipe', w: 72 },
-    { label: 'Pts', w: 16 },
-    { label: 'Diff', w: 18 },
-    { label: 'BP', w: 16 },
+    { label: t('tournament.standings.team'), w: 72 },
+    { label: t('tournament.standings.pts'), w: 16 },
+    { label: t('tournament.standings.diff'), w: 18 },
+    { label: t('tournament.standings.gf'), w: 16 },
   ]
   const scale = maxW / cols.reduce((sum, col) => sum + col.w, 0)
   const sc = cols.map(col => ({ ...col, w: col.w * scale }))
@@ -373,7 +379,7 @@ function downloadTournamentPdf(tournament) {
 
   if (tournament.knockoutRounds?.length) {
     y += 6
-    section('Phase finale')
+    section(t('tournament.pdf.knockoutStage'))
     tournament.knockoutRounds.forEach(round => {
       ensurePage(10)
       doc.setFont('helvetica', 'bold')
@@ -399,7 +405,7 @@ function downloadTournamentPdf(tournament) {
 
   if (tournament.placementRounds?.length) {
     y += 6
-    section('Matchs de classement')
+    section(t('tournament.pdf.placementMatches'))
     tournament.placementRounds.forEach(({ label, match }) => {
       ensurePage(8)
       const played = match.score1 !== null && match.score2 !== null
@@ -417,16 +423,17 @@ function downloadTournamentPdf(tournament) {
 }
 
 function FinalRankingTable({ ranking, hasKnockout }) {
+  const { t } = useTranslation()
   return (
     <div className="trn-table-wrap">
       <table className="trn-table">
         <thead>
           <tr>
             <th>#</th>
-            <th className="trn-th-team">Équipe</th>
-            <th title="Points de poule">Pts</th>
-            <th title="Différence de buts">Diff</th>
-            <th title="Buts pour">BP</th>
+            <th className="trn-th-team">{t('tournament.standings.team')}</th>
+            <th title={t('tournament.standings.pts')}>{t('tournament.standings.pts')}</th>
+            <th title={t('tournament.standings.diffTitle')}>{t('tournament.standings.diff')}</th>
+            <th title={t('tournament.standings.gfTitle')}>{t('tournament.standings.gf')}</th>
           </tr>
         </thead>
         <tbody>
@@ -442,13 +449,14 @@ function FinalRankingTable({ ranking, hasKnockout }) {
         </tbody>
       </table>
       {hasKnockout && (
-        <div className="trn-ranking-note">Ordre basé sur la phase finale · pts/diff = stats de poule</div>
+        <div className="trn-ranking-note">{t('tournament.finalRankingNote')}</div>
       )}
     </div>
   )
 }
 
 function TournamentEnd({ tournament, onBack }) {
+  const { t } = useTranslation()
   const { finalRanking, winner, allMatches } = getTournamentEndState(tournament)
   const topThree   = finalRanking.slice(0, 3)
   const totalPlayed = allMatches.filter(m => m.score1 !== null && m.score2 !== null).length
@@ -457,16 +465,16 @@ function TournamentEnd({ tournament, onBack }) {
   return (
     <div className="trn-end">
       <div className="trn-end-hero">
-        <div className="trn-end-title">Tournoi terminé</div>
+        <div className="trn-end-title">{t('tournament.finished')}</div>
         <div className="trn-end-subtitle">
-          {winner ? `Vainqueur : ${winner}` : 'Classement final disponible'}
+          {winner ? t('tournament.winnerLabel', { winner }) : t('tournament.rankingAvailable')}
         </div>
         <div className="trn-end-meta">
-          {totalPlayed} matchs joués · {tournament.teams.length} équipes
+          {t('tournament.matchesTeamsMeta', { played: totalPlayed, teams: tournament.teams.length })}
         </div>
       </div>
 
-      <div className="trn-section">Podium</div>
+      <div className="trn-section">{t('tournament.podium')}</div>
       <div className="trn-podium">
         {topThree.map((row, i) => (
           <div key={row.team} className={`trn-podium-card trn-podium-${i + 1}`}>
@@ -477,26 +485,27 @@ function TournamentEnd({ tournament, onBack }) {
         ))}
       </div>
 
-      <div className="trn-section">Classement final</div>
+      <div className="trn-section">{t('tournament.finalRanking')}</div>
       <FinalRankingTable ranking={finalRanking} hasKnockout={hasKnockout} />
 
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button className="btn-mini" onClick={() => downloadTournamentPdf(tournament)}>PDF ↓</button>
-        <button className="btn-acc trn-end-btn" onClick={onBack}>← Retour à la liste</button>
+        <button className="btn-mini" onClick={() => downloadTournamentPdf(tournament)}>{t('history.pdfBtn')}</button>
+        <button className="btn-acc trn-end-btn" onClick={onBack}>{t('tournament.backToList')}</button>
       </div>
     </div>
   )
 }
 
 function ValidationBanner({ onValidate }) {
+  const { t } = useTranslation()
   return (
     <div className="trn-validate-banner">
       <div>
-        <div className="trn-validate-title">Tournoi terminé</div>
-        <div className="trn-validate-text">Valide le tournoi pour afficher l'écran final et le classement complet.</div>
+        <div className="trn-validate-title">{t('tournament.validateTitle')}</div>
+        <div className="trn-validate-text">{t('tournament.validateText')}</div>
       </div>
       <button className="btn-acc trn-validate-btn" onClick={onValidate}>
-        Valider le tournoi
+        {t('tournament.validateButton')}
       </button>
     </div>
   )
@@ -504,19 +513,20 @@ function ValidationBanner({ onValidate }) {
 
 // ── Vue Tous contre tous ──────────────────────────────────────────────────────
 function RoundRobinView({ tournament, onUpdate, finished, onValidate }) {
+  const { t } = useTranslation()
   const done = tournament.matches.filter(m => m.score1 !== null).length
   const perGroup = tournament.knockoutSize ?? 0
 
   return (
     <>
       <Progress done={done} total={tournament.matches.length} />
-      <div className="trn-section">Tableau croisé</div>
+      <div className="trn-section">{t('tournament.crossTable')}</div>
       <CrossTable teams={tournament.teams} matches={tournament.matches} />
 
-      <div className="trn-section">Classement</div>
+      <div className="trn-section">{t('tournament.standingsTitle')}</div>
       <Standings teams={tournament.teams} matches={tournament.matches} qualifyN={perGroup} />
 
-      <div className="trn-section">Matchs</div>
+      <div className="trn-section">{t('tournament.matches')}</div>
       <div className="trn-matches-list">
         {tournament.matches.map(m => (
           <MatchRow key={m.id + m.score1 + m.score2} match={m}
@@ -526,12 +536,12 @@ function RoundRobinView({ tournament, onUpdate, finished, onValidate }) {
 
       {canStartKnockout(tournament) && (
         <button className="btn-acc trn-ko-btn" onClick={() => onUpdate(startKnockout(tournament))}>
-          Lancer la phase finale →
+          {t('tournament.startKnockout')}
         </button>
       )}
       {tournament.knockoutRounds && (
         <>
-          <div className="trn-section">Phase finale</div>
+          <div className="trn-section">{t('tournament.pdf.knockoutStage')}</div>
           <KnockoutBracket rounds={tournament.knockoutRounds}
             onScore={(ri, mi, s1, s2) => onUpdate(setKnockoutScore(tournament, ri, mi, s1, s2))} />
         </>
@@ -546,6 +556,7 @@ function RoundRobinView({ tournament, onUpdate, finished, onValidate }) {
 
 // ── Vue Poules ────────────────────────────────────────────────────────────────
 function GroupsView({ tournament, onUpdate, finished, onValidate }) {
+  const { t } = useTranslation()
   const allMatches = tournament.groups.flatMap(g => g.matches)
   const done = allMatches.filter(m => m.score1 !== null).length
   const perGroup = tournament.knockoutSize ? Math.ceil(tournament.knockoutSize / tournament.groups.length) : 0
@@ -572,12 +583,12 @@ function GroupsView({ tournament, onUpdate, finished, onValidate }) {
 
       {canStartKnockout(tournament) && (
         <button className="btn-acc trn-ko-btn" onClick={() => onUpdate(startKnockout(tournament))}>
-          Lancer la phase finale →
+          {t('tournament.startKnockout')}
         </button>
       )}
       {tournament.knockoutRounds && (
         <>
-          <div className="trn-section">Phase finale</div>
+          <div className="trn-section">{t('tournament.pdf.knockoutStage')}</div>
           <KnockoutBracket rounds={tournament.knockoutRounds}
             onScore={(ri, mi, s1, s2) => onUpdate(setKnockoutScore(tournament, ri, mi, s1, s2))} />
         </>
@@ -585,12 +596,12 @@ function GroupsView({ tournament, onUpdate, finished, onValidate }) {
 
       {canStartFullPlacement(tournament) && (
         <button className="btn-acc trn-ko-btn" onClick={() => onUpdate(startFullPlacement(tournament))}>
-          Lancer les matchs de classement →
+          {t('tournament.startPlacement')}
         </button>
       )}
       {tournament.placementRounds?.length > 0 && (
         <>
-          <div className="trn-section">Matchs de classement</div>
+          <div className="trn-section">{t('tournament.placementMatchesTitle')}</div>
           <div className="trn-placement-list">
             {tournament.placementRounds.map((r, ri) => (
               <div key={r.id} className="trn-placement-row">
@@ -615,6 +626,7 @@ function GroupsView({ tournament, onUpdate, finished, onValidate }) {
 
 // ── Vue Ronde suisse ──────────────────────────────────────────────────────────
 function SwissView({ tournament, onUpdate, finished, onValidate }) {
+  const { t } = useTranslation()
   const allMatches = tournament.rounds.flatMap(r => r.matches)
   const currentRound = tournament.rounds[tournament.rounds.length - 1]
   const roundDone = isRoundComplete(currentRound)
@@ -624,13 +636,13 @@ function SwissView({ tournament, onUpdate, finished, onValidate }) {
   return (
     <>
       <div className="trn-prog-label" style={{ marginBottom: 4 }}>
-        Ronde {tournament.rounds.length} / {tournament.numSwissRounds}
+        {t('tournament.roundLabel', { current: tournament.rounds.length, total: tournament.numSwissRounds })}
       </div>
       <div className="trn-prog-track" style={{ marginBottom: 12 }}>
         <div className="trn-prog-fill" style={{ width: `${Math.round(tournament.rounds.length / tournament.numSwissRounds * 100)}%` }} />
       </div>
 
-      <div className="trn-section">Classement</div>
+      <div className="trn-section">{t('tournament.standingsTitle')}</div>
       <Standings teams={tournament.teams} matches={allMatches} />
 
       {tournament.rounds.map((round, ri) => (
@@ -647,7 +659,7 @@ function SwissView({ tournament, onUpdate, finished, onValidate }) {
 
       {canNext && (
         <button className="btn-acc trn-ko-btn" onClick={() => onUpdate(addSwissRound(tournament))}>
-          Ronde {tournament.rounds.length + 1} →
+          {t('tournament.nextRound', { n: tournament.rounds.length + 1 })}
         </button>
       )}
       {finished && roundFinished && <ValidationBanner onValidate={onValidate} />}
@@ -657,15 +669,16 @@ function SwissView({ tournament, onUpdate, finished, onValidate }) {
 
 // ── Formulaire de création ────────────────────────────────────────────────────
 const KNOCKOUT_OPTIONS = [
-  { value: null, label: 'Pas de phase finale' },
-  { value: 2,   label: 'Finale uniquement' },
-  { value: 4,   label: 'Demi-finales + Finale' },
-  { value: 8,   label: 'Quarts + Demis + Finale' },
-  { value: 16,  label: '8èmes + Quarts + Demis + Finale' },
-  { value: 32,  label: '16èmes + ...' },
+  { value: null, labelKey: 'tournament.knockoutOptions.none' },
+  { value: 2,   labelKey: 'tournament.knockoutOptions.final' },
+  { value: 4,   labelKey: 'tournament.knockoutOptions.semis' },
+  { value: 8,   labelKey: 'tournament.knockoutOptions.quarters' },
+  { value: 16,  labelKey: 'tournament.knockoutOptions.roundOf16' },
+  { value: 32,  labelKey: 'tournament.knockoutOptions.roundOf32' },
 ]
 
 function TournamentSetup({ onStart, onCancel }) {
+  const { t } = useTranslation()
   const [name, setName]               = useState('')
   const [format, setFormat]           = useState('roundrobin')
   const [teamInput, setTeamInput]     = useState('')
@@ -676,13 +689,13 @@ function TournamentSetup({ onStart, onCancel }) {
   const [fullPlacement, setFull]      = useState(false)
 
   function addTeam() {
-    const t = teamInput.trim()
-    if (t && !teams.includes(t)) { setTeams(p => [...p, t]); setTeamInput('') }
+    const name = teamInput.trim()
+    if (name && !teams.includes(name)) { setTeams(p => [...p, name]); setTeamInput('') }
   }
 
   function handleStart() {
     if (teams.length < 2) return
-    const n = name.trim() || `Tournoi du ${new Date().toLocaleDateString('fr-FR')}`
+    const n = name.trim() || t('tournament.setup.defaultName', { date: new Date().toLocaleDateString(i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR') })
     onStart(mkTournament({
       name: n, format, teams,
       numGroups: Number(numGroups),
@@ -697,31 +710,31 @@ function TournamentSetup({ onStart, onCancel }) {
   return (
     <>
       <div className="trn-topbar">
-        <button className="btn-mini" onClick={onCancel}>← Annuler</button>
-        <div className="trn-topbar-title">Nouveau tournoi</div>
+        <button className="btn-mini" onClick={onCancel}>{t('tournament.setup.cancel')}</button>
+        <div className="trn-topbar-title">{t('tournament.setup.title')}</div>
       </div>
 
       <div className="trn-setup">
         <div className="trn-field">
-          <div className="flabel">Nom du tournoi</div>
-          <input type="text" placeholder="Ex: Open de printemps" value={name}
+          <div className="flabel">{t('tournament.setup.nameLabel')}</div>
+          <input type="text" placeholder={t('tournament.setup.namePlaceholder')} value={name}
             onChange={e => setName(e.target.value)} autoFocus />
         </div>
 
         <div className="trn-field">
-          <div className="flabel">Format</div>
+          <div className="flabel">{t('tournament.setup.formatLabelField')}</div>
           <div className="seg">
-            <button className={format === 'roundrobin' ? 'on' : ''} onClick={() => setFormat('roundrobin')}>Tous vs tous</button>
-            <button className={format === 'groups' ? 'on' : ''} onClick={() => setFormat('groups')}>Poules</button>
-            <button className={format === 'swiss' ? 'on' : ''} onClick={() => setFormat('swiss')}>Ronde suisse</button>
+            <button className={format === 'roundrobin' ? 'on' : ''} onClick={() => setFormat('roundrobin')}>{t('tournament.formatLabel.roundrobin')}</button>
+            <button className={format === 'groups' ? 'on' : ''} onClick={() => setFormat('groups')}>{t('tournament.formatLabel.groups')}</button>
+            <button className={format === 'swiss' ? 'on' : ''} onClick={() => setFormat('swiss')}>{t('tournament.formatLabel.swiss')}</button>
           </div>
         </div>
 
         {format === 'groups' && (
           <div className="trn-field">
-            <div className="flabel">Nombre de poules</div>
+            <div className="flabel">{t('tournament.setup.groupsCountLabel')}</div>
             <select className="sel" value={numGroups} onChange={e => { setNumGroups(e.target.value); setFull(false) }}>
-              {[2, 3, 4, 6, 8].map(n => <option key={n} value={n}>{n} poules</option>)}
+              {[2, 3, 4, 6, 8].map(n => <option key={n} value={n}>{t('tournament.setup.groupsOption', { n })}</option>)}
             </select>
           </div>
         )}
@@ -730,13 +743,13 @@ function TournamentSetup({ onStart, onCancel }) {
           <label className="trn-toggle">
             <input type="checkbox" checked={fullPlacement} onChange={e => { setFull(e.target.checked); if (e.target.checked) setKoSize(null) }} />
             <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
-            <span>Classement complet — chaque équipe joue pour sa place</span>
+            <span>{t('tournament.setup.fullPlacementLabel')}</span>
           </label>
         )}
 
         {format === 'swiss' && (
           <div className="trn-field">
-            <div className="flabel">Nombre de rondes</div>
+            <div className="flabel">{t('tournament.setup.swissRoundsLabel')}</div>
             <input type="number" min="2" max="15" value={swissRounds}
               onChange={e => setSwissRounds(e.target.value)} />
           </div>
@@ -744,30 +757,30 @@ function TournamentSetup({ onStart, onCancel }) {
 
         {showKo && (
           <div className="trn-field">
-            <div className="flabel">Phase finale (optionnel)</div>
+            <div className="flabel">{t('tournament.setup.knockoutOptional')}</div>
             <select className="sel" value={knockoutSize === null ? 'null' : String(knockoutSize)}
               onChange={e => setKoSize(e.target.value === 'null' ? null : Number(e.target.value))}>
               {KNOCKOUT_OPTIONS.map(o => (
-                <option key={String(o.value)} value={String(o.value)}>{o.label}</option>
+                <option key={String(o.value)} value={String(o.value)}>{t(o.labelKey)}</option>
               ))}
             </select>
           </div>
         )}
 
         <div className="trn-field">
-          <div className="flabel">Équipes ({teams.length})</div>
+          <div className="flabel">{t('tournament.setup.teamsLabel', { count: teams.length })}</div>
           <div className="trn-team-row">
-            <input type="text" placeholder="Nom de l'équipe" value={teamInput}
+            <input type="text" placeholder={t('tournament.setup.teamNamePlaceholder')} value={teamInput}
               onChange={e => setTeamInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTeam()} />
-            <button className="btn-mini" onClick={addTeam}>+ Ajouter</button>
+            <button className="btn-mini" onClick={addTeam}>{t('tournament.setup.addTeam')}</button>
           </div>
           {teams.length > 0 && (
             <div className="trn-chips">
-              {teams.map(t => (
-                <div key={t} className="trn-chip">
-                  <span>{t}</span>
-                  <button onClick={() => setTeams(p => p.filter(x => x !== t))}>×</button>
+              {teams.map(tm => (
+                <div key={tm} className="trn-chip">
+                  <span>{tm}</span>
+                  <button onClick={() => setTeams(p => p.filter(x => x !== tm))}>×</button>
                 </div>
               ))}
             </div>
@@ -775,7 +788,7 @@ function TournamentSetup({ onStart, onCancel }) {
         </div>
 
         <button className="btn-acc" onClick={handleStart} disabled={teams.length < 2}>
-          Lancer le tournoi →
+          {t('tournament.setup.start')}
         </button>
       </div>
     </>
@@ -784,17 +797,18 @@ function TournamentSetup({ onStart, onCancel }) {
 
 // ── Détail d'un tournoi ───────────────────────────────────────────────────────
 function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated }) {
-  const formatLabel = { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse' }
+  const { t } = useTranslation()
+  const formatLabel = t('tournament.formatLabel', { returnObjects: true })
   const { finished } = getTournamentEndState(tournament)
   if (validated) {
     return (
       <div className="trn-detail">
         <div className="trn-topbar">
-          <button className="btn-mini" onClick={onBack}>← Retour</button>
+          <button className="btn-mini" onClick={onBack}>{t('tournament.back')}</button>
           <div>
             <div className="trn-topbar-title">{tournament.name}</div>
             <div className="trn-topbar-meta">
-              {formatLabel[tournament.format]} · {tournament.teams.length} équipes
+              {formatLabel[tournament.format]} · {t('tournament.teamsCount', { count: tournament.teams.length })}
             </div>
           </div>
         </div>
@@ -807,11 +821,11 @@ function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated 
   return (
     <div className="trn-detail">
       <div className="trn-topbar">
-        <button className="btn-mini" onClick={onBack}>← Retour</button>
+        <button className="btn-mini" onClick={onBack}>{t('tournament.back')}</button>
         <div>
           <div className="trn-topbar-title">{tournament.name}</div>
           <div className="trn-topbar-meta">
-            {formatLabel[tournament.format]} · {tournament.teams.length} équipes
+            {formatLabel[tournament.format]} · {t('tournament.teamsCount', { count: tournament.teams.length })}
           </div>
         </div>
       </div>
@@ -825,6 +839,7 @@ function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated 
 
 // ── Écran principal Tournois ──────────────────────────────────────────────────
 export default function Tournament({ tournaments, onSave, onBack }) {
+  const { t } = useTranslation()
   const initialUi = loadTournamentUi()
   const [view, setView]       = useState(initialUi.view)
   const [active, setActive]   = useState(() => tournaments.find(t => t.id === initialUi.activeId) || null)
@@ -873,7 +888,7 @@ export default function Tournament({ tournaments, onSave, onBack }) {
   }
 
   function handleDelete(id) {
-    if (!window.confirm('Supprimer ce tournoi ?')) return
+    if (!window.confirm(t('tournament.deleteConfirm'))) return
     onSave(tournaments.filter(t => t.id !== id))
     setValidatedIds(ids => ids.filter(vId => vId !== id))
     if (active?.id === id) setView('list')
@@ -896,39 +911,39 @@ export default function Tournament({ tournaments, onSave, onBack }) {
   return (
     <div className="trn-list-screen">
       <div className="trn-topbar">
-        <button className="btn-mini" onClick={onBack}>← Accueil</button>
+        <button className="btn-mini" onClick={onBack}>{t('tournament.home')}</button>
         <div>
-          <div className="trn-topbar-title">Tournois</div>
-          <div className="trn-topbar-meta">Sauvegarde locale et synchro entre pages actives</div>
+          <div className="trn-topbar-title">{t('tournament.title')}</div>
+          <div className="trn-topbar-meta">{t('tournament.subtitle')}</div>
         </div>
-        <button className="btn-acc trn-new-btn" onClick={() => setView('setup')}>+ Nouveau</button>
+        <button className="btn-acc trn-new-btn" onClick={() => setView('setup')}>{t('tournament.newButton')}</button>
       </div>
 
       {tournaments.length === 0 ? (
         <div className="trn-empty">
-          <div>Aucun tournoi créé pour l'instant.</div>
-          <button className="btn-acc" onClick={() => setView('setup')}>Créer un tournoi</button>
+          <div>{t('tournament.empty')}</div>
+          <button className="btn-acc" onClick={() => setView('setup')}>{t('tournament.createButton')}</button>
         </div>
       ) : (
         <div className="trn-list">
-          {tournaments.map(t => {
-            const allMatches = t.format === 'groups'
-              ? t.groups?.flatMap(g => g.matches) ?? []
-              : t.format === 'swiss'
-              ? t.rounds?.flatMap(r => r.matches) ?? []
-              : t.matches ?? []
+          {tournaments.map(tour => {
+            const allMatches = tour.format === 'groups'
+              ? tour.groups?.flatMap(g => g.matches) ?? []
+              : tour.format === 'swiss'
+              ? tour.rounds?.flatMap(r => r.matches) ?? []
+              : tour.matches ?? []
             const done = allMatches.filter(m => m.score1 !== null).length
-            const formatLabel = { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse' }
+            const formatLabel = t('tournament.formatLabel', { returnObjects: true })
             return (
-              <div key={t.id} className="trn-item" onClick={() => { setActive(t); setView('detail') }}>
+              <div key={tour.id} className="trn-item" onClick={() => { setActive(tour); setView('detail') }}>
                 <div className="trn-item-info">
-                  <div className="trn-item-name">{t.name}</div>
+                  <div className="trn-item-name">{tour.name}</div>
                   <div className="trn-item-meta">
-                    {formatLabel[t.format]} · {t.teams.length} équipes · {done}/{allMatches.length} matchs
-                    {t.createdAt && <> · {fmtDateTime(t.createdAt)}</>}
+                    {t('tournament.itemMeta', { format: formatLabel[tour.format], teams: tour.teams.length, done, total: allMatches.length })}
+                    {tour.createdAt && <> · {fmtDateTime(tour.createdAt)}</>}
                   </div>
                 </div>
-                <button className="trn-item-del" onClick={e => { e.stopPropagation(); handleDelete(t.id) }}>×</button>
+                <button className="trn-item-del" onClick={e => { e.stopPropagation(); handleDelete(tour.id) }}>×</button>
               </div>
             )
           })}

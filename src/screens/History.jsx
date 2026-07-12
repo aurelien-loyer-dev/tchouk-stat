@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { jsPDF } from 'jspdf'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import { buildPointsSeries } from '../lib/shotSeries'
 import { playerTirsTotal, playerDerivedStats, playerTeamScore } from '../lib/playerStats'
 import { fmtClock, fmtDateTime, hexToRgb, fileSafeName, pct } from '../lib/format'
@@ -7,6 +9,7 @@ import { teamTextStyle, teamSwatchStyle, colorLum } from '../lib/teamColor'
 
 // ── PDF : match stats / scoreur ───────────────────────────────────────────────
 function generateStatsPdf(match) {
+  const t = i18n.t
   const { teams = [], settings, timeline = [], playedAt, durationSec, numTeams: n = 2 } = match
   const doc   = new jsPDF({ unit: 'mm', format: 'a4' })
   const pageW = doc.internal.pageSize.getWidth()
@@ -21,11 +24,11 @@ function generateStatsPdf(match) {
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(15)
-  doc.text('Feuille de match', left, 12)
+  doc.text(t('results.pdf.sheetTitle'), left, 12)
   doc.setFontSize(10)
   doc.setFont('helvetica', 'normal')
-  doc.text(`Export : ${fmtDateTime(new Date().toISOString())}  ·  Match du : ${fmtDateTime(playedAt)}`, left, 19)
-  const hdrScore = teams.map(t => `${t.name} ${t.score}`).join('  —  ')
+  doc.text(t('history.pdf.exportMatchLabel', { exportDate: fmtDateTime(new Date().toISOString()), playedDate: fmtDateTime(playedAt) }), left, 19)
+  const hdrScore = teams.map(tm => `${tm.name} ${tm.score}`).join('  —  ')
   doc.text(hdrScore, left, 25)
   doc.setTextColor(15, 23, 42)
   y = 34
@@ -33,22 +36,23 @@ function generateStatsPdf(match) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(90, 100, 120)
-  doc.text(`Format : ${settings?.halfCount}×${settings?.halfDurationMin} min  ·  Durée : ${fmtClock(durationSec)}`, left, y)
+  doc.text(t('history.pdf.formatDuration', { halfCount: settings?.halfCount, halfDuration: settings?.halfDurationMin, time: fmtClock(durationSec) }), left, y)
   doc.setTextColor(15, 23, 42)
   y += 10
 
   // Team stats table
+  const sCols = t('history.pdf.statsCols', { returnObjects: true })
   const cols = [
-    { label: 'Équipe',   w: 34, key: 'name' },
-    { label: 'Score',    w: 12, key: 'score' },
-    { label: 'Tirs',     w: 11, key: 'tirs' },
-    { label: 'Gagnés',   w: 14, key: 'tGagne' },
-    { label: 'Donnés',   w: 14, key: 'tDonne' },
-    { label: 'Catchés',  w: 15, key: 'tCatche' },
-    { label: 'F.Tir',    w: 11, key: 'tFaute' },
-    { label: 'Fautes',   w: 12, key: 'fautes' },
-    { label: 'Pos.',     w: 10, key: 'pos' },
-    { label: 'Eff. %',   w: 14, key: '__eff' },
+    { label: sCols.team,      w: 34, key: 'name' },
+    { label: sCols.score,     w: 12, key: 'score' },
+    { label: sCols.shots,     w: 11, key: 'tirs' },
+    { label: sCols.won,       w: 14, key: 'tGagne' },
+    { label: sCols.given,     w: 14, key: 'tDonne' },
+    { label: sCols.caught,    w: 15, key: 'tCatche' },
+    { label: sCols.shotFouls, w: 11, key: 'tFaute' },
+    { label: sCols.fouls,     w: 12, key: 'fautes' },
+    { label: sCols.pos,       w: 10, key: 'pos' },
+    { label: sCols.eff,       w: 14, key: '__eff' },
   ]
   const scale = maxW / cols.reduce((s, c) => s + c.w, 0)
   const sc    = cols.map(c => ({ ...c, w: c.w * scale }))
@@ -64,7 +68,7 @@ function generateStatsPdf(match) {
   sc.forEach((col, i) => doc.text(col.label, i === 0 ? xOf(i) + 2 : xOf(i) + col.w / 2, y + 1, { align: i === 0 ? 'left' : 'center' }))
   y += rowH
 
-  teams.slice(0, n).forEach((t, ti) => {
+  teams.slice(0, n).forEach((tm, ti) => {
     const c  = hexToRgb(settings?.teamColors?.[ti])
     const bg = ti % 2 === 0 ? [255, 255, 255] : [248, 250, 254]
     doc.setFillColor(...bg)
@@ -72,7 +76,7 @@ function generateStatsPdf(match) {
     doc.setFillColor(c.r, c.g, c.b)
     doc.rect(left, y - 4, 2, rowH, 'F')
     sc.forEach((col, i) => {
-      const val    = col.key === '__eff' ? (t.tirs > 0 ? `${Math.round((t.tGagne / t.tirs) * 100)} %` : '—') : String(t[col.key] ?? 0)
+      const val    = col.key === '__eff' ? (tm.tirs > 0 ? `${Math.round((tm.tGagne / tm.tirs) * 100)} %` : '—') : String(tm[col.key] ?? 0)
       const isBold = col.key === 'name' || col.key === 'score'
       doc.setFont('helvetica', isBold ? 'bold' : 'normal')
       doc.setFontSize(isBold ? 8.5 : 8)
@@ -87,17 +91,18 @@ function generateStatsPdf(match) {
   y += 10
 
   // Events list (up to 50)
-  const SHOT_LBL = { tGagne: 'Tir gagné', tDonne: 'Tir donné', tCatche: 'Tir catché', tFaute: 'Faute sur tir' }
+  const SHOT_LBL = t('results.pdf.shotLabels', { returnObjects: true })
   const evts = timeline.filter(e => e.category === 'tirs').slice(0, 50)
   if (evts.length > 0) {
+    const evc2 = t('history.pdf.eventCols', { returnObjects: true })
     const evCols = [{ w: 22 }, { w: 45 }, { w: 65 }, { w: 40 }]
-    const evLabels = ['Temps', 'Équipe', 'Action', 'Score']
+    const evLabels = [evc2.time, evc2.team, evc2.action, evc2.score]
     const evScale  = maxW / evCols.reduce((s, c) => s + c.w, 0)
     const evc      = evCols.map(c => ({ w: c.w * evScale }))
     function exOf(idx) { let x = left; for (let i = 0; i < idx; i++) x += evc[i].w; return x }
 
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(70, 80, 100)
-    doc.text('ÉVÉNEMENTS TIRS', left, y); y += 6
+    doc.text(t('history.pdf.shotEventsTitle'), left, y); y += 6
 
     doc.setFillColor(235, 240, 250); doc.rect(left, y - 4, maxW, 7, 'F')
     doc.setFontSize(6.5)
@@ -123,6 +128,7 @@ function generateStatsPdf(match) {
 
 // ── PDF : match joueurs ───────────────────────────────────────────────────────
 function generatePlayerMatchPdf(match) {
+  const t = i18n.t
   const { players = [], teams = [], settings, numTeams: nt = 2, playedAt, durationSec } = match
   const n       = nt
   const score0  = playerTeamScore(players, 0, n)
@@ -141,34 +147,35 @@ function generatePlayerMatchPdf(match) {
 
   doc.setFillColor(20, 30, 48); doc.rect(0, 0, pageW, 28, 'F')
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(15)
-  doc.text('Feuille de match · Stats joueurs', left, 12)
+  doc.text(t('history.pdf.playerSheetTitle'), left, 12)
   doc.setFontSize(10); doc.setFont('helvetica', 'normal')
-  doc.text(`Export : ${fmtDateTime(new Date().toISOString())}  ·  Match du : ${fmtDateTime(playedAt)}`, left, 19)
+  doc.text(t('history.pdf.exportMatchLabel', { exportDate: fmtDateTime(new Date().toISOString()), playedDate: fmtDateTime(playedAt) }), left, 19)
   const hdrScore = n === 2
-    ? `${teams[0]?.name || ''} ${score0}  —  ${score1} ${teams[1]?.name || ''}`
-    : `${teams[0]?.name || ''} : ${score0} pts`
+    ? t('playerResults.scoreLineTwo', { team1: teams[0]?.name || '', score1: score0, score2: score1, team2: teams[1]?.name || '' })
+    : t('playerResults.scoreLineOne', { team: teams[0]?.name || '', score: score0 })
   doc.text(hdrScore, left, 25)
   doc.setTextColor(15, 23, 42); y = 34
 
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 100, 120)
-  doc.text(`Durée : ${fmtClock(durationSec)}  ·  ${settings?.halfCount}×${settings?.halfDurationMin} min`, left, y)
+  doc.text(t('history.pdf.durationFormat', { time: fmtClock(durationSec), halfCount: settings?.halfCount, halfDuration: settings?.halfDurationMin }), left, y)
   doc.setTextColor(15, 23, 42); y += 8
 
+  const cc = t('playerResults.columns', { returnObjects: true })
   const cols = [
-    { label: 'Joueur',   w: 30, key: null },
-    { label: 'Pts',      w: 9,  key: 'pointsMarques' },
-    { label: 'Tirs Tot', w: 12, key: '__tirsTotal' },
-    { label: 'T.N.Tr',   w: 11, key: 'tirsNonTransformes' },
-    { label: 'Pt Dn',    w: 11, key: 'pointsDonnes' },
-    { label: 'F.Tir',    w: 9,  key: 'fautesTir' },
-    { label: 'Def Sol',  w: 12, key: 'defenseSolo' },
-    { label: 'Part Df',  w: 11, key: 'participationDef' },
-    { label: 'Def Rat',  w: 11, key: 'defenseRatee' },
-    { label: 'P.Rat',    w: 9,  key: 'passesRatees' },
-    { label: 'F.Tech',   w: 10, key: 'fautesTech' },
-    { label: 'Sanct',    w: 10, key: 'sanctions' },
-    { label: 'Eff Off',  w: 13, key: '__effOff' },
-    { label: '% Don',    w: 10, key: '__pctDon' },
+    { label: cc.player,      w: 30, key: null },
+    { label: cc.pts,         w: 9,  key: 'pointsMarques' },
+    { label: cc.totalShots,  w: 12, key: '__tirsTotal' },
+    { label: cc.missedShots, w: 11, key: 'tirsNonTransformes' },
+    { label: cc.pointsGiven, w: 11, key: 'pointsDonnes' },
+    { label: cc.shotFouls,   w: 9,  key: 'fautesTir' },
+    { label: cc.soloDef,     w: 12, key: 'defenseSolo' },
+    { label: cc.defAssist,   w: 11, key: 'participationDef' },
+    { label: cc.failedDef,   w: 11, key: 'defenseRatee' },
+    { label: cc.missedPass,  w: 9,  key: 'passesRatees' },
+    { label: cc.techFoul,    w: 10, key: 'fautesTech' },
+    { label: cc.sanctions,   w: 10, key: 'sanctions' },
+    { label: cc.offEff,      w: 13, key: '__effOff' },
+    { label: cc.pctGiven,    w: 10, key: '__pctDon' },
   ]
   const scale = maxW / cols.reduce((s, c) => s + c.w, 0)
   const sc    = cols.map(c => ({ ...c, w: c.w * scale }))
@@ -203,9 +210,9 @@ function generatePlayerMatchPdf(match) {
   }
 
   const teamGroups = n === 2
-    ? [{ grp: players.filter(p => p.teamIdx === 0), name: teams[0]?.name || 'Équipe 1', c: c1 },
-       { grp: players.filter(p => p.teamIdx === 1), name: teams[1]?.name || 'Équipe 2', c: c2 }]
-    : [{ grp: players.filter(p => p.teamIdx === 0), name: teams[0]?.name || 'Équipe 1', c: c1 }]
+    ? [{ grp: players.filter(p => p.teamIdx === 0), name: teams[0]?.name || t('playerResults.defaultTeam1'), c: c1 },
+       { grp: players.filter(p => p.teamIdx === 1), name: teams[1]?.name || t('playerResults.defaultTeam2'), c: c2 }]
+    : [{ grp: players.filter(p => p.teamIdx === 0), name: teams[0]?.name || t('playerResults.defaultTeam1'), c: c1 }]
 
   teamGroups.forEach(({ grp, name, c }) => {
     ensurePage(22 + (grp.length + 2) * rowH)
@@ -217,9 +224,9 @@ function generatePlayerMatchPdf(match) {
     const totPD   = grp.reduce((a, p) => a + p.pointsDonnes, 0)
     const totDef  = grp.reduce((a, p) => a + p.defenseSolo + p.participationDef, 0)
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(90, 100, 120)
-    doc.text(`Tirs : ${totTirs}  ·  Pts marqués : ${totPM}  ·  Pts donnés : ${totPD}  ·  Déf. : ${totDef}  ·  Eff. : ${pct(totPM, totTirs)}`, left + 8, y + 14)
+    doc.text(t('history.pdf.teamSummaryLine', { totalShots: totTirs, scored: totPM, given: totPD, def: totDef, eff: pct(totPM, totTirs) }), left + 8, y + 14)
     doc.setTextColor(15, 23, 42); y += 18
-    if (grp.length === 0) { doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.text('Aucun joueur.', left + 4, y); y += 8; return }
+    if (grp.length === 0) { doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.text(t('history.pdf.noPlayersShort'), left + 4, y); y += 8; return }
     y = drawHeader(y)
     grp.forEach((player, i) => { y = drawPlayerRow(player, i, y) })
     y += 8
@@ -271,9 +278,8 @@ function MiniTimeline({ timeline, settings, teams }) {
 }
 
 // ── Détail match stats / scoreur ──────────────────────────────────────────────
-const SHOT_LABELS = { tGagne: 'Tir gagné', tDonne: 'Tir donné', tCatche: 'Tir catché', tFaute: 'Faute sur tir' }
-
 function MatchDetail({ match, onClose }) {
+  const { t } = useTranslation()
   const { teams, timeline, settings } = match
   const shotEvents = (timeline || []).filter(e => e.category === 'tirs')
   const isScorerOnly = match.mode === 'scorer'
@@ -281,57 +287,57 @@ function MatchDetail({ match, onClose }) {
   return (
     <div className="hist-detail">
       <div className="hist-detail-header">
-        <button className="btn-ghost hist-back" onClick={onClose}>← Retour</button>
+        <button className="btn-ghost hist-back" onClick={onClose}>{t('common.back')}</button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div className="hist-detail-date">{fmtDateTime(match.playedAt)}</div>
-          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>PDF ↓</button>
+          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>{t('history.pdfBtn')}</button>
         </div>
       </div>
 
       <div className="mr-detail-names">
-        {teams.map((t, i) => (
+        {teams.map((tm, i) => (
           <span className="mr-name" key={i} style={{ fontSize: 15 }}>
             {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
-            {t.name}
+            {tm.name}
           </span>
         ))}
       </div>
       <div className="rf" style={{ marginBottom: 8 }}>
-        {teams.map((t, i) => (
+        {teams.map((tm, i) => (
           <span key={i}>
             {i > 0 && <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>}
-            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : { color: 'var(--txt)' }}>{t.score}</span>
+            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : { color: 'var(--txt)' }}>{tm.score}</span>
           </span>
         ))}
       </div>
 
       <div className="card" style={{ marginBottom: isScorerOnly ? 0 : 12 }}>
-        <div className="ctitle">Résumé</div>
-        <div className="si"><div className="si-l">Format</div><span className="si-v" style={{ fontSize: 14 }}>{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(match.durationSec)}</span></div>
+        <div className="ctitle">{t('history.summaryTitle')}</div>
+        <div className="si"><div className="si-l">{t('results.ui.format')}</div><span className="si-v" style={{ fontSize: 14 }}>{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span></div>
+        <div className="si"><div className="si-l">{t('history.actualDuration')}</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(match.durationSec)}</span></div>
         {!isScorerOnly && (
-          <div className="si"><div className="si-l">Événements tir</div><span className="si-v" style={{ fontSize: 14 }}>{match.shotEvents}</span></div>
+          <div className="si"><div className="si-l">{t('history.shotEventsLabel')}</div><span className="si-v" style={{ fontSize: 14 }}>{match.shotEvents}</span></div>
         )}
       </div>
 
-      {!isScorerOnly && teams.map((t, i) => (
+      {!isScorerOnly && teams.map((tm, i) => (
         <div className="card" key={i} style={{ marginBottom: 12, borderTop: `3px solid ${settings?.teamColors?.[i] || 'var(--acc)'}` }}>
           <div className="ctitle">
             {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
-            {t.name}
+            {tm.name}
           </div>
-          <div className="si"><div className="si-l">Score</div><span className="si-v">{t.score}</span></div>
-          <div className="si"><div className="si-l">Tirs</div><span className="si-v" style={{ fontSize: 16 }}>{t.tirs}</span></div>
-          <div className="si"><div className="si-l">Gagnés</div><span className="si-v" style={{ fontSize: 16 }}>{t.tGagne}</span></div>
-          <div className="si"><div className="si-l">Donnés</div><span className="si-v" style={{ fontSize: 16 }}>{t.tDonne}</span></div>
-          <div className="si"><div className="si-l">Catchés</div><span className="si-v" style={{ fontSize: 16 }}>{t.tCatche}</span></div>
-          <div className="si"><div className="si-l">Fautes tir</div><span className="si-v" style={{ fontSize: 16 }}>{t.tFaute}</span></div>
-          <div className="si"><div className="si-l">Fautes total</div><span className="si-v" style={{ fontSize: 16 }}>{t.fautes}</span></div>
-          <div className="si"><div className="si-l">Possessions</div><span className="si-v" style={{ fontSize: 16 }}>{t.pos}</span></div>
-          {t.tirs > 0 && (
+          <div className="si"><div className="si-l">{t('history.score')}</div><span className="si-v">{tm.score}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.shotsTitle')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.tirs}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.won')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.tGagne}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.given')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.tDonne}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.caught')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.tCatche}</span></div>
+          <div className="si"><div className="si-l">{t('history.shotFoulsShort')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.tFaute}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.totalFouls')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.fautes}</span></div>
+          <div className="si"><div className="si-l">{t('results.ui.possessions')}</div><span className="si-v" style={{ fontSize: 16 }}>{tm.pos}</span></div>
+          {tm.tirs > 0 && (
             <div className="si">
-              <div className="si-l">Efficacité offensive</div>
-              <span className="si-v" style={{ fontSize: 16 }}>{Math.round((t.tGagne / t.tirs) * 100)}<span className="unit">%</span></span>
+              <div className="si-l">{t('results.ui.offEff')}</div>
+              <span className="si-v" style={{ fontSize: 16 }}>{Math.round((tm.tGagne / tm.tirs) * 100)}<span className="unit">%</span></span>
             </div>
           )}
         </div>
@@ -339,13 +345,13 @@ function MatchDetail({ match, onClose }) {
 
       {!isScorerOnly && (
         <div className="card" style={{ marginBottom: 12 }}>
-          <div className="ctitle">Timeline des points</div>
-          <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((t, i) => ({ ...t, name: teams[i]?.name || t.name }))} />
+          <div className="ctitle">{t('history.timelineTitle')}</div>
+          <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((tm, i) => ({ ...tm, name: teams[i]?.name || tm.name }))} />
           <div className="tg-legend" style={{ marginTop: 8 }}>
-            {teams.map((t, i) => (
+            {teams.map((tm, i) => (
               <div className="tg-leg-item" key={i}>
                 <span className="tg-leg-dot" style={settings?.teamColors?.[i] ? teamSwatchStyle(settings.teamColors[i]) : { background: 'var(--dim)' }} />
-                <span>{t.name}</span>
+                <span>{tm.name}</span>
               </div>
             ))}
           </div>
@@ -354,7 +360,7 @@ function MatchDetail({ match, onClose }) {
 
       {!isScorerOnly && shotEvents.length > 0 && (
         <div className="card">
-          <div className="ctitle">Événements ({shotEvents.length})</div>
+          <div className="ctitle">{t('history.eventsTitle', { count: shotEvents.length })}</div>
           <div className="tl-list">
             {shotEvents.map((ev, i) => {
               const color = settings?.teamColors?.[ev.teamIdx]
@@ -365,7 +371,7 @@ function MatchDetail({ match, onClose }) {
                     <div className="tl-label">
                       {color && <span className="team-dot" style={teamSwatchStyle(color)} />}
                       <span style={{ fontWeight: 700, marginRight: 4 }}>{ev.teamName}</span>
-                      {SHOT_LABELS[ev.id] || ev.id}
+                      {t(`shotLabels.${ev.id}`, ev.id)}
                       <span className={`tl-delta ${ev.d > 0 ? 'pos' : 'neg'}`}>{ev.d > 0 ? '+1' : '-1'}</span>
                     </div>
                     {Array.isArray(ev.scores) && <div className="tl-score">{ev.scores.join(' – ')}</div>}
@@ -382,23 +388,24 @@ function MatchDetail({ match, onClose }) {
 
 // ── Détail match joueurs ──────────────────────────────────────────────────────
 function PlayerMatchDetail({ match, onClose }) {
+  const { t } = useTranslation()
   const { players = [], teams = [], settings, numTeams: nt = 2, playedAt, durationSec } = match
   const n      = nt
   const score0 = playerTeamScore(players, 0, n)
   const score1 = n === 2 ? playerTeamScore(players, 1, n) : null
 
   const teamGroups = [
-    { name: teams[0]?.name || 'Équipe 1', color: settings?.teamColors?.[0], grp: players.filter(p => p.teamIdx === 0) },
-    ...(n === 2 ? [{ name: teams[1]?.name || 'Équipe 2', color: settings?.teamColors?.[1], grp: players.filter(p => p.teamIdx === 1) }] : []),
+    { name: teams[0]?.name || t('playerResults.defaultTeam1'), color: settings?.teamColors?.[0], grp: players.filter(p => p.teamIdx === 0) },
+    ...(n === 2 ? [{ name: teams[1]?.name || t('playerResults.defaultTeam2'), color: settings?.teamColors?.[1], grp: players.filter(p => p.teamIdx === 1) }] : []),
   ]
 
   return (
     <div className="hist-detail">
       <div className="hist-detail-header">
-        <button className="btn-ghost hist-back" onClick={onClose}>← Retour</button>
+        <button className="btn-ghost hist-back" onClick={onClose}>{t('common.back')}</button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div className="hist-detail-date">{fmtDateTime(playedAt)}</div>
-          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>PDF ↓</button>
+          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>{t('history.pdfBtn')}</button>
         </div>
       </div>
 
@@ -427,10 +434,10 @@ function PlayerMatchDetail({ match, onClose }) {
       </div>
 
       <div className="card" style={{ marginBottom: 12 }}>
-        <div className="ctitle">Résumé</div>
-        <div className="si"><div className="si-l">Format</div><span className="si-v" style={{ fontSize: 14 }}>{settings?.halfCount}×{settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">Durée réelle</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(durationSec)}</span></div>
-        <div className="si"><div className="si-l">Joueurs</div><span className="si-v" style={{ fontSize: 14 }}>{players.length}</span></div>
+        <div className="ctitle">{t('history.summaryTitle')}</div>
+        <div className="si"><div className="si-l">{t('results.ui.format')}</div><span className="si-v" style={{ fontSize: 14 }}>{settings?.halfCount}×{settings?.halfDurationMin} min</span></div>
+        <div className="si"><div className="si-l">{t('history.actualDuration')}</div><span className="si-v" style={{ fontSize: 14 }}>{fmtClock(durationSec)}</span></div>
+        <div className="si"><div className="si-l">{t('history.playersLabel')}</div><span className="si-v" style={{ fontSize: 14 }}>{players.length}</span></div>
       </div>
 
       {teamGroups.map(({ name, color, grp }) => (
@@ -440,16 +447,16 @@ function PlayerMatchDetail({ match, onClose }) {
             {name}
           </div>
           {grp.length === 0
-            ? <div style={{ color: 'var(--dim)', fontSize: 13 }}>Aucun joueur.</div>
+            ? <div style={{ color: 'var(--dim)', fontSize: 13 }}>{t('history.noPlayersShort')}</div>
             : (
               <div className="hist-player-table">
                 <div className="hist-player-hd">
-                  <span>Joueur</span>
-                  <span>Pts</span>
-                  <span>Tirs</span>
-                  <span>Eff.</span>
-                  <span>Déf.</span>
-                  <span>Fautes</span>
+                  <span>{t('history.playerTableCols.player')}</span>
+                  <span>{t('history.playerTableCols.pts')}</span>
+                  <span>{t('history.playerTableCols.shots')}</span>
+                  <span>{t('history.playerTableCols.eff')}</span>
+                  <span>{t('history.playerTableCols.def')}</span>
+                  <span>{t('history.playerTableCols.fouls')}</span>
                 </div>
                 {grp.map(p => {
                   const d = playerDerivedStats(p)
@@ -475,6 +482,7 @@ function PlayerMatchDetail({ match, onClose }) {
 
 // ── Liste historique ──────────────────────────────────────────────────────────
 export default function History({ history, onBack, onClear, initialMatch }) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState(initialMatch || null)
 
   if (selected) {
@@ -486,13 +494,13 @@ export default function History({ history, onBack, onClear, initialMatch }) {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <h1>Historique</h1>
-        <button className="btn-ghost" style={{ padding: '8px 14px', fontSize: 14 }} onClick={onBack}>← Retour</button>
+        <h1>{t('history.title')}</h1>
+        <button className="btn-ghost" style={{ padding: '8px 14px', fontSize: 14 }} onClick={onBack}>{t('common.back')}</button>
       </div>
 
       {history.length === 0 ? (
         <div className="card" style={{ color: 'var(--dim)', fontSize: 14, textAlign: 'center', padding: 32 }}>
-          Aucun match enregistré pour le moment.
+          {t('history.noMatches')}
         </div>
       ) : (
         <>
@@ -511,31 +519,31 @@ export default function History({ history, onBack, onClear, initialMatch }) {
                         role="button"
                         onClick={e => { e.stopPropagation(); downloadMatchPdf(m) }}
                       >
-                        PDF ↓
+                        {t('history.pdfBtn')}
                       </span>
                     </div>
                   </div>
                   <div className="mr-names">
-                    {(m.teams || []).map((t, i) => (
+                    {(m.teams || []).map((tm, i) => (
                       <div className="mr-name" key={i}>
                         {m.settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(m.settings.teamColors[i])} />}
-                        {t.name}
+                        {tm.name}
                       </div>
                     ))}
                   </div>
                   <div className="mr-score">
-                    {(m.teams || []).map((t, i) => (
+                    {(m.teams || []).map((tm, i) => (
                       <span key={i} style={m.settings?.teamColors?.[i] ? teamTextStyle(m.settings.teamColors[i]) : { color: 'var(--txt)' }}>
                         {i > 0 && <span className="mr-score-sep">–</span>}
-                        {t.score}
+                        {tm.score}
                       </span>
                     ))}
                   </div>
                   {m.mode !== 'scorer' && (
                     <div className="mr-foot">
                       {m.mode === 'player'
-                        ? `${m.players?.length || 0} joueurs · stats joueurs`
-                        : `${(m.teams || []).map(t => `${t.tirs ?? 0} tirs`).join(' · ')} · ${m.shotEvents ?? 0} evt`
+                        ? t('history.footerPlayer', { count: m.players?.length || 0 })
+                        : `${(m.teams || []).map(tm => t('history.footerStatsShots', { count: tm.tirs ?? 0 })).join(' · ')} · ${t('history.footerStatsEvents', { count: m.shotEvents ?? 0 })}`
                       }
                     </div>
                   )}
@@ -547,9 +555,9 @@ export default function History({ history, onBack, onClear, initialMatch }) {
           <button
             className="btn-ghost"
             style={{ alignSelf: 'center', marginTop: 8, color: 'var(--err)' }}
-            onClick={() => { if (window.confirm('Effacer tout l\'historique ?')) onClear() }}
+            onClick={() => { if (window.confirm(t('history.clearConfirm'))) onClear() }}
           >
-            Effacer l'historique
+            {t('history.clearButton')}
           </button>
         </>
       )}

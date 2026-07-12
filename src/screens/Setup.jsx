@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { mkPlayer } from '../lib/playerStats'
 import { fmtDateTime } from '../lib/format'
 import { teamSwatchStyle, teamTextStyle } from '../lib/teamColor'
+import LanguageToggle from '../i18n/LanguageToggle'
 
 const COMPOS_KEY = 'tchouk_compos'
 function loadComposFromStorage() {
@@ -15,6 +17,7 @@ function saveComposToStorage(list) {
 
 // ── Gestionnaire de compositions ─────────────────────────────────────────────
 function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLabel }) {
+  const { t } = useTranslation()
   const [open, setOpen]         = useState(false)
   const [saveName, setSaveName] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -52,12 +55,12 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
   return (
     <div className="ps-compo-mgr">
       <button className="btn-mini ps-compo-toggle" onClick={() => setOpen(v => !v)}>
-        {open ? '▲ Compos' : '▼ Compos'}
+        {open ? t('setup.compos.toggleOpen') : t('setup.compos.toggleClosed')}
       </button>
       {open && (
         <div className="ps-compo-panel">
           {compos.length === 0
-            ? <div className="ps-compo-empty">Aucune compo sauvegardée</div>
+            ? <div className="ps-compo-empty">{t('setup.compos.empty')}</div>
             : compos.map(c => (
                 <div key={c.id}>
                   {editingId === c.id && draft ? (
@@ -65,7 +68,7 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                       <div className="ps-compo-edit-row">
                         <input
                           className="ps-compo-edit-input"
-                          placeholder="Nom de la compo"
+                          placeholder={t('setup.compos.namePlaceholder')}
                           value={draft.name}
                           onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
                         />
@@ -73,7 +76,7 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                       <div className="ps-compo-edit-row">
                         <input
                           className="ps-compo-edit-input"
-                          placeholder="Nom d'équipe"
+                          placeholder={t('setup.compos.teamNamePlaceholder')}
                           value={draft.teamName}
                           onChange={e => setDraft(d => ({ ...d, teamName: e.target.value }))}
                         />
@@ -89,7 +92,7 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                           <div className="ps-player-row" key={i}>
                             <input
                               type="text"
-                              placeholder={`Joueur ${i + 1}`}
+                              placeholder={t('setup.compos.playerPlaceholder', { n: i + 1 })}
                               value={p}
                               onChange={e => draftSetPlayer(i, e.target.value)}
                             />
@@ -100,11 +103,11 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                           </div>
                         ))}
                         <button className="btn-mini ps-add-btn"
-                          onClick={() => setDraft(d => ({ ...d, players: [...d.players, ''] }))}>+ Joueur</button>
+                          onClick={() => setDraft(d => ({ ...d, players: [...d.players, ''] }))}>{t('setup.compos.addPlayer')}</button>
                       </div>
                       <div className="ps-compo-edit-actions">
-                        <button className="btn-mini ps-compo-ok" onClick={confirmEdit}>Valider ✓</button>
-                        <button className="btn-mini" onClick={cancelEdit}>Annuler</button>
+                        <button className="btn-mini ps-compo-ok" onClick={confirmEdit}>{t('setup.compos.validate')}</button>
+                        <button className="btn-mini" onClick={cancelEdit}>{t('setup.compos.cancel')}</button>
                       </div>
                     </div>
                   ) : (
@@ -112,9 +115,9 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
                       <span className="ps-compo-dot" style={teamSwatchStyle(c.color)} />
                       <span className="ps-compo-lbl">
                         <span className="ps-compo-name">{c.name}</span>
-                        <span className="ps-compo-meta">{c.teamName} · {c.players.length}j</span>
+                        <span className="ps-compo-meta">{c.teamName} · {t('setup.compos.playersCount', { count: c.players.length })}</span>
                       </span>
-                      <button className="btn-mini" onClick={() => { onLoad(c); setOpen(false) }}>Charger</button>
+                      <button className="btn-mini" onClick={() => { onLoad(c); setOpen(false) }}>{t('setup.compos.load')}</button>
                       <button className="btn-mini ps-compo-edit-btn" onClick={() => startEdit(c)}>✏</button>
                       <button className="btn-mini ps-compo-del" onClick={() => onDelete(c.id)}>×</button>
                     </div>
@@ -125,13 +128,13 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
           <div className="ps-compo-save">
             <input
               type="text"
-              placeholder={currentTeamLabel ? `Sauvegarder "${currentTeamLabel}"…` : 'Nom de la compo…'}
+              placeholder={currentTeamLabel ? t('setup.compos.saveNamedPlaceholder', { name: currentTeamLabel }) : t('setup.compos.savePlaceholder')}
               value={saveName}
               onChange={e => setSaveName(e.target.value)}
               onFocus={() => { if (!saveName && currentTeamLabel) setSaveName(currentTeamLabel) }}
               onKeyDown={e => e.key === 'Enter' && handleSave()}
             />
-            <button className="btn-mini" onClick={handleSave}>Sauvegarder</button>
+            <button className="btn-mini" onClick={handleSave}>{t('setup.compos.save')}</button>
           </div>
         </div>
       )}
@@ -140,6 +143,7 @@ function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLa
 }
 
 function LogoUpload({ label, logo, onChange, color }) {
+  const { t } = useTranslation()
   const ref = useRef(null)
   return (
     <div className="logo-upload" onClick={() => ref.current.click()} style={{ borderColor: color + '55' }}>
@@ -151,7 +155,7 @@ function LogoUpload({ label, logo, onChange, color }) {
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="m21 15-5-5L5 21" />
             </svg>
-            <span>Logo</span>
+            <span>{t('setup.logo')}</span>
           </div>
       }
       <input
@@ -173,6 +177,7 @@ function LogoUpload({ label, logo, onChange, color }) {
 
 // ── Liste de noms de joueurs (colonne) ────────────────────────────────────────
 function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveCompo, onDeleteCompo, onLoadCompo, onUpdateCompo }) {
+  const { t } = useTranslation()
   function updateName(i, val) {
     const next = [...names]
     next[i] = val
@@ -199,7 +204,7 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
         <div className="ps-player-row" key={i}>
           <input
             type="text"
-            placeholder={`Joueur ${i + 1}`}
+            placeholder={t('setup.compos.playerPlaceholder', { n: i + 1 })}
             value={name}
             onChange={e => updateName(i, e.target.value)}
           />
@@ -208,13 +213,14 @@ function PlayerNamesCol({ teamLabel, teamColor, names, onChange, compos, onSaveC
           )}
         </div>
       ))}
-      <button className="btn-mini ps-add-btn" onClick={addPlayer}>+ Joueur</button>
+      <button className="btn-mini ps-add-btn" onClick={addPlayer}>{t('setup.compos.addPlayer')}</button>
     </div>
   )
 }
 
 // ── Écran de configuration ────────────────────────────────────────────────────
 export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament }) {
+  const { t } = useTranslation()
   const [step, setStep]   = useState('home') // 'home' | 'stats-choice' | 'form'
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
@@ -262,8 +268,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
 
   useEffect(() => { if (numTeams !== 2) setNumTeams(2) }, [numTeams, setNumTeams])
 
-  const n1Label = name1.trim() || 'Équipe 1'
-  const n2Label = name2.trim() || 'Équipe 2'
+  const n1Label = name1.trim() || t('setup.defaultTeam1')
+  const n2Label = name2.trim() || t('setup.defaultTeam2')
 
   function handleStart() {
     const settings = {
@@ -283,8 +289,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       if (playerNumTeams === 2) allPlayers.push(...buildPlayers(players2, 1))
 
       // Joueur par défaut si colonne vide
-      if (!allPlayers.some(p => p.teamIdx === 0)) allPlayers.unshift(mkPlayer('Joueur 1', 0))
-      if (playerNumTeams === 2 && !allPlayers.some(p => p.teamIdx === 1)) allPlayers.push(mkPlayer('Joueur 1', 1))
+      if (!allPlayers.some(p => p.teamIdx === 0)) allPlayers.unshift(mkPlayer(t('setup.defaultPlayerName'), 0))
+      if (playerNumTeams === 2 && !allPlayers.some(p => p.teamIdx === 1)) allPlayers.push(mkPlayer(t('setup.defaultPlayerName'), 1))
 
       onStart({
         names:          [n1Label, n2Label],
@@ -323,7 +329,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {step === 'home' && (
         <>
           <div className="setup-head">
-            <h1>Tchoukball Assistant</h1>
+            <h1>{t('setup.appTitle')}</h1>
+            <LanguageToggle className="btn-mini" style={{ marginLeft: 'auto' }} />
           </div>
 
           <section className="setup-section">
@@ -332,15 +339,15 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                 </svg>
-                <span className="home-card-label">Stats</span>
-                <span className="home-card-desc">Feuille de stats ou suivi joueur par joueur</span>
+                <span className="home-card-label">{t('setup.home.statsLabel')}</span>
+                <span className="home-card-desc">{t('setup.home.statsDesc')}</span>
               </button>
               <button className="home-card" onClick={chooseScorer}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
-                <span className="home-card-label">Scoreur</span>
-                <span className="home-card-desc">Grand tableau de score plein écran</span>
+                <span className="home-card-label">{t('setup.home.scorerLabel')}</span>
+                <span className="home-card-desc">{t('setup.home.scorerDesc')}</span>
               </button>
               <button className="home-card" onClick={onViewTournament}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -351,8 +358,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                   <path d="M6 6H4a2 2 0 0 0 2 2" />
                   <path d="M18 6h2a2 2 0 0 1-2 2" />
                 </svg>
-                <span className="home-card-label">Tournois</span>
-                <span className="home-card-desc">Créer et suivre un tournoi</span>
+                <span className="home-card-label">{t('setup.home.tournamentLabel')}</span>
+                <span className="home-card-desc">{t('setup.home.tournamentDesc')}</span>
               </button>
             </div>
           </section>
@@ -363,19 +370,19 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {step === 'stats-choice' && (
         <>
           <div className="setup-head">
-            <button className="btn-mini" onClick={backToHome}>← Retour</button>
-            <h1>Stats</h1>
+            <button className="btn-mini" onClick={backToHome}>{t('common.back')}</button>
+            <h1>{t('setup.statsChoice.title')}</h1>
           </div>
 
           <section className="setup-section">
-            <div className="section-title">Quel type de suivi ?</div>
+            <div className="section-title">{t('setup.statsChoice.question')}</div>
             <div className="home-choices home-choices-2">
               <button className="home-card" onClick={chooseStatsSheet}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                 </svg>
-                <span className="home-card-label">Feuille de stats</span>
-                <span className="home-card-desc">Stats d'équipe complètes pendant le match</span>
+                <span className="home-card-label">{t('setup.statsChoice.sheetLabel')}</span>
+                <span className="home-card-desc">{t('setup.statsChoice.sheetDesc')}</span>
               </button>
               <button className="home-card" onClick={chooseStatsPlayers}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -384,8 +391,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
                 </svg>
-                <span className="home-card-label">Stats joueurs</span>
-                <span className="home-card-desc">Suivi individuel, joueur par joueur</span>
+                <span className="home-card-label">{t('setup.statsChoice.playersLabel')}</span>
+                <span className="home-card-desc">{t('setup.statsChoice.playersDesc')}</span>
               </button>
             </div>
           </section>
@@ -394,43 +401,43 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
 
       {step === 'form' && (
       <div className="setup-head">
-        <button className="btn-mini" onClick={backFromForm}>← Retour</button>
-        <h1>{mode === 'scorer' ? 'Scoreur' : mode === 'player' ? 'Stats joueurs' : 'Feuille de stats'}</h1>
+        <button className="btn-mini" onClick={backFromForm}>{t('common.back')}</button>
+        <h1>{mode === 'scorer' ? t('setup.formTitle.scorer') : mode === 'player' ? t('setup.formTitle.player') : t('setup.formTitle.stats')}</h1>
       </div>
       )}
 
       {/* ── Équipes (stats & scorer) ── */}
       {step === 'form' && mode !== 'player' && (
         <section className="setup-section">
-          <div className="section-title">Configuration des équipes</div>
-          <div className="flabel" style={{ marginBottom: 10 }}>Format fixe : 2 équipes</div>
+          <div className="section-title">{t('setup.teamsSection')}</div>
+          <div className="flabel" style={{ marginBottom: 10 }}>{t('setup.fixedFormat')}</div>
           <div className="team-rows">
             {/* Équipe 1 */}
             <div className="team-row">
-              {mode === 'scorer' && <LogoUpload label="Équipe 1" logo={logo1} onChange={setLogo1} color={color1} />}
+              {mode === 'scorer' && <LogoUpload label={t('setup.team1')} logo={logo1} onChange={setLogo1} color={color1} />}
               <div className="team-row-fields">
                 <div className="field">
-                  <div className="flabel">Équipe 1</div>
-                  <input type="text" placeholder="Nom" value={name1}
+                  <div className="flabel">{t('setup.team1')}</div>
+                  <input type="text" placeholder={t('setup.namePlaceholder')} value={name1}
                          onChange={e => setName1(e.target.value)} onKeyDown={handleKey} autoFocus />
                 </div>
                 <div className="field" style={{ maxWidth: 80 }}>
-                  <div className="flabel">Couleur</div>
+                  <div className="flabel">{t('setup.color')}</div>
                   <input className="color-in" type="color" value={color1} onChange={e => setColor1(e.target.value)} />
                 </div>
               </div>
             </div>
             {/* Équipe 2 */}
             <div className="team-row">
-              {mode === 'scorer' && <LogoUpload label="Équipe 2" logo={logo2} onChange={setLogo2} color={color2} />}
+              {mode === 'scorer' && <LogoUpload label={t('setup.team2')} logo={logo2} onChange={setLogo2} color={color2} />}
               <div className="team-row-fields">
                 <div className="field">
-                  <div className="flabel">Équipe 2</div>
-                  <input type="text" placeholder="Nom" value={name2}
+                  <div className="flabel">{t('setup.team2')}</div>
+                  <input type="text" placeholder={t('setup.namePlaceholder')} value={name2}
                          onChange={e => setName2(e.target.value)} onKeyDown={handleKey} />
                 </div>
                 <div className="field" style={{ maxWidth: 80 }}>
-                  <div className="flabel">Couleur</div>
+                  <div className="flabel">{t('setup.color')}</div>
                   <input className="color-in" type="color" value={color2} onChange={e => setColor2(e.target.value)} />
                 </div>
               </div>
@@ -442,24 +449,24 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {/* ── Mode joueurs : noms des équipes + joueurs ── */}
       {step === 'form' && mode === 'player' && (
         <section className="setup-section">
-          <div className="section-title">Équipes &amp; joueurs</div>
+          <div className="section-title">{t('setup.teamsPlayersSection')}</div>
 
           {/* Nombre d'équipes */}
           <div className="seg" style={{ maxWidth: 280 }}>
             <button className={playerNumTeams === 1 ? 'on' : ''} onClick={() => setPlayerNumTeams(1)}>
-              1 équipe
+              {t('setup.oneTeam')}
             </button>
             <button className={playerNumTeams === 2 ? 'on' : ''} onClick={() => setPlayerNumTeams(2)}>
-              2 équipes
+              {t('setup.twoTeams')}
             </button>
           </div>
 
           {/* Noms + couleurs des équipes */}
           <div className={`ps-teams-row${playerNumTeams === 1 ? ' ps-single' : ''}`}>
             <div className="ps-team-name-field">
-              <div className="flabel">Équipe 1</div>
+              <div className="flabel">{t('setup.team1')}</div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="text" placeholder="Nom équipe 1" value={name1}
+                <input type="text" placeholder={t('setup.team1NamePlaceholder')} value={name1}
                        onChange={e => setName1(e.target.value)} autoFocus />
                 <input className="color-in" type="color" value={color1}
                        onChange={e => setColor1(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
@@ -467,9 +474,9 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             </div>
             {playerNumTeams === 2 && (
               <div className="ps-team-name-field">
-                <div className="flabel">Équipe 2</div>
+                <div className="flabel">{t('setup.team2')}</div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input type="text" placeholder="Nom équipe 2" value={name2}
+                  <input type="text" placeholder={t('setup.team2NamePlaceholder')} value={name2}
                          onChange={e => setName2(e.target.value)} />
                   <input className="color-in" type="color" value={color2}
                          onChange={e => setColor2(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
@@ -512,15 +519,15 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
         <>
           {/* ── Mi-temps ── */}
           <section className="setup-section">
-            <div className="section-title">Configuration des mi-temps</div>
+            <div className="section-title">{t('setup.halvesSection')}</div>
             <div className="opts-grid">
               <div className="field">
-                <div className="flabel">Durée d'une mi-temps (min)</div>
+                <div className="flabel">{t('setup.halfDuration')}</div>
                 <input type="number" min={1} max={60} value={halfDurationMin}
                        onChange={e => setHalfDurationMin(e.target.value)} />
               </div>
               <div className="field">
-                <div className="flabel">Nombre de mi-temps</div>
+                <div className="flabel">{t('setup.halfCount')}</div>
                 <select className="sel" value={halfCount} onChange={e => setHalfCount(e.target.value)}>
                   {[1, 2, 3, 4].map(v => <option key={v} value={v}>{v}</option>)}
                 </select>
@@ -530,7 +537,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
 
           <div className="setup-actions">
             <button className="btn-acc setup-start-btn" onClick={handleStart}>
-              {mode === 'scorer' ? 'Lancer le scoreur' : mode === 'player' ? 'Lancer le match' : 'Commencer'}
+              {mode === 'scorer' ? t('setup.startScorer') : mode === 'player' ? t('setup.startPlayerMatch') : t('setup.start')}
             </button>
           </div>
         </>
@@ -540,8 +547,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {step === 'home' && recentHistory.length > 0 && (
         <section className="setup-section">
           <div className="history-head">
-            <div className="section-title">Matchs récents</div>
-            <button className="btn-mini" onClick={onViewHistory}>Voir tout →</button>
+            <div className="section-title">{t('setup.recentMatches')}</div>
+            <button className="btn-mini" onClick={onViewHistory}>{t('setup.viewAll')}</button>
           </div>
           <div className="mr-list">
             {recentHistory.map(m => {

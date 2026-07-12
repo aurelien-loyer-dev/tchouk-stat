@@ -1,21 +1,21 @@
 // Stats disponibles par joueur
 export const PLAYER_STATS = [
-  { id: 'pointsMarques',      label: 'Points marqués',       sub: null, scoreImpact: 'self', color: 'green', group: 'off' },
-  { id: 'tirsNonTransformes', label: 'Tirs non transformés', sub: null,                             group: 'off' },
-  { id: 'pointsDonnes',       label: 'Points donnés',        sub: null, scoreImpact: 'opp',  color: 'red',   group: 'off' },
-  { id: 'fautesTir',          label: 'Fautes de tir',        sub: null,             color: 'amber', group: 'off' },
-  { id: 'defenseSolo',        label: 'Défense solo',         sub: null,             color: 'green', group: 'def' },
-  { id: 'participationDef',   label: 'Participation déf.',   sub: null,                             group: 'def' },
-  { id: 'defenseRatee',       label: 'Défense ratée',        sub: null,             color: 'red',   group: 'def' },
-  { id: 'passesRatees',       label: 'Passe ratée',          sub: null,             color: 'amber',   group: 'tech' },
-  { id: 'fautesTech',         label: 'Faute technique',      sub: null,             color: 'red',   group: 'tech' },
-  { id: 'sanctions',          label: 'Sanctions',            sub: null,             color: 'red',   group: 'tech' },
+  { id: 'pointsMarques',      labelKey: 'playerStats.pointsMarques',      scoreImpact: 'self', color: 'green', group: 'off' },
+  { id: 'tirsNonTransformes', labelKey: 'playerStats.tirsNonTransformes',                             group: 'off' },
+  { id: 'pointsDonnes',       labelKey: 'playerStats.pointsDonnes',       scoreImpact: 'opp',  color: 'red',   group: 'off' },
+  { id: 'fautesTir',          labelKey: 'playerStats.fautesTir',             color: 'amber', group: 'off' },
+  { id: 'defenseSolo',        labelKey: 'playerStats.defenseSolo',           color: 'green', group: 'def' },
+  { id: 'participationDef',   labelKey: 'playerStats.participationDef',                             group: 'def' },
+  { id: 'defenseRatee',       labelKey: 'playerStats.defenseRatee',          color: 'red',   group: 'def' },
+  { id: 'passesRatees',       labelKey: 'playerStats.passesRatees',          color: 'amber',   group: 'tech' },
+  { id: 'fautesTech',         labelKey: 'playerStats.fautesTech',            color: 'red',   group: 'tech' },
+  { id: 'sanctions',          labelKey: 'playerStats.sanctions',             color: 'red',   group: 'tech' },
 ]
 
 export const STAT_GROUPS = [
-  { id: 'off',  label: 'Offensives' },
-  { id: 'def',  label: 'Défensives' },
-  { id: 'tech', label: 'Techniques' },
+  { id: 'off',  labelKey: 'playerStats.groups.off' },
+  { id: 'def',  labelKey: 'playerStats.groups.def' },
+  { id: 'tech', labelKey: 'playerStats.groups.tech' },
 ]
 
 export function mkPlayer(name, teamIdx) {
