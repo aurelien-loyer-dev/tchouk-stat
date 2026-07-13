@@ -1,0 +1,83 @@
+.mr-card {
+  border: 1px solid var(--bdr);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--s1);
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+button.mr-card {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+button.mr-card:hover {
+  border-color: var(--acc);
+  background: var(--s2);
+}
+
+.mr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* Noms d'équipe groupés — jamais accolés au score, qui vit dans .mr-score
+   juste en dessous, comme le score final de l'écran de résultats (.rf). */
+.mr-names {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mr-name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mr-score {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.mr-score-sep {
+  color: var(--s3);
+  font-weight: 200;
+  margin: 0 10px;
+}
+
+.mr-foot {
+  font-size: 11px;
+  color: var(--dim);
+  padding-top: 9px;
+  border-top: 1px solid var(--bdr);
+}
+
+/* Variante horizontale de .mr-name pour les en-têtes de détail (au-dessus
+   d'un gros score .rf) : noms côte à côte, mais jamais accolés au score. */
+.mr-detail-names {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}

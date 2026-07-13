@@ -1,61 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { score } from '../lib/stats'
-import { fmtClock } from '../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
-
-function AnimScore({ value, color }) {
-  const ref  = useRef(null)
-  const prev = useRef(value)
-  useEffect(() => {
-    if (prev.current !== value && ref.current) {
-      ref.current.classList.remove('sc-bump')
-      void ref.current.offsetWidth
-      ref.current.classList.add('sc-bump')
-    }
-    prev.current = value
-  }, [value])
-  return <div ref={ref} className="sc-score" style={teamTextStyle(color)}>{value}</div>
-}
+import { score } from '../../lib/stats'
+import { fmtClock } from '../../lib/format'
+import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
+import { useMatchClock } from '../../hooks/useMatchClock'
+import AnimScore from './components/AnimScore'
+import './scorer.css'
 
 export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, settings, logos }) {
   const { t } = useTranslation()
   const two = numTeams === 2
-  const [elapsedSec, setElapsedSec] = useState(0)
-  const [running, setRunning] = useState(false)
   const [halfSnapshots, setHalfSnapshots] = useState([[0, 0]])
   const [matchEnded, setMatchEnded] = useState(false)
 
-  const halfDurationMin = Math.max(1, Number(settings?.halfDurationMin) || 12)
-  const halfCount       = Math.max(1, Number(settings?.halfCount) || 2)
-  const totalHalfSec    = halfDurationMin * 60
-  const totalMatchSec   = totalHalfSec * halfCount
+  const {
+    elapsedSec, setElapsedSec, running, setRunning,
+    halfCount, totalHalfSec, currentHalf, elapsedInHalf, remainingHalfSec,
+    handleSkipHalf, handleResetCurrentHalf,
+  } = useMatchClock(settings, { stopAtHalfEnd: true })
 
   const c1 = settings?.teamColors?.[0] || '#5de8d6'
   const c2 = settings?.teamColors?.[1] || '#ff7272'
-
-  // Stop at end of each half, not just end of match
-  useEffect(() => {
-    if (!running) return
-    const id = window.setInterval(() => {
-      setElapsedSec(prev => {
-        const next = prev + 1
-        const currentHalfEnd = (Math.floor(prev / totalHalfSec) + 1) * totalHalfSec
-        const stop = Math.min(currentHalfEnd, totalMatchSec)
-        if (next >= stop) { setRunning(false); return stop }
-        return next
-      })
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [running, totalMatchSec, totalHalfSec])
-
-  const currentHalf = useMemo(() => {
-    if (elapsedSec >= totalMatchSec) return halfCount
-    return Math.min(halfCount, Math.floor(elapsedSec / totalHalfSec) + 1)
-  }, [elapsedSec, totalHalfSec, totalMatchSec, halfCount])
-
-  const elapsedInHalf    = elapsedSec >= totalMatchSec ? totalHalfSec : elapsedSec % totalHalfSec
-  const remainingHalfSec = Math.max(0, totalHalfSec - elapsedInHalf)
 
   const s0 = score(teams, numTeams, 0)
   const s1 = two ? score(teams, numTeams, 1) : null
@@ -100,17 +65,6 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
     setRunning(false)
     setMatchEnded(true)
     onFinish?.()
-  }
-
-  function handleResetCurrentHalf() {
-    setRunning(false)
-    setElapsedSec((currentHalf - 1) * totalHalfSec)
-  }
-
-  function handleSkipHalf() {
-    if (currentHalf >= halfCount) return
-    setRunning(false)
-    setElapsedSec(currentHalf * totalHalfSec)
   }
 
   function handleResetScorer() {

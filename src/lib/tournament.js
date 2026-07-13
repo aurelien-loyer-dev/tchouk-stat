@@ -303,3 +303,105 @@ export function addSwissRound(tournament) {
 export function isRoundComplete(round) {
   return round.matches.length > 0 && round.matches.every(m => m.score1 !== null && m.score2 !== null)
 }
+
+// ── Lecture de l'état d'un tournoi (matchs à plat, classement final, fin) ────
+export function getTournamentMatches(tournament) {
+  if (tournament.format === 'groups') return tournament.groups?.flatMap(g => g.matches) || []
+  if (tournament.format === 'swiss') return tournament.rounds?.flatMap(r => r.matches) || []
+  return tournament.matches || []
+}
+
+export function isAllPlayed(matches) {
+  return matches.length > 0 && matches.every(m => m.score1 !== null && m.score2 !== null)
+}
+
+export function buildFinalRanking(tournament) {
+  const allGroupMatches = getTournamentMatches(tournament)
+  const groupStandings  = calcStandings(tournament.teams, allGroupMatches)
+  const groupStatsOf    = t => groupStandings.find(s => s.team === t) ?? { pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
+
+  // ── Classement complet (placement rounds) ──────────────────────────────────
+  if (tournament.placementRounds?.length) {
+    const n = tournament.teams.length
+    const result = new Array(n).fill(null)
+
+    tournament.placementRounds.forEach(({ forPos, match }) => {
+      const [wp, lp] = forPos
+      if (match.score1 !== null && match.score2 !== null) {
+        const winner = match.score1 >= match.score2 ? match.team1 : match.team2
+        const loser  = match.score1 >= match.score2 ? match.team2 : match.team1
+        result[wp - 1] = { ...groupStatsOf(winner), team: winner }
+        result[lp - 1] = { ...groupStatsOf(loser),  team: loser  }
+      } else {
+        // Match pas encore joué : remplit avec l'ordre de poule
+        if (!result[wp - 1]) result[wp - 1] = { ...groupStatsOf(match.team1), team: match.team1 }
+        if (!result[lp - 1]) result[lp - 1] = { ...groupStatsOf(match.team2), team: match.team2 }
+      }
+    })
+
+    // Remplit les trous restants (byes, équipes non appariées)
+    const placed = new Set(result.filter(Boolean).map(r => r.team))
+    const unplaced = groupStandings.filter(s => !placed.has(s.team))
+    let ui = 0
+    for (let i = 0; i < n; i++) {
+      if (!result[i] && unplaced[ui]) result[i] = unplaced[ui++]
+    }
+    return result.filter(Boolean)
+  }
+
+  // ── Knockout (phase finale) ────────────────────────────────────────────────
+  const rounds = tournament.knockoutRounds
+  if (!rounds || rounds.length === 0) return groupStandings
+
+  const finalMatch = rounds[rounds.length - 1]?.matches?.[0]
+  const koComplete = finalMatch?.score1 !== null && finalMatch?.score2 !== null
+    && finalMatch.score1 !== finalMatch.score2
+  if (!koComplete) return groupStandings
+
+  const placed = new Set()
+  const ranked = []
+
+  const groupRankOf = t => groupStandings.findIndex(s => s.team === t)
+  const add = t => { if (!placed.has(t)) { ranked.push({ ...groupStatsOf(t), team: t }); placed.add(t) } }
+
+  // 1er : vainqueur de la finale
+  add(finalMatch.score1 > finalMatch.score2 ? finalMatch.team1 : finalMatch.team2)
+  // 2ème : finaliste
+  add(finalMatch.score1 < finalMatch.score2 ? finalMatch.team1 : finalMatch.team2)
+
+  // 3ème+ : perdants de chaque tour précédent (du plus récent au plus ancien)
+  for (let ri = rounds.length - 2; ri >= 0; ri--) {
+    const losers = rounds[ri].matches
+      .filter(m => m.score1 !== null && m.score2 !== null && m.score1 !== m.score2)
+      .map(m => m.score1 < m.score2 ? m.team1 : m.team2)
+      .filter(t => !placed.has(t))
+      .sort((a, b) => groupRankOf(a) - groupRankOf(b))
+    losers.forEach(add)
+  }
+
+  // Restants : équipes éliminées en phase de poules, ordre classement de poule
+  groupStandings.forEach(s => { if (!placed.has(s.team)) add(s.team) })
+
+  return ranked
+}
+
+export function getTournamentEndState(tournament) {
+  const allMatches = getTournamentMatches(tournament)
+  const knockoutDone = tournament.knockoutRounds
+    ? tournament.knockoutRounds.every(r => r.matches.every(m => m.score1 !== null && m.score2 !== null && m.score1 !== m.score2))
+    : false
+  const placementDone = tournament.placementRounds?.length > 0
+    && tournament.placementRounds.every(r => r.match.score1 !== null && r.match.score2 !== null)
+  const finished = tournament.format === 'swiss'
+    ? isRoundComplete(tournament.rounds?.[tournament.rounds.length - 1]) && tournament.rounds.length >= tournament.numSwissRounds
+    : tournament.placementRounds
+    ? isAllPlayed(allMatches) && placementDone
+    : tournament.knockoutRounds
+    ? isAllPlayed(allMatches) && knockoutDone
+    : isAllPlayed(allMatches)
+
+  const finalRanking = buildFinalRanking(tournament)
+  const winner = finalRanking[0]?.team || null
+
+  return { finished, finalRanking, winner, allMatches }
+}

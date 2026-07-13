@@ -1,0 +1,301 @@
+.pr-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 16px;
+}
+
+.pr-legend-row {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.pr-legend-row:last-child { border-bottom: none; }
+
+.pr-legend-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt);
+}
+
+.pr-legend-sub {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.pr-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.pr-no-players {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+}
+
+.pr-player-card {
+  border: 1px solid var(--bdr);
+  border-left-width: 4px;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--s1);
+}
+
+.pr-player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pr-player-name {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pr-player-team {
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 2px;
+}
+
+.pr-player-pts-big {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--txt);
+  line-height: 1;
+}
+
+.pr-stat-section-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--dim);
+  margin: 10px 0 4px;
+}
+
+.pr-stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 4px;
+}
+
+.pr-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.pr-stat-row:last-child { border-bottom: none; }
+
+.pr-stat-label {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.pr-stat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--txt);
+}
+
+.pr-stat-ratio {
+  font-size: 14px;
+  color: var(--acc);
+}
+
+.pr-ratio-lbl small,
+.pr-stat-label small {
+  display: block;
+  font-size: 10px;
+  opacity: 0.5;
+  margin-top: 1px;
+}
+
+.pr-dl-btn {
+  width: 100%;
+  text-align: center;
+  padding: 7px 10px;
+}
+
+@media (max-width: 560px) {
+  .pr-legend { grid-template-columns: 1fr; }
+}
+
+/* ── AWARDS — Distinctions du match ── */
+.awards-card {
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.award-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.award-section:last-child {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+.award-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.award-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.award-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.award-full {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.award-desc {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.award-ranking {
+  display: flex;
+  flex-direction: column;
+}
+
+.award-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.award-rank-row:last-child {
+  border-bottom: none;
+}
+
+.award-rank-num {
+  width: 18px;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--dim);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.award-rank-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--txt);
+  min-width: 0;
+}
+
+.award-eq-badge {
+  font-size: 10px;
+  color: var(--dim);
+  border: 1px solid var(--bdr);
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  font-style: italic;
+}
+
+.award-rank-hint {
+  font-size: 11px;
+  color: var(--dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .award-rank-hint { display: none; }
+}
+
+/* ── PDF stats joueur — sélecteur ── */
+.player-pdf-wrap {
+  align-self: center;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.player-pdf-btn {
+  width: 100%;
+  text-align: center;
+}
+
+.player-pdf-panel {
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.player-pdf-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--bdr);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.player-pdf-item:last-child {
+  border-bottom: none;
+}
+
+.player-pdf-item:hover {
+  background: var(--s2);
+}
+
+.player-pdf-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.player-pdf-team {
+  font-size: 12px;
+  color: var(--dim);
+  font-weight: 400;
+}

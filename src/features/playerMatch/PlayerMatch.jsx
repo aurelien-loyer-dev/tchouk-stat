@@ -1,97 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../lib/playerStats'
-import { fmtClock } from '../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
+import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../../lib/playerStats'
+import { fmtClock } from '../../lib/format'
+import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
+import { useMatchClock } from '../../hooks/useMatchClock'
+import TeamColumn from './components/TeamColumn'
+import './playerMatch.css'
 
-// ── Carte joueur ──────────────────────────────────────────────────────────────
-function PlayerCard({ player, teamColor, selectedStat, onAdj }) {
-  const { t } = useTranslation()
-  const statVal = selectedStat ? (player[selectedStat] ?? 0) : null
-
-  return (
-    <div
-      className={`pm-player-card${selectedStat ? ' pm-player-active' : ''}`}
-      style={{ borderColor: teamColor }}
-    >
-      <div className="pm-player-top">
-        <div className="pm-player-name">{player.name}</div>
-        <div className="pm-player-pts">
-          {player.pointsMarques}
-          <span className="pm-player-pts-lbl"> {t('playerMatch.ptsShort')}</span>
-        </div>
-      </div>
-      {selectedStat && (
-        <div className="pm-player-bottom">
-          <span className="pm-stat-cur">{statVal}</span>
-          <button className="pm-adj-btn pm-adj-p" onClick={() => onAdj(player, 1)}>+</button>
-          <button className="pm-adj-btn pm-adj-m" onClick={() => onAdj(player, -1)}>−</button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Colonne d'équipe avec grille de joueurs ───────────────────────────────────
-function TeamColumn({ teamName, teamColor, players, selectedStat, dimmed, onAdj }) {
-  const { t } = useTranslation()
-  return (
-    <div className={`pm-team-col${dimmed ? ' pm-col-dimmed' : ''}`}>
-      <div className="pm-team-hd"><span className="team-dot" style={teamSwatchStyle(teamColor)} />{teamName}</div>
-      {players.length === 0 && <div className="pm-no-players">{t('playerMatch.noPlayers')}</div>}
-      <div className="pm-players-grid-inner">
-        {players.map(p => (
-          <PlayerCard
-            key={p.id}
-            player={p}
-            teamColor={teamColor}
-            selectedStat={selectedStat}
-            onAdj={onAdj}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ── Écran match joueurs ───────────────────────────────────────────────────────
 export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onEnd, settings }) {
   const { t } = useTranslation()
-  const [selectedStat, setSelectedStat]   = useState(null)
-  const [focusedTeam, setFocusedTeam]     = useState(null) // null = les deux, 0 = équipe 1, 1 = équipe 2
-  const [elapsedSec, setElapsedSec]       = useState(0)
-  const [running, setRunning]             = useState(false)
+  const [selectedStat, setSelectedStat] = useState(null)
+  const [focusedTeam, setFocusedTeam]   = useState(null) // null = les deux, 0 = équipe 1, 1 = équipe 2
+
+  const {
+    elapsedSec, running, setRunning,
+    halfCount, currentHalf, remainingHalfSec, remainingMatchSec,
+    handleSkipHalf, handleResetCurrentHalf, handleResetAll,
+  } = useMatchClock(settings)
 
   const n = numTeams ?? 2
 
   const c1 = settings?.teamColors?.[0] || '#0e9f8f'
   const c2 = settings?.teamColors?.[1] || '#d14343'
-
-  const halfDurationMin = Math.max(1, Number(settings?.halfDurationMin) || 12)
-  const halfCount       = Math.max(1, Number(settings?.halfCount) || 2)
-  const totalHalfSec    = halfDurationMin * 60
-  const totalMatchSec   = totalHalfSec * halfCount
-
-  useEffect(() => {
-    if (!running) return undefined
-    const id = window.setInterval(() => {
-      setElapsedSec(prev => {
-        const next = prev + 1
-        if (next >= totalMatchSec) { setRunning(false); return totalMatchSec }
-        return next
-      })
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [running, totalMatchSec])
-
-  const currentHalf = useMemo(() => {
-    if (elapsedSec >= totalMatchSec) return halfCount
-    return Math.min(halfCount, Math.floor(elapsedSec / totalHalfSec) + 1)
-  }, [elapsedSec, totalHalfSec, totalMatchSec, halfCount])
-
-  const elapsedInHalf     = elapsedSec >= totalMatchSec ? totalHalfSec : elapsedSec % totalHalfSec
-  const remainingHalfSec  = Math.max(0, totalHalfSec - elapsedInHalf)
-  const remainingMatchSec = Math.max(0, totalMatchSec - elapsedSec)
 
   const score0      = playerTeamScore(players, 0, n)
   const score1      = n === 2 ? playerTeamScore(players, 1, n) : null
@@ -113,22 +43,6 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
   function handlePlayerAdj(player, d) {
     if (!selectedStat) return
     onPlayerAdj(player.id, selectedStat, d)
-  }
-
-  function handleSkipHalf() {
-    if (currentHalf >= halfCount) return
-    setRunning(false)
-    setElapsedSec(currentHalf * totalHalfSec)
-  }
-
-  function handleResetCurrentHalf() {
-    setRunning(false)
-    setElapsedSec((currentHalf - 1) * totalHalfSec)
-  }
-
-  function handleResetAll() {
-    setRunning(false)
-    setElapsedSec(0)
   }
 
   function handleEnd() {

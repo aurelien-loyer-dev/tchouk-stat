@@ -41,3 +41,10 @@ export function teamSwatchStyle(hex) {
   const ring = lum < 0.22 ? 'rgba(255,255,255,0.4)' : lum > 0.85 ? 'rgba(0,0,0,0.4)' : 'transparent'
   return { background: hex, boxShadow: `0 0 0 1px ${ring}` }
 }
+
+// Retire le boilerplate `settings?.teamColors?.[i] || fallback` répété dans
+// chaque écran — les couleurs de repli restent au choix de l'appelant car
+// elles diffèrent légitimement selon l'écran (stats vs scorer/setup).
+export function pickTeamColors(settings, fallback1, fallback2) {
+  return [settings?.teamColors?.[0] || fallback1, settings?.teamColors?.[1] || fallback2]
+}

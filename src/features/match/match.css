@@ -1,0 +1,97 @@
+/* ── PANELS ── */
+.grid    { display: grid; gap: 12px; }
+.grid.g2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .grid.g2 { grid-template-columns: 1fr; } }
+
+.panel { background: var(--s1); border-radius: 14px; overflow: hidden; border: 1px solid var(--bdr); border-top: 4px solid; }
+.panel.p0 { border-top-color: var(--c1); box-shadow: 0 -1px 0 0 rgba(0,0,0,0.08) inset; }
+.panel.p1 { border-top-color: var(--c2); box-shadow: 0 -1px 0 0 rgba(0,0,0,0.08) inset; }
+.panel.ps { border-top-color: var(--acc); }
+
+.ph {
+  padding: 13px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--bdr);
+}
+.panel.p0 .ph { color: var(--c1); }
+.panel.p1 .ph { color: var(--c2); }
+.panel.ps .ph { color: var(--acc); }
+
+.row            { display: flex; align-items: stretch; border-bottom: 1px solid var(--bdr); min-height: 54px; }
+.row:last-child { border-bottom: none; }
+
+.rl {
+  flex: 1; padding: 0 14px;
+  font-size: 14px; font-weight: 600; color: var(--txt);
+  display: flex; align-items: center;
+}
+.rl small { display: block; font-size: 10px; opacity: 0.4; margin-top: 1px; }
+
+.rv {
+  min-width: 60px; text-align: center;
+  font-size: 28px; font-weight: 900; color: var(--txt);
+  display: flex; align-items: center; justify-content: center;
+  border-left: 1px solid var(--bdr);
+  background: var(--s2);
+  letter-spacing: -1px;
+}
+
+.ab {
+  border: none; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: background 0.12s, opacity 0.12s;
+  border-left: 1px solid var(--bdr);
+}
+.ab.m { width: 44px; background: none; color: var(--dim); font-size: 26px; }
+.ab.m:hover { background: var(--s2); }
+.ab.p { width: 56px; background: var(--acc); color: var(--acc-txt); font-size: 24px; font-weight: 700; }
+.ab.p:hover { opacity: 0.85; }
+
+/* ── Couleurs sémantiques des lignes ── */
+.row.hl         { background: rgba(22,163,74,0.07); }
+.row.hl .rl     { color: var(--ok); font-weight: 700; }
+.row.hl .rv     { color: var(--ok); }
+.row.hl .ab.p   { background: var(--ok); }
+
+.row-red        { background: rgba(220,38,38,0.06); }
+.row-red .rl    { color: var(--err); font-weight: 700; }
+.row-red .rv    { color: var(--err); }
+.row-red .ab.p  { background: var(--err); }
+
+.row-amber        { background: rgba(217,119,6,0.06); }
+.row-amber .rl    { color: var(--warn); font-weight: 600; }
+.row-amber .rv    { color: var(--warn); }
+.row-amber .ab.p  { background: var(--warn); }
+
+.rsep { height: 1px; background: var(--s2); margin: 3px 0; }
+
+/* ── Category headers ── */
+.cat-hd {
+  padding: 9px 16px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--s2);
+  border-top: 1px solid var(--bdr);
+  border-bottom: 1px solid var(--bdr);
+}
+.cat-first { border-top: none; }
+.cat-total {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--txt);
+  letter-spacing: -0.5px;
+}
+
+/* ── Contours automatiques pour les couleurs très claires ou très sombres ──
+   --c1-halo / --c2-halo sont calculés en JS (App.jsx) selon la luminance. ── */
+.panel.p0 .ph { text-shadow: var(--c1-halo); }
+.panel.p1 .ph { text-shadow: var(--c2-halo); }

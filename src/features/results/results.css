@@ -1,0 +1,8 @@
+.tabs  { display: flex; gap: 8px; justify-content: center; }
+.tab   {
+  padding: 9px 22px; border-radius: 30px; border: 1px solid var(--s3);
+  background: var(--s1); color: var(--dim); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+}
+.tab.a0 { border-color: var(--c1); color: var(--c1); background: color-mix(in srgb, var(--c1) 10%, transparent); text-shadow: var(--c1-halo); }
+.tab.a1 { border-color: var(--c2); color: var(--c2); background: color-mix(in srgb, var(--c2) 10%, transparent); text-shadow: var(--c2-halo); }
