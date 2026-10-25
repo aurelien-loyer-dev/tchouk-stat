@@ -48,11 +48,10 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 - **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne teintée par équipe, zone interdite au centre.
 - **En-tête d'écran** (`components/PageHeader.jsx`) : lien Retour avec chevron, titre, sous-titre, actions.
 - **Icônes** (`components/Icon.jsx`) : un seul jeu, trait 2px, 24×24. Pas de glyphes Unicode comme icônes.
-- **Listes de choix** : lignes pleine largeur séparées par des filets (accueil), pas de grille de cartes.
 - **Boutons** : `.btn-acc` (principal), `.btn-ghost` (secondaire), `.btn-danger`, `.btn-mini`, `.btn-link`, `.icon-btn`. Hauteur 48px (36–44 pour les petits).
 - **Compteurs de stats** : libellé · − · valeur · +, cibles de 56–64px, le + porte la teinte d'état.
 - **Signature** : le demi-cercle de la zone interdite tracé en filet sous le séparateur du tableau de score (`.sb-scores::after`) ; la ligne médiane sépare les deux camps du scoreur.
-- Rayons : 12px (panneaux), 8px (contrôles), pilule pour les petites étiquettes. Élévation par filet, pas d'ombre sur les panneaux.
+- Rayons : 12px (panneaux), 8px (contrôles), pilule pour les petites étiquettes. Élévation par filet ; seule une légère ombre au survol des éléments cliquables (tuiles, cartes de match).
 
 ## Mouvement
 
