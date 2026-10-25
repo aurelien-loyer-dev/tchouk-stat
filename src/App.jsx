@@ -4,6 +4,7 @@ import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
 import { teamBtnTxt } from './lib/teamColor'
+import { LIVE_SCREENS, clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
 import AppBar from './components/AppBar'
 import Setup from './features/setup/Setup'
 import Match from './features/match/Match'
@@ -120,14 +121,16 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings, mode)
 }
 
 export default function App() {
-  const [screen, setScreen]         = useState(loadScreen)
-  const [appMode, setAppMode]       = useState('stats') // 'stats' | 'scorer' | 'player'
-  const [numTeams, setNumTeams]     = useState(2)
-  const [teams, setTeams]           = useState([])
-  const [teamLogos, setTeamLogos]   = useState([null, null])
-  const [timeline, setTimeline]     = useState([])
-  const [lastSummary, setLastSummary] = useState(null)
-  const [matchSettings, setMatchSettings] = useState(DEFAULT_SETTINGS)
+  // Match en cours restauré après un rechargement (null s'il n'y en a pas).
+  const [live] = useState(loadLive)
+  const [screen, setScreen]         = useState(() => live?.screen || loadScreen())
+  const [appMode, setAppMode]       = useState(live?.appMode || 'stats') // 'stats' | 'scorer' | 'player'
+  const [numTeams, setNumTeams]     = useState(live?.numTeams || 2)
+  const [teams, setTeams]           = useState(live?.teams || [])
+  const [teamLogos, setTeamLogos]   = useState(live?.logos || [null, null])
+  const [timeline, setTimeline]     = useState(live?.timeline || [])
+  const [lastSummary, setLastSummary] = useState(live?.lastSummary || null)
+  const [matchSettings, setMatchSettings] = useState(live?.settings || DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
   const [historyInitialMatch, setHistoryInitialMatch] = useState(null)
   const [tournaments, setTournaments] = useState(loadTournaments)
@@ -152,12 +155,25 @@ export default function App() {
   }, [])
 
   // Mode joueurs
-  const [players, setPlayers]         = useState([])
-  const [playerNumTeams, setPlayerNumTeams] = useState(2)
+  const [players, setPlayers]         = useState(live?.players || [])
+  const [playerNumTeams, setPlayerNumTeams] = useState(live?.playerNumTeams || 2)
 
-  const teamsRef      = useRef([])
-  const playersRef    = useRef([])
-  const matchStartRef = useRef(null)
+  const teamsRef      = useRef(live?.teams || [])
+  const playersRef    = useRef(live?.players || [])
+  const matchStartRef = useRef(live?.matchStartedAt || null)
+
+  // ── Sauvegarde automatique du match en cours ─────────────────────────────
+  useEffect(() => {
+    if (!LIVE_SCREENS.includes(screen)) return
+    saveLive({
+      screen, appMode, numTeams, teams, timeline, players, playerNumTeams,
+      settings: matchSettings,
+      lastSummary,
+      matchStartedAt: matchStartRef.current,
+    })
+  }, [screen, appMode, numTeams, teams, timeline, players, playerNumTeams, matchSettings, lastSummary])
+
+  useEffect(() => { saveLiveLogos(teamLogos) }, [teamLogos])
 
   useEffect(() => { teamsRef.current = teams }, [teams])
 
@@ -216,6 +232,7 @@ export default function App() {
     }
 
     const nextTeams = names.map(mkTeam)
+    clearLive()
     matchStartRef.current = Date.now()
     teamsRef.current = nextTeams
     setAppMode(mode)
@@ -336,6 +353,7 @@ export default function App() {
   }
 
   function newMatch() {
+    clearLive()
     setTeams([])
     teamsRef.current    = []
     playersRef.current  = []

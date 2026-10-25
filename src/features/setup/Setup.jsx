@@ -134,21 +134,23 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {step === 'home' && (
         <div className="home">
           <section className="hero">
-            <Court className="hero-court" />
-            <div className="hero-body">
+            <div className="hero-main">
               <h1>{t('setup.home.heroTitle')}</h1>
               <p>{t('setup.home.heroSub')}</p>
+              <dl className="hero-stats">
+                <div>
+                  <dt>{(history || []).length}</dt>
+                  <dd>{t('setup.home.statMatches')}</dd>
+                </div>
+                <div>
+                  <dt>{tournamentCount || 0}</dt>
+                  <dd>{t('setup.home.statTournaments')}</dd>
+                </div>
+              </dl>
             </div>
-            <dl className="hero-stats">
-              <div>
-                <dt>{(history || []).length}</dt>
-                <dd>{t('setup.home.statMatches')}</dd>
-              </div>
-              <div>
-                <dt>{tournamentCount || 0}</dt>
-                <dd>{t('setup.home.statTournaments')}</dd>
-              </div>
-            </dl>
+            <div className="hero-art" aria-hidden="true">
+              <Court className="hero-court" />
+            </div>
           </section>
 
           <section className="sec">
