@@ -4,6 +4,7 @@ import { score } from '../../lib/stats'
 import { fmtClock } from '../../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
+import { loadScorerState, saveScorerState } from '../../lib/liveMatch'
 import Icon from '../../components/Icon'
 import AnimScore from './components/AnimScore'
 import './scorer.css'
@@ -11,8 +12,13 @@ import './scorer.css'
 export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, settings, logos }) {
   const { t } = useTranslation()
   const two = numTeams === 2
-  const [halfSnapshots, setHalfSnapshots] = useState([[0, 0]])
-  const [matchEnded, setMatchEnded] = useState(false)
+  const [saved] = useState(loadScorerState)
+  const [halfSnapshots, setHalfSnapshots] = useState(saved?.halfSnapshots || [[0, 0]])
+  const [matchEnded, setMatchEnded] = useState(!!saved?.matchEnded)
+
+  useEffect(() => {
+    saveScorerState({ halfSnapshots, matchEnded })
+  }, [halfSnapshots, matchEnded])
 
   const {
     elapsedSec, setElapsedSec, running, setRunning,
@@ -30,7 +36,7 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
   const s1Ref = useRef(s1)
   s0Ref.current = s0
   s1Ref.current = s1
-  const prevHalfRef = useRef(1)
+  const prevHalfRef = useRef(halfSnapshots.length) // une photo de score par mi-temps commencée
 
   // Capture snapshot when half changes (half 1→2, 2→3…)
   useEffect(() => {

@@ -5,63 +5,68 @@
   gap: 32px;
 }
 
-/* Hero : prolonge le bandeau, terrain dessiné en filets. */
+/* Hero : prolonge le bandeau. Texte et chiffres à gauche, terrain dessiné
+   dans sa propre colonne à droite : rien ne passe derrière le texte. */
 .hero {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  min-height: 200px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+  align-items: center;
+  gap: 32px;
   padding: 32px;
   border-radius: 16px;
   background: var(--shell);
   color: var(--shell-txt);
 }
 
-.hero-court {
-  position: absolute;
-  top: 50%;
-  right: 32px;
-  width: min(340px, 42%);
-  transform: translateY(-50%);
-  stroke: currentColor;
-  stroke-width: 1.5;
-  opacity: 0.16;
-  pointer-events: none;
+.hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
-.hero-court .court-frame { fill: currentColor; }
-
-.hero-body {
-  position: relative;
+.hero-main h1 { font-size: 2.25rem; }
+.hero-main p {
   max-width: 34rem;
-}
-.hero-body h1 { font-size: 2.25rem; }
-.hero-body p {
-  margin-top: 8px;
   font-size: 17px;
   color: var(--shell-dim);
 }
 
 .hero-stats {
-  position: relative;
   display: flex;
-  gap: 32px;
+  gap: 0;
+  margin-top: 16px;
 }
-.hero-stats div { display: flex; flex-direction: column; }
+.hero-stats div {
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px;
+  border-left: 1px solid rgb(255 255 255 / 0.18);
+}
+.hero-stats div:first-child { padding-left: 0; border-left: none; }
 .hero-stats dt {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 750;
-  line-height: 1;
+  line-height: 1.1;
   letter-spacing: -0.02em;
 }
 .hero-stats dd {
-  margin-top: 4px;
   font-size: 14px;
   color: var(--shell-dim);
 }
+
+.hero-art {
+  display: grid;
+  place-items: center;
+}
+
+.hero-court {
+  width: 100%;
+  height: auto;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0.4;
+}
+.hero-court .court-frame { fill: currentColor; }
 
 /* Tuiles de choix : texte seul, bordure d'accent au survol. */
 .tiles {
@@ -111,15 +116,19 @@
   transition: transform 0.2s var(--ease), color 0.15s;
 }
 
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+}
+
 @media (max-width: 760px) {
   .tiles-3 { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
   .tiles-2 { grid-template-columns: 1fr; }
-  .hero { padding: 24px 20px; min-height: 0; }
-  .hero-body h1 { font-size: 1.75rem; }
-  .hero-court { width: 64%; right: -12%; top: auto; bottom: 16px; transform: none; opacity: 0.12; }
+  .hero { padding: 24px 20px; }
+  .hero-main h1 { font-size: 1.75rem; }
 }
 
 /* ── Formulaire de match ── */
