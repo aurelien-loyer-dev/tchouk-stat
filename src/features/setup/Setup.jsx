@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { mkPlayer } from '../../lib/playerStats'
-import LanguageToggle from '../../i18n/LanguageToggle'
+import Icon from '../../components/Icon'
+import PageHeader from '../../components/PageHeader'
 import MatchCard from '../../components/MatchCard'
 import { loadComposFromStorage, saveComposToStorage } from './compoStorage'
 import LogoUpload from './components/LogoUpload'
@@ -10,7 +11,7 @@ import './setup.css'
 
 export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament }) {
   const { t } = useTranslation()
-  const [step, setStep]   = useState('home') // 'home' | 'stats-choice' | 'form'
+  const [step, setStep]   = useState('home') // 'home' | 'form'
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
@@ -103,224 +104,186 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
     if (e.key === 'Enter') handleStart()
   }
 
-  function chooseScorer()      { setMode('scorer'); setStep('form') }
-  function chooseStatsHome()   { setStep('stats-choice') }
-  function chooseStatsSheet()  { setMode('stats');  setStep('form') }
-  function chooseStatsPlayers(){ setMode('player'); setStep('form') }
-  function backToHome()        { setStep('home') }
-  function backFromForm()      { setStep(mode === 'scorer' ? 'home' : 'stats-choice') }
+  function choose(nextMode) { setMode(nextMode); setStep('form') }
+  function backToHome()      { setStep('home') }
 
   const recentHistory = (history || []).slice(0, 3)
 
+  const startChoices = [
+    { mode: 'stats',  icon: 'sheet',      label: t('setup.statsChoice.sheetLabel'),   desc: t('setup.statsChoice.sheetDesc') },
+    { mode: 'player', icon: 'players',    label: t('setup.statsChoice.playersLabel'), desc: t('setup.statsChoice.playersDesc') },
+    { mode: 'scorer', icon: 'scoreboard', label: t('setup.home.scorerLabel'),         desc: t('setup.home.scorerDesc') },
+  ]
+
+  const formTitle = mode === 'scorer' ? t('setup.formTitle.scorer') : mode === 'player' ? t('setup.formTitle.player') : t('setup.formTitle.stats')
+
   return (
     <>
-      {/* ── Accueil : 3 choix ── */}
+      {/* ── Accueil : choix directs ── */}
       {step === 'home' && (
-        <>
-          <div className="setup-head">
-            <h1>{t('setup.appTitle')}</h1>
-            <LanguageToggle className="btn-mini" style={{ marginLeft: 'auto' }} />
-          </div>
+        <div className="home">
+          <section className="sec">
+            <h1 className="home-title">{t('setup.home.startTitle')}</h1>
+            <div className="choice-list">
+              {startChoices.map(c => (
+                <button key={c.mode} className="choice" onClick={() => choose(c.mode)}>
+                  <span className="choice-icon"><Icon name={c.icon} size={22} /></span>
+                  <span className="choice-text">
+                    <span className="choice-label">{c.label}</span>
+                    <span className="choice-desc">{c.desc}</span>
+                  </span>
+                  <Icon name="chevron" size={20} className="choice-chev" />
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <section className="setup-section">
-            <div className="home-choices">
-              <button className="home-card" onClick={chooseStatsHome}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                </svg>
-                <span className="home-card-label">{t('setup.home.statsLabel')}</span>
-                <span className="home-card-desc">{t('setup.home.statsDesc')}</span>
-              </button>
-              <button className="home-card" onClick={chooseScorer}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-                </svg>
-                <span className="home-card-label">{t('setup.home.scorerLabel')}</span>
-                <span className="home-card-desc">{t('setup.home.scorerDesc')}</span>
-              </button>
-              <button className="home-card" onClick={onViewTournament}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" />
-                  <path d="M8 20h8" />
-                  <path d="M12 12v5" />
-                  <path d="M9 20h6" />
-                  <path d="M6 6H4a2 2 0 0 0 2 2" />
-                  <path d="M18 6h2a2 2 0 0 1-2 2" />
-                </svg>
-                <span className="home-card-label">{t('setup.home.tournamentLabel')}</span>
-                <span className="home-card-desc">{t('setup.home.tournamentDesc')}</span>
+          <section className="sec">
+            <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
+            <div className="choice-list">
+              <button className="choice" onClick={onViewTournament}>
+                <span className="choice-icon"><Icon name="trophy" size={22} /></span>
+                <span className="choice-text">
+                  <span className="choice-label">{t('setup.home.tournamentLabel')}</span>
+                  <span className="choice-desc">{t('setup.home.tournamentDesc')}</span>
+                </span>
+                <Icon name="chevron" size={20} className="choice-chev" />
               </button>
             </div>
           </section>
-        </>
-      )}
 
-      {/* ── Sous-choix Stats : feuille de stats ou joueurs ── */}
-      {step === 'stats-choice' && (
-        <>
-          <div className="setup-head">
-            <button className="btn-mini" onClick={backToHome}>{t('common.back')}</button>
-            <h1>{t('setup.statsChoice.title')}</h1>
-          </div>
-
-          <section className="setup-section">
-            <div className="section-title">{t('setup.statsChoice.question')}</div>
-            <div className="home-choices home-choices-2">
-              <button className="home-card" onClick={chooseStatsSheet}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                </svg>
-                <span className="home-card-label">{t('setup.statsChoice.sheetLabel')}</span>
-                <span className="home-card-desc">{t('setup.statsChoice.sheetDesc')}</span>
-              </button>
-              <button className="home-card" onClick={chooseStatsPlayers}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  <path d="M21 21v-2a4 4 0 0 0-3-3.87" />
-                </svg>
-                <span className="home-card-label">{t('setup.statsChoice.playersLabel')}</span>
-                <span className="home-card-desc">{t('setup.statsChoice.playersDesc')}</span>
-              </button>
-            </div>
-          </section>
-        </>
+          {recentHistory.length > 0 && (
+            <section className="sec home-recent">
+              <h2 className="sec-title">
+                {t('setup.recentMatches')}
+                <button className="btn-link" onClick={onViewHistory}>
+                  {t('setup.viewAll')}<Icon name="chevron" size={16} />
+                </button>
+              </h2>
+              <div className="mr-list">
+                {recentHistory.map(m => (
+                  <MatchCard key={m.id} match={m} onClick={onOpenMatch} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       {step === 'form' && (
-      <div className="setup-head">
-        <button className="btn-mini" onClick={backFromForm}>{t('common.back')}</button>
-        <h1>{mode === 'scorer' ? t('setup.formTitle.scorer') : mode === 'player' ? t('setup.formTitle.player') : t('setup.formTitle.stats')}</h1>
-      </div>
-      )}
+        <div className="setup-form">
+          <PageHeader title={formTitle} onBack={backToHome} />
 
-      {/* ── Équipes (stats & scorer) ── */}
-      {step === 'form' && mode !== 'player' && (
-        <section className="setup-section">
-          <div className="section-title">{t('setup.teamsSection')}</div>
-          <div className="flabel" style={{ marginBottom: 10 }}>{t('setup.fixedFormat')}</div>
-          <div className="team-rows">
-            {/* Équipe 1 */}
-            <div className="team-row">
-              {mode === 'scorer' && <LogoUpload label={t('setup.team1')} logo={logo1} onChange={setLogo1} color={color1} />}
-              <div className="team-row-fields">
-                <div className="field">
-                  <div className="flabel">{t('setup.team1')}</div>
-                  <input type="text" placeholder={t('setup.namePlaceholder')} value={name1}
-                         onChange={e => setName1(e.target.value)} onKeyDown={handleKey} autoFocus />
-                </div>
-                <div className="field" style={{ maxWidth: 80 }}>
-                  <div className="flabel">{t('setup.color')}</div>
-                  <input className="color-in" type="color" value={color1} onChange={e => setColor1(e.target.value)} />
-                </div>
+          {/* ── Équipes (stats & scorer) ── */}
+          {mode !== 'player' && (
+            <section className="sec">
+              <h2 className="sec-title">{t('setup.teamsSection')}</h2>
+              <div className="team-rows">
+                {[
+                  { label: t('setup.team1'), name: name1, setName: setName1, color: color1, setColor: setColor1, logo: logo1, setLogo: setLogo1 },
+                  { label: t('setup.team2'), name: name2, setName: setName2, color: color2, setColor: setColor2, logo: logo2, setLogo: setLogo2 },
+                ].map((tm, i) => (
+                  <div className="team-row" key={i}>
+                    {mode === 'scorer' && <LogoUpload label={tm.label} logo={tm.logo} onChange={tm.setLogo} color={tm.color} />}
+                    <label className="field">
+                      <span className="flabel">{tm.label}</span>
+                      <input type="text" placeholder={t('setup.namePlaceholder')} value={tm.name}
+                             onChange={e => tm.setName(e.target.value)} onKeyDown={handleKey} autoFocus={i === 0} />
+                    </label>
+                    <label className="field field-color">
+                      <span className="flabel">{t('setup.color')}</span>
+                      <input className="color-in" type="color" value={tm.color} onChange={e => tm.setColor(e.target.value)} />
+                    </label>
+                  </div>
+                ))}
               </div>
-            </div>
-            {/* Équipe 2 */}
-            <div className="team-row">
-              {mode === 'scorer' && <LogoUpload label={t('setup.team2')} logo={logo2} onChange={setLogo2} color={color2} />}
-              <div className="team-row-fields">
-                <div className="field">
-                  <div className="flabel">{t('setup.team2')}</div>
-                  <input type="text" placeholder={t('setup.namePlaceholder')} value={name2}
-                         onChange={e => setName2(e.target.value)} onKeyDown={handleKey} />
-                </div>
-                <div className="field" style={{ maxWidth: 80 }}>
-                  <div className="flabel">{t('setup.color')}</div>
-                  <input className="color-in" type="color" value={color2} onChange={e => setColor2(e.target.value)} />
-                </div>
+            </section>
+          )}
+
+          {/* ── Mode joueurs : noms des équipes + joueurs ── */}
+          {mode === 'player' && (
+            <section className="sec">
+              <h2 className="sec-title">{t('setup.teamsPlayersSection')}</h2>
+
+              <div className="seg seg-inline">
+                <button className={playerNumTeams === 1 ? 'on' : ''} onClick={() => setPlayerNumTeams(1)}>
+                  {t('setup.oneTeam')}
+                </button>
+                <button className={playerNumTeams === 2 ? 'on' : ''} onClick={() => setPlayerNumTeams(2)}>
+                  {t('setup.twoTeams')}
+                </button>
               </div>
-            </div>
-          </div>
-        </section>
-      )}
 
-      {/* ── Mode joueurs : noms des équipes + joueurs ── */}
-      {step === 'form' && mode === 'player' && (
-        <section className="setup-section">
-          <div className="section-title">{t('setup.teamsPlayersSection')}</div>
-
-          {/* Nombre d'équipes */}
-          <div className="seg" style={{ maxWidth: 280 }}>
-            <button className={playerNumTeams === 1 ? 'on' : ''} onClick={() => setPlayerNumTeams(1)}>
-              {t('setup.oneTeam')}
-            </button>
-            <button className={playerNumTeams === 2 ? 'on' : ''} onClick={() => setPlayerNumTeams(2)}>
-              {t('setup.twoTeams')}
-            </button>
-          </div>
-
-          {/* Noms + couleurs des équipes */}
-          <div className={`ps-teams-row${playerNumTeams === 1 ? ' ps-single' : ''}`}>
-            <div className="ps-team-name-field">
-              <div className="flabel">{t('setup.team1')}</div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="text" placeholder={t('setup.team1NamePlaceholder')} value={name1}
-                       onChange={e => setName1(e.target.value)} autoFocus />
-                <input className="color-in" type="color" value={color1}
-                       onChange={e => setColor1(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
-              </div>
-            </div>
-            {playerNumTeams === 2 && (
-              <div className="ps-team-name-field">
-                <div className="flabel">{t('setup.team2')}</div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input type="text" placeholder={t('setup.team2NamePlaceholder')} value={name2}
-                         onChange={e => setName2(e.target.value)} />
-                  <input className="color-in" type="color" value={color2}
-                         onChange={e => setColor2(e.target.value)} style={{ width: 44, flexShrink: 0 }} />
+              <div className={`ps-players-grid${playerNumTeams === 1 ? ' ps-single' : ''}`}>
+                <div className="ps-team">
+                  <div className="team-row">
+                    <label className="field">
+                      <span className="flabel">{t('setup.team1')}</span>
+                      <input type="text" placeholder={t('setup.team1NamePlaceholder')} value={name1}
+                             onChange={e => setName1(e.target.value)} autoFocus />
+                    </label>
+                    <label className="field field-color">
+                      <span className="flabel">{t('setup.color')}</span>
+                      <input className="color-in" type="color" value={color1} onChange={e => setColor1(e.target.value)} />
+                    </label>
+                  </div>
+                  <PlayerNamesCol
+                    teamLabel={n1Label}
+                    teamColor={color1}
+                    names={players1}
+                    onChange={setPlayers1}
+                    compos={compos}
+                    onSaveCompo={name => saveCompo(name, n1Label, color1, players1)}
+                    onDeleteCompo={deleteCompo}
+                    onUpdateCompo={updateCompo}
+                    onLoadCompo={c => { setName1(c.teamName || c.name); setColor1(c.color); setPlayers1(c.players.length ? c.players : ['']) }}
+                  />
                 </div>
+                {playerNumTeams === 2 && (
+                  <div className="ps-team">
+                    <div className="team-row">
+                      <label className="field">
+                        <span className="flabel">{t('setup.team2')}</span>
+                        <input type="text" placeholder={t('setup.team2NamePlaceholder')} value={name2}
+                               onChange={e => setName2(e.target.value)} />
+                      </label>
+                      <label className="field field-color">
+                        <span className="flabel">{t('setup.color')}</span>
+                        <input className="color-in" type="color" value={color2} onChange={e => setColor2(e.target.value)} />
+                      </label>
+                    </div>
+                    <PlayerNamesCol
+                      teamLabel={n2Label}
+                      teamColor={color2}
+                      names={players2}
+                      onChange={setPlayers2}
+                      compos={compos}
+                      onSaveCompo={name => saveCompo(name, n2Label, color2, players2)}
+                      onDeleteCompo={deleteCompo}
+                      onUpdateCompo={updateCompo}
+                      onLoadCompo={c => { setName2(c.teamName || c.name); setColor2(c.color); setPlayers2(c.players.length ? c.players : ['']) }}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </section>
+          )}
 
-          {/* Joueurs par équipe */}
-          <div className={`ps-players-grid${playerNumTeams === 1 ? ' ps-single' : ''}`}>
-            <PlayerNamesCol
-              teamLabel={n1Label}
-              teamColor={color1}
-              names={players1}
-              onChange={setPlayers1}
-              compos={compos}
-              onSaveCompo={name => saveCompo(name, n1Label, color1, players1)}
-              onDeleteCompo={deleteCompo}
-              onUpdateCompo={updateCompo}
-              onLoadCompo={c => { setName1(c.teamName || c.name); setColor1(c.color); setPlayers1(c.players.length ? c.players : ['']) }}
-            />
-            {playerNumTeams === 2 && (
-              <PlayerNamesCol
-                teamLabel={n2Label}
-                teamColor={color2}
-                names={players2}
-                onChange={setPlayers2}
-                compos={compos}
-                onSaveCompo={name => saveCompo(name, n2Label, color2, players2)}
-                onDeleteCompo={deleteCompo}
-                onUpdateCompo={updateCompo}
-                onLoadCompo={c => { setName2(c.teamName || c.name); setColor2(c.color); setPlayers2(c.players.length ? c.players : ['']) }}
-              />
-            )}
-          </div>
-        </section>
-      )}
-
-      {step === 'form' && (
-        <>
           {/* ── Mi-temps ── */}
-          <section className="setup-section">
-            <div className="section-title">{t('setup.halvesSection')}</div>
+          <section className="sec">
+            <h2 className="sec-title">{t('setup.halvesSection')}</h2>
             <div className="opts-grid">
-              <div className="field">
-                <div className="flabel">{t('setup.halfDuration')}</div>
+              <label className="field">
+                <span className="flabel">{t('setup.halfDuration')}</span>
                 <input type="number" min={1} max={60} value={halfDurationMin}
                        onChange={e => setHalfDurationMin(e.target.value)} />
-              </div>
-              <div className="field">
-                <div className="flabel">{t('setup.halfCount')}</div>
+              </label>
+              <label className="field">
+                <span className="flabel">{t('setup.halfCount')}</span>
                 <select className="sel" value={halfCount} onChange={e => setHalfCount(e.target.value)}>
                   {[1, 2, 3, 4].map(v => <option key={v} value={v}>{v}</option>)}
                 </select>
-              </div>
+              </label>
             </div>
           </section>
 
@@ -329,22 +292,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
               {mode === 'scorer' ? t('setup.startScorer') : mode === 'player' ? t('setup.startPlayerMatch') : t('setup.start')}
             </button>
           </div>
-        </>
-      )}
-
-      {/* ── Historique récent ── */}
-      {step === 'home' && recentHistory.length > 0 && (
-        <section className="setup-section">
-          <div className="history-head">
-            <div className="section-title">{t('setup.recentMatches')}</div>
-            <button className="btn-mini" onClick={onViewHistory}>{t('setup.viewAll')}</button>
-          </div>
-          <div className="mr-list">
-            {recentHistory.map(m => (
-              <MatchCard key={m.id} match={m} onClick={onOpenMatch} />
-            ))}
-          </div>
-        </section>
+        </div>
       )}
     </>
   )

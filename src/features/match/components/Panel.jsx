@@ -9,7 +9,7 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
 
   return (
     <div className={`panel ${cls}`}>
-      <div className="ph">{team.name}</div>
+      <div className="ph"><span className="ph-name">{team.name}</span></div>
 
       {/* Possession */}
       <div className="cat-hd cat-first"><span>{t('match.categories.possession')}</span></div>

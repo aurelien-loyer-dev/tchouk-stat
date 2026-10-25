@@ -4,6 +4,7 @@ import { PLAYER_STATS, STAT_GROUPS, playerTeamScore } from '../../lib/playerStat
 import { fmtClock } from '../../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
+import Icon from '../../components/Icon'
 import TeamColumn from './components/TeamColumn'
 import './playerMatch.css'
 
@@ -62,8 +63,8 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
               </div>
               <div className="sb-sep">–</div>
               <div className="sb-t">
-                <div className="sb-score" style={teamTextStyle(c2)}>{score1}</div>
                 <div className="sb-name"><span className="team-dot" style={teamSwatchStyle(c2)} />{teams[1]?.name}</div>
+                <div className="sb-score" style={teamTextStyle(c2)}>{score1}</div>
               </div>
             </>
           ) : (
@@ -74,12 +75,15 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
           )}
         </div>
         <div className="clock-wrap">
-          <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
-          <div className="clock-meta">
-            {t('playerMatch.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
+          <div>
+            <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
+            <div className="clock-meta">
+              {t('playerMatch.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
+            </div>
           </div>
           <div className="clock-ctrl">
-            <button className="btn-mini" onClick={() => setRunning(v => !v)}>
+            <button className="btn-mini is-primary" onClick={() => setRunning(v => !v)}>
+              <Icon name={running ? 'pause' : 'play'} size={16} />
               {running ? t('match.pause') : elapsedSec > 0 ? t('match.resume') : t('match.start')}
             </button>
             {currentHalf < halfCount && (

@@ -34,9 +34,9 @@ export function Row({ label, sub, children }) {
   )
 }
 
-export function Card({ title, children }) {
+export function Card({ title, children, wide }) {
   return (
-    <div className="card">
+    <div className={`card${wide ? ' card-wide' : ''}`}>
       <div className="ctitle">{title}</div>
       {children}
     </div>

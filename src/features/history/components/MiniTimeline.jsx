@@ -1,6 +1,5 @@
 import { buildPointsSeries } from '../../../lib/shotSeries'
 import { fmtClock } from '../../../lib/format'
-import { colorLum } from '../../../lib/teamColor'
 
 export default function MiniTimeline({ timeline, settings, teams }) {
   const { series, maxT, maxV } = buildPointsSeries(teams || [], timeline || [])
@@ -9,7 +8,7 @@ export default function MiniTimeline({ timeline, settings, teams }) {
   const y = v => h - pb - (v / Math.max(1, maxV)) * (h - pt - pb)
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg" style={{ marginTop: 8 }}>
+    <svg viewBox={`0 0 ${w} ${h}`} className="tg-svg">
       <line x1={pl} y1={h - pb} x2={w - pr} y2={h - pb} className="tg-axis" />
       <line x1={pl} y1={pt}     x2={pl}     y2={h - pb} className="tg-axis" />
       {[0, 0.25, 0.5, 0.75, 1].map(tick => {
@@ -23,12 +22,11 @@ export default function MiniTimeline({ timeline, settings, teams }) {
       })}
       {series.map((pts, i) => {
         const color = settings?.teamColors?.[i] || (i === 0 ? '#0e9f8f' : '#d14343')
-        const needsHalo = colorLum(color) < 0.22
         const d = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${x(p.t)} ${y(p.v)}`).join(' ')
         return (
           <g key={i}>
-            {needsHalo && <path d={d} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="5.5" />}
-            <path d={d} fill="none" stroke={color} strokeWidth="2.5" />
+            <path d={d} fill="none" className="tg-under" strokeWidth="6.5" strokeLinejoin="round" />
+            <path d={d} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" />
           </g>
         )
       })}

@@ -9,7 +9,8 @@ export default function LanguageToggle({ className, style }) {
       className={className || 'btn-mini'}
       style={style}
       onClick={() => i18n.changeLanguage(next)}
-      title={next === 'en' ? 'Switch to English' : 'Passer en français'}
+      title={t('common.langTitle')}
+      aria-label={t('common.langTitle')}
     >
       {t('common.langToggle')}
     </button>

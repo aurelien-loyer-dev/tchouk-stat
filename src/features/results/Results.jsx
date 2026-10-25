@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../../lib/stats'
 import { fmtClock, fmtDateTime } from '../../lib/format'
-import { teamTextStyle } from '../../lib/teamColor'
+import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
+import Icon from '../../components/Icon'
 import TimelineGraph from './components/TimelineGraph'
 import { N, Pct, Ratio, Row, Card } from './components/StatDisplay'
 import { downloadResultsPdf } from './pdf'
@@ -42,32 +43,46 @@ export default function Results({
   return (
     <>
       {/* Score final */}
-      <div className="rf">
-        {n === 1 ? (
-          <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
-        ) : (
-          <>
+      <div className="res-hero">
+        <div className="mr-detail-names">
+          {teams.slice(0, n).map((team, i) => (
+            <span className="mr-name" key={i}>
+              <span className="team-dot" style={teamSwatchStyle(i === 0 ? c1 : c2)} />{team.name}
+            </span>
+          ))}
+        </div>
+        <div className="rf">
+          {n === 1 ? (
             <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
-            <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={teamTextStyle(c2)}>{score(teams, n, 1)}</span>
-          </>
-        )}
+          ) : (
+            <>
+              <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
+              <span className="rf-sep">–</span>
+              <span style={teamTextStyle(c2)}>{score(teams, n, 1)}</span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Onglets équipes */}
       {n === 2 && (
-        <div className="tabs">
+        <div className="seg res-tabs" role="tablist">
           {teams.map((team, i) => (
             <button
               key={i}
-              className={`tab${i === tab ? ` a${i}` : ''}`}
+              role="tab"
+              aria-selected={i === tab}
+              className={i === tab ? 'on' : ''}
               onClick={() => setTab(i)}
             >
+              <span className="team-dot" style={teamSwatchStyle(i === 0 ? c1 : c2)} />
               {team.name}
             </button>
           ))}
         </div>
       )}
+
+      <div className="res-grid">
 
       {/* ── Resume ── */}
       {summary && (
@@ -147,7 +162,7 @@ export default function Results({
       </Card>
 
       {/* ── Timeline des points ── */}
-      <Card title={t('results.ui.timelineTitle')}>
+      <Card title={t('results.ui.timelineTitle')} wide>
         <TimelineGraph teams={teams} timeline={timeline} settings={settings} />
 
         {shotEvents.length > 0 && (
@@ -167,21 +182,16 @@ export default function Results({
         )}
       </Card>
 
-      <button
-        className="btn-ghost"
-        style={{ alignSelf: 'center', minWidth: 260, marginTop: 4 }}
-        onClick={handleDownloadSheet}
-      >
-        {t('results.ui.downloadPdf')}
-      </button>
+      </div>
 
-      <button
-        className="btn-ghost"
-        style={{ alignSelf: 'center', minWidth: 200, marginTop: 8 }}
-        onClick={onNew}
-      >
-        {t('results.ui.newMatch')}
-      </button>
+      <div className="actions-row">
+        <button className="btn-ghost" onClick={handleDownloadSheet}>
+          <Icon name="download" size={18} />{t('results.ui.downloadPdf')}
+        </button>
+        <button className="btn-acc" onClick={onNew}>
+          {t('results.ui.newMatch')}
+        </button>
+      </div>
     </>
   )
 }

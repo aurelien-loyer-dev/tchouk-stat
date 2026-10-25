@@ -21,3 +21,5 @@ pnpm-debug.log*
 # Editor folders
 .vscode/
 .idea/
+
+.impeccable/review/

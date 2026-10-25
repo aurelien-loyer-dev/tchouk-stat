@@ -4,6 +4,7 @@ import { score } from '../../lib/stats'
 import { fmtClock } from '../../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
+import Icon from '../../components/Icon'
 import AnimScore from './components/AnimScore'
 import './scorer.css'
 
@@ -86,8 +87,8 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
       <div className="sc-root sc-end-root">
         <div className="sc-topbar">
           <div className="sc-half-badge">{t('scorer.matchEnded')}</div>
-          <button className="sc-ctrl-btn" style={{ fontSize: 13 }} onClick={handleResetScorer}>
-            {t('scorer.replay')}
+          <button className="sc-ctrl-btn" onClick={handleResetScorer}>
+            <Icon name="reset" size={16} />{t('scorer.replay')}
           </button>
         </div>
 
@@ -154,22 +155,22 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
   return (
     <div className="sc-root">
 
-      {/* Top bar */}
+      {/* Top bar : mi-temps, chrono, fin */}
       <div className="sc-topbar">
         <div className="sc-half-badge">{t('scorer.halfBadge', { current: currentHalf, total: halfCount })}</div>
+        <button
+          className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}${running ? '' : ' sc-clock-paused'}`}
+          onClick={() => setRunning(v => !v)}
+          title={t('scorer.clockTitle')}
+        >
+          {fmtClock(remainingHalfSec)}
+        </button>
         <button className="sc-end-btn" onClick={handleEnd}>{t('scorer.end')}</button>
       </div>
 
       {/* Clock progress bar */}
       <div className="sc-progress-track">
-        <div className="sc-progress-fill" style={{ width: `${clockPct}%`, background: isLast10 ? '#ff5252' : 'var(--acc)' }} />
-      </div>
-
-      {/* Big centered clock */}
-      <div className="sc-clock-wrap">
-        <div className={`sc-clock${isLast10 ? ' sc-clock-urgent' : ''}`} onClick={() => setRunning(v => !v)} title={t('scorer.clockTitle')}>
-          {fmtClock(remainingHalfSec)}
-        </div>
+        <div className={`sc-progress-fill${isLast10 ? ' urgent' : ''}`} style={{ width: `${clockPct}%` }} />
       </div>
 
       {/* Scoreboard */}
@@ -187,8 +188,8 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
           <AnimScore value={s0} color={c1} />
           <div className="sc-half-score" style={teamTextStyle(c1)}>+{halfScore0}</div>
           <div className="sc-actions">
-            <button className="sc-btn-score" style={{ background: c1 }} onClick={() => adjScore(0, 1)}>+1</button>
-            <button className="sc-btn-neg" onClick={() => adjScore(0, -1)}>-1</button>
+            <button className="sc-btn-neg" onClick={() => adjScore(0, -1)} disabled={!s0}>−1</button>
+            <button className="sc-btn-score" onClick={() => adjScore(0, 1)}>+1</button>
           </div>
         </div>
 
@@ -206,8 +207,8 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
             <AnimScore value={s1} color={c2} />
             <div className="sc-half-score" style={teamTextStyle(c2)}>+{halfScore1}</div>
             <div className="sc-actions">
-              <button className="sc-btn-score" style={{ background: c2 }} onClick={() => adjScore(1, 1)}>+1</button>
-              <button className="sc-btn-neg" onClick={() => adjScore(1, -1)}>-1</button>
+              <button className="sc-btn-neg" onClick={() => adjScore(1, -1)} disabled={!s1}>−1</button>
+              <button className="sc-btn-score" onClick={() => adjScore(1, 1)}>+1</button>
             </div>
           </div>
         )}
@@ -215,25 +216,22 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
 
       {/* Clock controls */}
       <div className="sc-ctrl">
-        <button className={`sc-ctrl-btn${running ? ' active' : ''}`} onClick={() => setRunning(v => !v)}>
-          {running
-            ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-            : <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-          }
+        <button className={`sc-ctrl-btn sc-ctrl-main${running ? ' active' : ''}`} onClick={() => setRunning(v => !v)}>
+          <Icon name={running ? 'pause' : 'play'} size={18} />
           {running ? t('scorer.pause') : elapsedSec > 0 ? t('scorer.resume') : t('scorer.start')}
         </button>
         {currentHalf < halfCount && (
           <button className="sc-ctrl-btn" onClick={handleSkipHalf} title={t('scorer.nextHalfTitle')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 15,12 5,21"/><rect x="16" y="3" width="3" height="18"/></svg>
+            <Icon name="skip" size={16} />
             {t('scorer.nextHalf')}
           </button>
         )}
         <button className="sc-ctrl-btn" onClick={handleResetCurrentHalf} title={t('scorer.resetHalfTitle')}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <Icon name="reset" size={16} />
           {t('scorer.resetHalf')}
         </button>
         <button className="sc-ctrl-btn" onClick={handleResetScorer} title={t('scorer.resetAllTitle')}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <Icon name="reset" size={16} />
           {t('scorer.resetAll')}
         </button>
       </div>

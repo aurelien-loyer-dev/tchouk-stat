@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { setMatchScore, addSwissRound, isRoundComplete } from '../../../lib/tournament'
+import Progress from '../components/Progress'
 import Standings from '../components/Standings'
 import MatchRow from '../components/MatchRow'
 import ValidationBanner from '../components/ValidationBanner'
@@ -14,12 +15,11 @@ export default function SwissView({ tournament, onUpdate, finished, onValidate }
 
   return (
     <>
-      <div className="trn-prog-label" style={{ marginBottom: 4 }}>
-        {t('tournament.roundLabel', { current: tournament.rounds.length, total: tournament.numSwissRounds })}
-      </div>
-      <div className="trn-prog-track" style={{ marginBottom: 12 }}>
-        <div className="trn-prog-fill" style={{ width: `${Math.round(tournament.rounds.length / tournament.numSwissRounds * 100)}%` }} />
-      </div>
+      <Progress
+        done={tournament.rounds.length}
+        total={tournament.numSwissRounds}
+        label={t('tournament.roundLabel', { current: tournament.rounds.length, total: tournament.numSwissRounds })}
+      />
 
       <div className="trn-section">{t('tournament.standingsTitle')}</div>
       <Standings teams={tournament.teams} matches={allMatches} />
