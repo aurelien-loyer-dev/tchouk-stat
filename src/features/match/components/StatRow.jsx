@@ -1,11 +1,11 @@
 import Icon from '../../../components/Icon'
 import Animated from './Animated'
 
-export default function StatRow({ label, count, hl, color, onInc, onDec }) {
-  const cls = ['row', hl && 'hl', color && `row-${color}`].filter(Boolean).join(' ')
+export default function StatRow({ label, count, color, onInc, onDec }) {
+  const cls = ['row', color && `stat-${color}`].filter(Boolean).join(' ')
   return (
     <div className={cls}>
-      <div className="rl">{label}</div>
+      <div className="rl"><span className="stat-chip" aria-hidden="true" />{label}</div>
       <button className="ab m" onClick={onDec} aria-label={`${label} −1`} disabled={!count}>
         <Icon name="minus" size={20} />
       </button>

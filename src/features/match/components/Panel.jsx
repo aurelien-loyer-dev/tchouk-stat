@@ -16,6 +16,7 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
       <StatRow
         label={t('match.stats.balls')}
         count={team.pos}
+        color="yellow"
         onInc={() => onAdj(teamIdx, 'pos', 1)}
         onDec={() => onAdj(teamIdx, 'pos', -1)}
       />
@@ -32,7 +33,6 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
               key={item.id}
               label={t(item.labelKey)}
               count={team[item.id]}
-              hl={item.hl}
               color={item.color}
               onInc={() => onAdj(teamIdx, item.id, 1)}
               onDec={() => onAdj(teamIdx, item.id, -1)}
@@ -48,6 +48,7 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
           <StatRow
             label={t('match.stats.opponentScore')}
             count={team.padv}
+            color="slate"
             onInc={() => onAdj(teamIdx, 'padv', 1)}
             onDec={() => onAdj(teamIdx, 'padv', -1)}
           />

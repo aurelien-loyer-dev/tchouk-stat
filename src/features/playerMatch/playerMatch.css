@@ -10,13 +10,17 @@
 }
 
 .pm-stats-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   font-size: 15px;
   color: var(--dim);
   padding-bottom: 10px;
   border-bottom: 1px solid var(--bdr);
 }
 .pm-hint-active { color: var(--txt); }
-.pm-hint-active strong { color: var(--acc); font-weight: 650; }
+.pm-hint-active strong { font-weight: 700; }
 
 .pm-stat-groups {
   display: grid;
@@ -46,38 +50,27 @@
 .pm-stat-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-height: 48px;
   padding: 8px 12px;
   border: 1px solid var(--bdr-strong);
   border-radius: var(--r-sm);
   background: var(--s1);
   text-align: left;
-  --tone: var(--s3);
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.pm-stat-btn::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tone);
-  flex-shrink: 0;
-}
-.pm-stat-btn:hover { background: var(--s2); }
+.pm-stat-btn:hover { background: color-mix(in srgb, var(--stat) 8%, var(--s1)); }
 .pm-stat-btn:active { transform: scale(0.98); }
 
-.pm-stat-green { --tone: var(--ok); }
-.pm-stat-red   { --tone: var(--err); }
-.pm-stat-amber { --tone: var(--warn); }
-
+/* Stat choisie : sa couleur encadre le bouton et teinte le fond. */
 .pm-stat-sel,
 .pm-stat-sel:hover {
-  background: var(--acc);
-  border-color: var(--acc);
+  background: color-mix(in srgb, var(--stat) 18%, var(--s1));
+  border-color: var(--stat);
+  box-shadow: inset 0 0 0 1px var(--stat);
 }
-.pm-stat-sel .pm-stat-label { color: var(--acc-txt); }
-.pm-stat-sel::before { box-shadow: 0 0 0 2px var(--acc-txt); }
+.pm-stat-sel .pm-stat-label { font-weight: 700; }
+
 
 .pm-stat-label {
   font-size: 14px;
@@ -187,7 +180,7 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.pm-player-active { box-shadow: 0 0 0 1px var(--bdr-strong); }
+.pm-player-active { border-color: var(--bdr-strong); }
 
 .pm-player-top {
   display: flex;
@@ -254,8 +247,12 @@
 }
 .pm-adj-btn:active:not(:disabled) { transform: scale(0.95); }
 
-.pm-adj-p { background: var(--acc); color: var(--acc-txt); }
-.pm-adj-p:hover { background: var(--acc-hover); }
+.pm-adj-p {
+  background: color-mix(in srgb, var(--stat, var(--acc)) 18%, var(--s1));
+  color: color-mix(in oklab, var(--stat, var(--acc)) 75%, var(--txt));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stat, var(--acc)) 45%, transparent);
+}
+.pm-adj-p:hover { background: color-mix(in srgb, var(--stat, var(--acc)) 28%, var(--s1)); }
 
 .pm-adj-m { background: var(--s2); color: var(--txt); }
 .pm-adj-m:hover:not(:disabled) { background: var(--bdr); }

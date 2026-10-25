@@ -26,13 +26,10 @@
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 52px 56px 64px;
+  grid-template-columns: 1fr 52px 56px 72px;
   align-items: center;
   min-height: 60px;
   border-top: 1px solid var(--bdr);
-  --tone: var(--txt);
-  --tone-soft: var(--acc-soft);
-  --tone-btn: var(--acc);
 }
 
 .rl {
@@ -42,14 +39,14 @@
   color: var(--txt);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .rv {
   text-align: center;
   font-size: 28px;
   font-weight: 750;
-  color: var(--tone);
+  color: var(--txt);
   letter-spacing: -0.02em;
 }
 
@@ -70,28 +67,13 @@
 .ab.m:hover:not(:disabled) { background: var(--s2); color: var(--txt); }
 .ab.m:disabled { opacity: 0.3; }
 
+/* Le + porte la couleur de la stat : on retrouve sa ligne sans lire. */
 .ab.p {
-  background: var(--tone-soft);
-  color: var(--tone-btn);
-  border-left: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--stat) 16%, var(--s1));
+  color: color-mix(in oklab, var(--stat) 75%, var(--txt));
+  border-left: 1px solid color-mix(in srgb, var(--stat) 30%, var(--bdr));
 }
-.ab.p:hover { background: color-mix(in srgb, var(--tone-btn) 22%, var(--s1)); }
-
-/* Teintes d'état : la valeur et le bouton + portent le sens. */
-.row.hl     { --tone: var(--ok);   --tone-soft: var(--ok-soft);   --tone-btn: var(--ok); }
-.row-red    { --tone: var(--err);  --tone-soft: var(--err-soft);  --tone-btn: var(--err); }
-.row-amber  { --tone: var(--warn); --tone-soft: var(--warn-soft); --tone-btn: var(--warn); }
-
-.row.hl .rl::before,
-.row-red .rl::before,
-.row-amber .rl::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tone);
-  flex-shrink: 0;
-}
+.ab.p:hover { background: color-mix(in srgb, var(--stat) 26%, var(--s1)); }
 
 /* ── En-têtes de catégorie ── */
 .cat-hd {
