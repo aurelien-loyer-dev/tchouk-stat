@@ -18,6 +18,9 @@ const PATHS = {
   players:  <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7" /><path d="M18 14a5 5 0 0 1 3.5 6" /></>,
   scoreboard: <><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M12 5v14" /><path d="M6.5 10v4M16 10h2.5v4H16" /></>,
   trophy:   <><path d="M7 4h10v4a5 5 0 0 1-10 0Z" /><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /><path d="M12 13v4M8 21h8M9 17h6v4H9Z" /></>,
+  trash:    <><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M6 7l1 13h10l1-13" /><path d="M9 7V4h6v3" /></>,
+  search:   <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+  history:  <><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l3 2" /></>,
   image:    <><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></>,
 }
 

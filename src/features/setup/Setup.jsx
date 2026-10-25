@@ -3,13 +3,25 @@ import { useTranslation } from 'react-i18next'
 import { mkPlayer } from '../../lib/playerStats'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
+import Court from '../../components/Court'
 import MatchCard from '../../components/MatchCard'
 import { loadComposFromStorage, saveComposToStorage } from './compoStorage'
 import LogoUpload from './components/LogoUpload'
 import PlayerNamesCol from './components/PlayerNamesCol'
 import './setup.css'
 
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament }) {
+function Tile({ icon, label, desc, onClick }) {
+  return (
+    <button className="tile" onClick={onClick}>
+      <span className="tile-icon"><Icon name={icon} size={24} /></span>
+      <span className="tile-label">{label}</span>
+      <span className="tile-desc">{desc}</span>
+      <Icon name="chevron" size={20} className="tile-chev" />
+    </button>
+  )
+}
+
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament, tournamentCount }) {
   const { t } = useTranslation()
   const [step, setStep]   = useState('home') // 'home' | 'form'
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
@@ -122,45 +134,50 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
       {/* ── Accueil : choix directs ── */}
       {step === 'home' && (
         <div className="home">
+          <section className="hero">
+            <Court className="hero-court" />
+            <div className="hero-body">
+              <h1>{t('setup.home.heroTitle')}</h1>
+              <p>{t('setup.home.heroSub')}</p>
+            </div>
+            <dl className="hero-stats">
+              <div>
+                <dt>{(history || []).length}</dt>
+                <dd>{t('setup.home.statMatches')}</dd>
+              </div>
+              <div>
+                <dt>{tournamentCount || 0}</dt>
+                <dd>{t('setup.home.statTournaments')}</dd>
+              </div>
+            </dl>
+          </section>
+
           <section className="sec">
-            <h1 className="home-title">{t('setup.home.startTitle')}</h1>
-            <div className="choice-list">
+            <h2 className="sec-title">{t('setup.home.startTitle')}</h2>
+            <div className="tiles tiles-3">
               {startChoices.map(c => (
-                <button key={c.mode} className="choice" onClick={() => choose(c.mode)}>
-                  <span className="choice-icon"><Icon name={c.icon} size={22} /></span>
-                  <span className="choice-text">
-                    <span className="choice-label">{c.label}</span>
-                    <span className="choice-desc">{c.desc}</span>
-                  </span>
-                  <Icon name="chevron" size={20} className="choice-chev" />
-                </button>
+                <Tile key={c.mode} icon={c.icon} label={c.label} desc={c.desc} onClick={() => choose(c.mode)} />
               ))}
             </div>
           </section>
 
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
-            <div className="choice-list">
-              <button className="choice" onClick={onViewTournament}>
-                <span className="choice-icon"><Icon name="trophy" size={22} /></span>
-                <span className="choice-text">
-                  <span className="choice-label">{t('setup.home.tournamentLabel')}</span>
-                  <span className="choice-desc">{t('setup.home.tournamentDesc')}</span>
-                </span>
-                <Icon name="chevron" size={20} className="choice-chev" />
-              </button>
+            <div className="tiles tiles-2">
+              <Tile icon="trophy" label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} onClick={onViewTournament} />
+              <Tile icon="history" label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} onClick={onViewHistory} />
             </div>
           </section>
 
           {recentHistory.length > 0 && (
-            <section className="sec home-recent">
+            <section className="sec">
               <h2 className="sec-title">
                 {t('setup.recentMatches')}
                 <button className="btn-link" onClick={onViewHistory}>
                   {t('setup.viewAll')}<Icon name="chevron" size={16} />
                 </button>
               </h2>
-              <div className="mr-list">
+              <div className="mc-grid">
                 {recentHistory.map(m => (
                   <MatchCard key={m.id} match={m} onClick={onOpenMatch} />
                 ))}

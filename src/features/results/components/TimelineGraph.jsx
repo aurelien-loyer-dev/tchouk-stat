@@ -27,7 +27,7 @@ export default function TimelineGraph({ teams, timeline, settings }) {
           return (
             <g key={`x-${tick}`}>
               <line x1={tx} y1={pt} x2={tx} y2={h - pb} className="tg-grid" />
-              <text x={tx} y={h - 12} textAnchor="middle" className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
+              <text x={tx} y={h - 12} textAnchor={tick === 0 ? 'start' : tick === 1 ? 'end' : 'middle'} className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
             </g>
           )
         })}

@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { playerTeamScore, playerDerivedStats } from '../../../lib/playerStats'
-import { fmtClock, fmtDateTime } from '../../../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../../../lib/teamColor'
+import { fmtClock, fmtDayLabel, fmtTime } from '../../../lib/format'
+import { teamSwatchStyle } from '../../../lib/teamColor'
 import PageHeader from '../../../components/PageHeader'
-import Icon from '../../../components/Icon'
-import { downloadMatchPdf } from '../pdf'
+import ScoreHero from '../../../components/ScoreHero'
+import { DetailActions } from './MatchDetail'
 
-export default function PlayerMatchDetail({ match, onClose }) {
+export default function PlayerMatchDetail({ match, onClose, onDelete }) {
   const { t } = useTranslation()
   const { players = [], teams = [], settings, numTeams: nt = 2, playedAt, durationSec } = match
   const n      = nt
@@ -21,45 +21,16 @@ export default function PlayerMatchDetail({ match, onClose }) {
   return (
     <div className="hist-detail">
       <PageHeader
-        title={fmtDateTime(playedAt)}
+        title={t('history.modes.player')}
+        subtitle={`${fmtDayLabel(playedAt)} · ${fmtTime(playedAt)}`}
         onBack={onClose}
-        actions={(
-          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>
-            <Icon name="download" size={16} />{t('history.pdfBtn')}
-          </button>
-        )}
+        actions={<DetailActions match={match} onDelete={onDelete} />}
       />
 
-      <div className="mr-detail-names">
-        <span className="mr-name">
-          {settings?.teamColors?.[0] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[0])} />}
-          {teams[0]?.name}
-        </span>
-        {n === 2 && (
-          <span className="mr-name">
-            {settings?.teamColors?.[1] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[1])} />}
-            {teams[1]?.name}
-          </span>
-        )}
-      </div>
-      <div className="rf">
-        {n === 2 ? (
-          <>
-            <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : undefined}>{score0}</span>
-            <span className="rf-sep">–</span>
-            <span style={settings?.teamColors?.[1] ? teamTextStyle(settings.teamColors[1]) : undefined}>{score1}</span>
-          </>
-        ) : (
-          <span style={settings?.teamColors?.[0] ? teamTextStyle(settings.teamColors[0]) : undefined}>{score0} pts</span>
-        )}
-      </div>
-
-      <div className="card">
-        <div className="ctitle">{t('history.summaryTitle')}</div>
-        <div className="si"><div className="si-l">{t('results.ui.format')}</div><span className="si-v sub">{settings?.halfCount}×{settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">{t('history.actualDuration')}</div><span className="si-v sub">{fmtClock(durationSec)}</span></div>
-        <div className="si"><div className="si-l">{t('history.playersLabel')}</div><span className="si-v sub">{players.length}</span></div>
-      </div>
+      <ScoreHero
+        teams={teamGroups.map((g, i) => ({ name: g.name, score: i === 0 ? score0 : score1, color: g.color }))}
+        meta={`${settings?.halfCount}×${settings?.halfDurationMin} min · ${t('history.duration')} ${fmtClock(durationSec)} · ${t('history.footerPlayer', { count: players.length })}`}
+      />
 
       {teamGroups.map(({ name, color, grp }) => (
         <div className="card card-team" key={name}>

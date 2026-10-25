@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../../lib/stats'
 import { fmtClock, fmtDateTime } from '../../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
+import { teamSwatchStyle } from '../../lib/teamColor'
 import Icon from '../../components/Icon'
+import ScoreHero from '../../components/ScoreHero'
 import TimelineGraph from './components/TimelineGraph'
 import { N, Pct, Ratio, Row, Card } from './components/StatDisplay'
 import { downloadResultsPdf } from './pdf'
@@ -43,26 +44,13 @@ export default function Results({
   return (
     <>
       {/* Score final */}
-      <div className="res-hero">
-        <div className="mr-detail-names">
-          {teams.slice(0, n).map((team, i) => (
-            <span className="mr-name" key={i}>
-              <span className="team-dot" style={teamSwatchStyle(i === 0 ? c1 : c2)} />{team.name}
-            </span>
-          ))}
-        </div>
-        <div className="rf">
-          {n === 1 ? (
-            <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
-          ) : (
-            <>
-              <span style={teamTextStyle(c1)}>{score(teams, n, 0)}</span>
-              <span className="rf-sep">–</span>
-              <span style={teamTextStyle(c2)}>{score(teams, n, 1)}</span>
-            </>
-          )}
-        </div>
-      </div>
+      <ScoreHero
+        teams={teams.slice(0, n).map((team, i) => ({
+          name:  team.name,
+          score: i === 0 ? score(teams, n, 0) : score(teams, n, 1),
+          color: i === 0 ? c1 : c2,
+        }))}
+      />
 
       {/* Onglets équipes */}
       {n === 2 && (

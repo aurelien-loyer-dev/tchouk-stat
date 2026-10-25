@@ -20,7 +20,10 @@ Direction : **lignes du gymnase**. Une interface d'outil sobre qui emprunte la s
 | `--txt` encre | `#1d1915` | `#eee8de` |
 | `--dim` texte secondaire | `#5f5548` | `#a99d8c` |
 | `--acc` accent (actions, focus, sélection) | `#0d6a70` | `#5fb8b9` |
+| `--shell` bandeau couleur terrain (barre d'app, hero) | `#0f4f53` | `#102e2e` |
 | `--ok` / `--err` / `--warn` | `#2c7a35` / `#b3261e` / `#94570a` | `#6cc475` / `#f08277` / `#e3a646` |
+
+Pastilles de mode : stats = `--acc`, joueurs = `--mode-player`, scoreur = `--warn`.
 
 Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--acc-soft`) pour les fonds.
 
@@ -38,7 +41,11 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 
 ## Composants
 
-- **Barre d'app** (`components/AppBar.jsx`) : marque (la zone interdite en deux traits), langue, thème. Collante.
+- **Barre d'app** (`components/AppBar.jsx`) : bandeau `--shell`, marque (la zone interdite en deux traits), langue, thème. Collante.
+- **Hero d'accueil** : même couleur `--shell`, terrain dessiné en filets (`components/Court.jsx`), compteurs matchs/tournois.
+- **Tuiles** (accueil) : icône sur fond `--acc-soft`, libellé, description, chevron ; légère élévation au survol.
+- **Carte de match** (`components/MatchCard.jsx`) : pastille de mode, barres de couleur d'équipe, vainqueur en gras, actions PDF / suppression.
+- **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne teintée par équipe, zone interdite au centre.
 - **En-tête d'écran** (`components/PageHeader.jsx`) : lien Retour avec chevron, titre, sous-titre, actions.
 - **Icônes** (`components/Icon.jsx`) : un seul jeu, trait 2px, 24×24. Pas de glyphes Unicode comme icônes.
 - **Listes de choix** : lignes pleine largeur séparées par des filets (accueil), pas de grille de cartes.
