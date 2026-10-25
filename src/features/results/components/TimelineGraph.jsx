@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { buildPointsSeries } from '../../../lib/shotSeries'
 import { fmtClock } from '../../../lib/format'
-import { teamSwatchStyle, colorLum } from '../../../lib/teamColor'
+import { teamSwatchStyle } from '../../../lib/teamColor'
 
 export default function TimelineGraph({ teams, timeline, settings }) {
   const { t } = useTranslation()
@@ -44,12 +44,11 @@ export default function TimelineGraph({ teams, timeline, settings }) {
 
         {series.map((pts, i) => {
           const color = settings?.teamColors?.[i] || (i === 0 ? '#0e9f8f' : '#d14343')
-          const needsHalo = colorLum(color) < 0.22
           const d = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${x(p.t)} ${y(p.v)}`).join(' ')
           return (
             <g key={`line-${i}`}>
-              {needsHalo && <path d={d} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="6" />}
-              <path d={d} fill="none" stroke={color} strokeWidth="3" />
+              <path d={d} fill="none" className="tg-under" strokeWidth="7" strokeLinejoin="round" />
+              <path d={d} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" />
             </g>
           )
         })}

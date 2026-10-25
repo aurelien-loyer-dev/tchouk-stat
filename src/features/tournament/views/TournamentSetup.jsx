@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import i18n from '../../../i18n'
 import { mkTournament } from '../../../lib/tournament'
 import { KNOCKOUT_OPTIONS } from '../constants'
+import PageHeader from '../../../components/PageHeader'
+import Icon from '../../../components/Icon'
 
 export default function TournamentSetup({ onStart, onCancel }) {
   const { t } = useTranslation()
@@ -36,12 +38,9 @@ export default function TournamentSetup({ onStart, onCancel }) {
 
   return (
     <>
-      <div className="trn-topbar">
-        <button className="btn-mini" onClick={onCancel}>{t('tournament.setup.cancel')}</button>
-        <div className="trn-topbar-title">{t('tournament.setup.title')}</div>
-      </div>
-
       <div className="trn-setup">
+        <PageHeader title={t('tournament.setup.title')} onBack={onCancel} backLabel={t('tournament.setup.cancel')} />
+
         <div className="trn-field">
           <div className="flabel">{t('tournament.setup.nameLabel')}</div>
           <input type="text" placeholder={t('tournament.setup.namePlaceholder')} value={name}
@@ -100,21 +99,23 @@ export default function TournamentSetup({ onStart, onCancel }) {
             <input type="text" placeholder={t('tournament.setup.teamNamePlaceholder')} value={teamInput}
               onChange={e => setTeamInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTeam()} />
-            <button className="btn-mini" onClick={addTeam}>{t('tournament.setup.addTeam')}</button>
+            <button className="btn-mini" onClick={addTeam} disabled={!teamInput.trim()}>{t('tournament.setup.addTeam')}</button>
           </div>
           {teams.length > 0 && (
             <div className="trn-chips">
               {teams.map(tm => (
                 <div key={tm} className="trn-chip">
                   <span>{tm}</span>
-                  <button onClick={() => setTeams(p => p.filter(x => x !== tm))}>×</button>
+                  <button onClick={() => setTeams(p => p.filter(x => x !== tm))} title={t('common.remove')} aria-label={`${t('common.remove')} ${tm}`}>
+                    <Icon name="close" size={14} />
+                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <button className="btn-acc" onClick={handleStart} disabled={teams.length < 2}>
+        <button className="btn-acc trn-start-btn" onClick={handleStart} disabled={teams.length < 2}>
           {t('tournament.setup.start')}
         </button>
       </div>

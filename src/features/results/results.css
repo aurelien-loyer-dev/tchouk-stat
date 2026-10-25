@@ -1,8 +1,37 @@
-.tabs  { display: flex; gap: 8px; justify-content: center; }
-.tab   {
-  padding: 9px 22px; border-radius: 30px; border: 1px solid var(--s3);
-  background: var(--s1); color: var(--dim); font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: all 0.18s;
+.res-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
 }
-.tab.a0 { border-color: var(--c1); color: var(--c1); background: color-mix(in srgb, var(--c1) 10%, transparent); text-shadow: var(--c1-halo); }
-.tab.a1 { border-color: var(--c2); color: var(--c2); background: color-mix(in srgb, var(--c2) 10%, transparent); text-shadow: var(--c2-halo); }
+
+.rf-sep {
+  color: var(--dim);
+  font-weight: 300;
+  margin: 0 0.3em;
+}
+
+.res-tabs {
+  align-self: center;
+  width: 100%;
+  max-width: 520px;
+}
+.res-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.res-grid .card-wide { grid-column: 1 / -1; }
+
+@media (max-width: 720px) {
+  .res-grid { grid-template-columns: 1fr; }
+}

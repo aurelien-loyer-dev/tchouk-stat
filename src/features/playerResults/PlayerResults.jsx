@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playerTeamScore } from '../../lib/playerStats'
 import { pct } from '../../lib/format'
-import { teamTextStyle } from '../../lib/teamColor'
+import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
+import Icon from '../../components/Icon'
 import { offScore, defScore, mvpScore, topPlayers, AWARDS } from './awards'
 import { generatePlayerPdf, generateFullPdf } from './pdf'
 import './playerResults.css'
@@ -42,16 +43,25 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
 
   return (
     <>
-      <div className="rf">
-        {n === 2 ? (
-          <>
+      <div className="res-hero">
+        <div className="mr-detail-names">
+          {teams.slice(0, n).map((team, i) => (
+            <span className="mr-name" key={i}>
+              <span className="team-dot" style={teamSwatchStyle(i === 0 ? c1 : c2)} />{team.name}
+            </span>
+          ))}
+        </div>
+        <div className="rf">
+          {n === 2 ? (
+            <>
+              <span style={teamTextStyle(c1)}>{score0}</span>
+              <span className="rf-sep">–</span>
+              <span style={teamTextStyle(c2)}>{score1}</span>
+            </>
+          ) : (
             <span style={teamTextStyle(c1)}>{score0}</span>
-            <span style={{ color: 'var(--s3)', fontWeight: 200 }}> – </span>
-            <span style={teamTextStyle(c2)}>{score1}</span>
-          </>
-        ) : (
-          <span style={teamTextStyle(c1)}>{score0}</span>
-        )}
+          )}
+        </div>
       </div>
 
       {/* ── Distinctions automatiques ── */}
@@ -64,7 +74,7 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
             return (
               <div key={award.key} className="award-section">
                 <div className="award-header">
-                  <span className="award-badge" style={{ background: award.color }}>{t(award.labelKey)}</span>
+                  <span className="award-badge" style={{ '--aw': award.color }}>{t(award.labelKey)}</span>
                   <div className="award-info">
                     <span className="award-full">{award.full}</span>
                     <span className="award-desc">{t(award.descKey)}</span>
@@ -74,16 +84,10 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
                   {groups.map(({ rank, players: gPlayers }) =>
                     gPlayers.map((p, i) => (
                       <div key={p.id} className="award-rank-row">
-                        <span
-                          className="award-rank-num"
-                          style={{ color: rank === 1 ? award.color : undefined }}
-                        >
+                        <span className={`award-rank-num${rank === 1 ? ' top' : ''}`} style={{ '--aw': award.color }}>
                           {i === 0 ? rank : ''}
                         </span>
-                        <span
-                          className="award-rank-name"
-                          style={{ color: rank === 1 && i === 0 ? award.color : undefined, fontWeight: rank === 1 ? 900 : 600 }}
-                        >
+                        <span className={`award-rank-name${rank === 1 ? ' top' : ''}`}>
                           {p.name}
                         </span>
                         {i > 0 && <span className="award-eq-badge">{t('awards.exAequo')}</span>}
@@ -98,14 +102,25 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         </div>
       )}
 
+      <div className="actions-row">
+        <button className="btn-ghost" onClick={handleGenerateFullPdf}>
+          <Icon name="download" size={18} />{t('playerResults.downloadFullPdf')}
+        </button>
+        <button className="btn-acc" onClick={onNew}>
+          {t('playerResults.newMatch')}
+        </button>
+      </div>
+
       {/* ── PDF stats d'un joueur (sélecteur) ── */}
       {players.length > 0 && (
         <div className="player-pdf-wrap">
           <button
             className="btn-ghost player-pdf-btn"
             onClick={() => setShowPicker(s => !s)}
+            aria-expanded={showPicker}
           >
-            {t('playerResults.pdfPlayerStatsBtn')} {showPicker ? '▲' : '▼'}
+            {t('playerResults.pdfPlayerStatsBtn')}
+            <Icon name="down" size={18} className={`rot${showPicker ? ' open' : ''}`} />
           </button>
           {showPicker && (
             <div className="player-pdf-panel">
@@ -117,28 +132,13 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
                 >
                   <span className="player-pdf-name">{p.name}</span>
                   <span className="player-pdf-team">{teamName(p)}</span>
+                  <Icon name="download" size={16} className="player-pdf-ico" />
                 </button>
               ))}
             </div>
           )}
         </div>
       )}
-
-      <button
-        className="btn-ghost"
-        style={{ alignSelf: 'center', minWidth: 280, marginTop: 4 }}
-        onClick={handleGenerateFullPdf}
-      >
-        {t('playerResults.downloadFullPdf')}
-      </button>
-
-      <button
-        className="btn-ghost"
-        style={{ alignSelf: 'center', minWidth: 200, marginTop: 8 }}
-        onClick={onNew}
-      >
-        {t('playerResults.newMatch')}
-      </button>
     </>
   )
 }

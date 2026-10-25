@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
-import { teamHalo, teamBtnTxt } from './lib/teamColor'
+import { teamBtnTxt } from './lib/teamColor'
+import AppBar from './components/AppBar'
 import Setup from './features/setup/Setup'
 import Match from './features/match/Match'
 import Results from './features/results/Results'
@@ -152,11 +153,11 @@ export default function App() {
     const c2 = matchSettings.teamColors[1] || DEFAULT_SETTINGS.teamColors[1]
     document.documentElement.style.setProperty('--c1', c1)
     document.documentElement.style.setProperty('--c2', c2)
-    document.documentElement.style.setProperty('--c1-halo',    teamHalo(c1))
-    document.documentElement.style.setProperty('--c2-halo',    teamHalo(c2))
     document.documentElement.style.setProperty('--c1-btn-txt', teamBtnTxt(c1))
     document.documentElement.style.setProperty('--c2-btn-txt', teamBtnTxt(c2))
   }, [matchSettings])
+
+  useEffect(() => { window.scrollTo(0, 0) }, [screen])
 
   useEffect(() => {
     try {
@@ -347,85 +348,88 @@ export default function App() {
 
   return (
     <>
-      {screen === 'setup' && (
-        <Setup
-          numTeams={numTeams}
-          setNumTeams={setNumTeams}
-          onStart={startMatch}
-          defaultSettings={matchSettings}
-          history={history}
-          onClearHistory={clearHistory}
-          onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
-          onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
-          onViewTournament={() => setScreen('tournament')}
-        />
-      )}
-      {screen === 'match' && (
-        <Match
-          teams={teams}
-          numTeams={numTeams}
-          onAdj={handleAdj}
-          onEnd={endMatch}
-          settings={matchSettings}
-        />
-      )}
-      {screen === 'scorer' && (
-        <Scorer
-          teams={teams}
-          numTeams={numTeams}
-          onAdj={handleAdj}
-          onFinish={saveMatchToHistory}
-          onNewMatch={newMatch}
-          onReset={resetScorer}
-          settings={matchSettings}
-          logos={teamLogos}
-        />
-      )}
-      {screen === 'playermatch' && (
-        <PlayerMatch
-          teams={teams}
-          players={players}
-          numTeams={playerNumTeams}
-          onPlayerAdj={handlePlayerAdj}
-          onEnd={endPlayerMatch}
-          settings={matchSettings}
-        />
-      )}
-      {screen === 'results' && (
-        <Results
-          teams={teams}
-          numTeams={numTeams}
-          timeline={timeline}
-          settings={matchSettings}
-          summary={lastSummary}
-          onNew={newMatch}
-        />
-      )}
-      {screen === 'playerresults' && (
-        <PlayerResults
-          teams={teams}
-          players={players}
-          numTeams={playerNumTeams}
-          settings={matchSettings}
-          summary={lastSummary}
-          onNew={newMatch}
-        />
-      )}
-      {screen === 'history' && (
-        <History
-          history={history}
-          onBack={() => setScreen('setup')}
-          onClear={clearHistory}
-          initialMatch={historyInitialMatch}
-        />
-      )}
-      {screen === 'tournament' && (
-        <Tournament
-          tournaments={tournaments}
-          onSave={handleSaveTournaments}
-          onBack={() => setScreen('setup')}
-        />
-      )}
+      <AppBar />
+      <main className="app-main">
+        {screen === 'setup' && (
+          <Setup
+            numTeams={numTeams}
+            setNumTeams={setNumTeams}
+            onStart={startMatch}
+            defaultSettings={matchSettings}
+            history={history}
+            onClearHistory={clearHistory}
+            onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
+            onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
+            onViewTournament={() => setScreen('tournament')}
+          />
+        )}
+        {screen === 'match' && (
+          <Match
+            teams={teams}
+            numTeams={numTeams}
+            onAdj={handleAdj}
+            onEnd={endMatch}
+            settings={matchSettings}
+          />
+        )}
+        {screen === 'scorer' && (
+          <Scorer
+            teams={teams}
+            numTeams={numTeams}
+            onAdj={handleAdj}
+            onFinish={saveMatchToHistory}
+            onNewMatch={newMatch}
+            onReset={resetScorer}
+            settings={matchSettings}
+            logos={teamLogos}
+          />
+        )}
+        {screen === 'playermatch' && (
+          <PlayerMatch
+            teams={teams}
+            players={players}
+            numTeams={playerNumTeams}
+            onPlayerAdj={handlePlayerAdj}
+            onEnd={endPlayerMatch}
+            settings={matchSettings}
+          />
+        )}
+        {screen === 'results' && (
+          <Results
+            teams={teams}
+            numTeams={numTeams}
+            timeline={timeline}
+            settings={matchSettings}
+            summary={lastSummary}
+            onNew={newMatch}
+          />
+        )}
+        {screen === 'playerresults' && (
+          <PlayerResults
+            teams={teams}
+            players={players}
+            numTeams={playerNumTeams}
+            settings={matchSettings}
+            summary={lastSummary}
+            onNew={newMatch}
+          />
+        )}
+        {screen === 'history' && (
+          <History
+            history={history}
+            onBack={() => setScreen('setup')}
+            onClear={clearHistory}
+            initialMatch={historyInitialMatch}
+          />
+        )}
+        {screen === 'tournament' && (
+          <Tournament
+            tournaments={tournaments}
+            onSave={handleSaveTournaments}
+            onBack={() => setScreen('setup')}
+          />
+        )}
+      </main>
       <AppFooter />
       <Analytics />
     </>

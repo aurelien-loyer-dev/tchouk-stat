@@ -1,83 +1,94 @@
+/* Lignes de match séparées par un filet, comme une feuille de résultats. */
+.mr-list {
+  border-top: 1px solid var(--bdr);
+}
+
 .mr-card {
-  border: 1px solid var(--bdr);
-  border-radius: 12px;
-  padding: 14px 16px;
-  background: var(--s1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--bdr);
+}
+
+.mr-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 11px;
-}
-
-button.mr-card {
-  width: 100%;
+  gap: 6px;
+  padding: 14px 8px;
+  margin: 0 -8px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
   text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  transition: border-color 0.15s, background 0.15s;
 }
 
-button.mr-card:hover {
-  border-color: var(--acc);
-  background: var(--s2);
-}
+button.mr-main { transition: background 0.15s; }
+button.mr-main:hover { background: var(--s2); }
 
 .mr-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
+  gap: 12px;
+  font-size: 13px;
   color: var(--dim);
 }
 
-/* Noms d'équipe groupés — jamais accolés au score, qui vit dans .mr-score
-   juste en dessous, comme le score final de l'écran de résultats (.rf). */
+.mr-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .mr-names {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 2px;
 }
 
 .mr-name {
   display: flex;
   align-items: center;
   min-width: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dim);
+  font-size: 16px;
+  font-weight: 550;
+  color: var(--txt);
+}
+
+.mr-name-txt {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .mr-score {
-  text-align: center;
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: -0.5px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.45;
 }
 
-.mr-score-sep {
-  color: var(--s3);
-  font-weight: 200;
-  margin: 0 10px;
-}
+.mr-chev { color: var(--dim); flex-shrink: 0; }
 
 .mr-foot {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--dim);
-  padding-top: 9px;
-  border-top: 1px solid var(--bdr);
 }
 
-/* Variante horizontale de .mr-name pour les en-têtes de détail (au-dessus
-   d'un gros score .rf) : noms côte à côte, mais jamais accolés au score. */
+.mr-pdf { flex-shrink: 0; }
+
+/* En-têtes de détail : noms côte à côte au-dessus d'un gros score .rf */
 .mr-detail-names {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 22px;
+  gap: 8px 32px;
   flex-wrap: wrap;
-  margin-bottom: 6px;
 }
+
+.mr-detail-names .mr-name { font-size: 17px; font-weight: 650; }

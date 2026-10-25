@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { teamSwatchStyle } from '../../../lib/teamColor'
+import Icon from '../../../components/Icon'
 import CompoLoader from './CompoLoader'
 
 // Liste de noms de joueurs (colonne)
@@ -17,7 +18,7 @@ export default function PlayerNamesCol({ teamLabel, teamColor, names, onChange, 
     <div className="ps-team-col">
       <div className="ps-team-hd">
         <span className="team-dot" style={teamSwatchStyle(teamColor)} />
-        {teamLabel}
+        <span className="ps-team-hd-name">{teamLabel}</span>
       </div>
       <CompoLoader
         compos={compos}
@@ -36,11 +37,13 @@ export default function PlayerNamesCol({ teamLabel, teamColor, names, onChange, 
             onChange={e => updateName(i, e.target.value)}
           />
           {names.length > 1 && (
-            <button className="btn-mini ps-rm-btn" onClick={() => removePlayer(i)}>×</button>
+            <button className="icon-btn danger" onClick={() => removePlayer(i)} title={t('common.remove')} aria-label={t('common.remove')}>
+              <Icon name="close" size={18} />
+            </button>
           )}
         </div>
       ))}
-      <button className="btn-mini ps-add-btn" onClick={addPlayer}>{t('setup.compos.addPlayer')}</button>
+      <button className="btn-link ps-add-btn" onClick={addPlayer}>{t('setup.compos.addPlayer')}</button>
     </div>
   )
 }

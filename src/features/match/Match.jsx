@@ -3,6 +3,7 @@ import { score } from '../../lib/stats'
 import { fmtClock } from '../../lib/format'
 import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
+import Icon from '../../components/Icon'
 import Animated from './components/Animated'
 import Panel from './components/Panel'
 import './match.css'
@@ -36,8 +37,8 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
               </div>
               <div className="sb-sep">–</div>
               <div className="sb-t">
-                <Animated value={score(teams, numTeams, 1)} className="sb-score" style={teamTextStyle(c2)} />
                 <div className="sb-name"><span className="team-dot" style={teamSwatchStyle(c2)} />{teams[1].name}</div>
+                <Animated value={score(teams, numTeams, 1)} className="sb-score" style={teamTextStyle(c2)} />
               </div>
             </>
           ) : (
@@ -49,12 +50,15 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
         </div>
 
         <div className="clock-wrap">
-          <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
-          <div className="clock-meta">
-            {t('match.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
+          <div>
+            <div className="clock-main">{fmtClock(remainingHalfSec)}</div>
+            <div className="clock-meta">
+              {t('match.clockMeta', { current: currentHalf, total: halfCount, time: fmtClock(remainingMatchSec) })}
+            </div>
           </div>
           <div className="clock-ctrl">
-            <button className="btn-mini" onClick={() => setRunning(v => !v)}>
+            <button className="btn-mini is-primary" onClick={() => setRunning(v => !v)}>
+              <Icon name={running ? 'pause' : 'play'} size={16} />
               {running ? t('match.pause') : elapsedSec > 0 ? t('match.resume') : t('match.start')}
             </button>
             {currentHalf < halfCount && (

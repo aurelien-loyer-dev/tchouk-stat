@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { teamSwatchStyle } from '../../../lib/teamColor'
+import Icon from '../../../components/Icon'
 
 // Gestionnaire de compositions sauvegardées (charger / éditer / supprimer)
 export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate, currentTeamLabel }) {
@@ -41,8 +42,9 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
 
   return (
     <div className="ps-compo-mgr">
-      <button className="btn-mini ps-compo-toggle" onClick={() => setOpen(v => !v)}>
+      <button className="ps-compo-toggle" onClick={() => setOpen(v => !v)} aria-expanded={open}>
         {open ? t('setup.compos.toggleOpen') : t('setup.compos.toggleClosed')}
+        <Icon name="down" size={16} className={`rot${open ? ' open' : ''}`} />
       </button>
       {open && (
         <div className="ps-compo-panel">
@@ -84,12 +86,12 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
                               onChange={e => draftSetPlayer(i, e.target.value)}
                             />
                             {draft.players.length > 1 && (
-                              <button className="btn-mini ps-rm-btn"
-                                onClick={() => setDraft(d => ({ ...d, players: d.players.filter((_, j) => j !== i) }))}>×</button>
+                              <button className="icon-btn danger" title={t('common.remove')} aria-label={t('common.remove')}
+                                onClick={() => setDraft(d => ({ ...d, players: d.players.filter((_, j) => j !== i) }))}><Icon name="close" size={18} /></button>
                             )}
                           </div>
                         ))}
-                        <button className="btn-mini ps-add-btn"
+                        <button className="btn-link ps-add-btn"
                           onClick={() => setDraft(d => ({ ...d, players: [...d.players, ''] }))}>{t('setup.compos.addPlayer')}</button>
                       </div>
                       <div className="ps-compo-edit-actions">
@@ -105,8 +107,8 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
                         <span className="ps-compo-meta">{c.teamName} · {t('setup.compos.playersCount', { count: c.players.length })}</span>
                       </span>
                       <button className="btn-mini" onClick={() => { onLoad(c); setOpen(false) }}>{t('setup.compos.load')}</button>
-                      <button className="btn-mini ps-compo-edit-btn" onClick={() => startEdit(c)}>✏</button>
-                      <button className="btn-mini ps-compo-del" onClick={() => onDelete(c.id)}>×</button>
+                      <button className="icon-btn" onClick={() => startEdit(c)} title={t('common.edit')} aria-label={t('common.edit')}><Icon name="edit" size={18} /></button>
+                      <button className="icon-btn danger" onClick={() => onDelete(c.id)} title={t('common.delete')} aria-label={t('common.delete')}><Icon name="close" size={18} /></button>
                     </div>
                   )}
                 </div>

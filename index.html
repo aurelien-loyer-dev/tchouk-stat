@@ -3,8 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta name="color-scheme" content="light dark" />
     <title>Tchoukball Assistant</title>
     <link rel="icon" type="image/png" href="/src/public/logo_al.png" />
+    <script>
+      (function () {
+        var t = null
+        try { t = localStorage.getItem('tchouk_theme') } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = t
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

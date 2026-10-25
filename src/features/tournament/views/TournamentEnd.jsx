@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { getTournamentEndState } from '../../../lib/tournament'
 import FinalRankingTable from '../components/FinalRankingTable'
 import { downloadTournamentPdf } from '../pdf'
+import Icon from '../../../components/Icon'
 
 export default function TournamentEnd({ tournament, onBack }) {
   const { t } = useTranslation()
@@ -26,7 +27,7 @@ export default function TournamentEnd({ tournament, onBack }) {
       <div className="trn-podium">
         {topThree.map((row, i) => (
           <div key={row.team} className={`trn-podium-card trn-podium-${i + 1}`}>
-            <div className="trn-podium-rank">#{i + 1}</div>
+            <div className="trn-podium-rank">{i + 1}</div>
             <div className="trn-podium-team">{row.team}</div>
             <div className="trn-podium-points">{row.pts} pts</div>
           </div>
@@ -36,9 +37,11 @@ export default function TournamentEnd({ tournament, onBack }) {
       <div className="trn-section">{t('tournament.finalRanking')}</div>
       <FinalRankingTable ranking={finalRanking} hasKnockout={hasKnockout} />
 
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <button className="btn-mini" onClick={() => downloadTournamentPdf(tournament)}>{t('history.pdfBtn')}</button>
-        <button className="btn-acc trn-end-btn" onClick={onBack}>{t('tournament.backToList')}</button>
+      <div className="actions-row">
+        <button className="btn-ghost" onClick={() => downloadTournamentPdf(tournament)}>
+          <Icon name="download" size={18} />{t('history.pdfBtn')}
+        </button>
+        <button className="btn-acc" onClick={onBack}>{t('tournament.backToList')}</button>
       </div>
     </div>
   )
