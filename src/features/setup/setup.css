@@ -63,7 +63,7 @@
   color: var(--shell-dim);
 }
 
-/* Tuiles de choix : texte seul, une ligne de terrain en haut au survol. */
+/* Tuiles de choix : texte seul, bordure d'accent au survol. */
 .tiles {
   display: grid;
   gap: 12px;
@@ -82,25 +82,13 @@
   border-radius: var(--r);
   background: var(--s1);
   text-align: left;
-  overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.tile::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: var(--acc);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s var(--ease);
-}
 .tile:hover {
-  border-color: var(--bdr-strong);
+  border-color: var(--acc);
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
-.tile:hover::before { transform: scaleX(1); }
 .tile:hover .tile-chev { color: var(--acc); transform: translate(3px, -50%); }
 .tile:active { transform: translateY(0); }
 

@@ -59,7 +59,7 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 
 - **Barre d'app** (`components/AppBar.jsx`) : bandeau `--shell`, marque (la zone interdite en deux traits), langue, thème. Collante.
 - **Hero d'accueil** : même couleur `--shell`, terrain dessiné en filets (`components/Court.jsx`), compteurs matchs/tournois.
-- **Tuiles** (accueil) : texte seul (libellé, description) et chevron, sans picto ; une ligne d'accent apparaît en haut au survol.
+- **Tuiles** (accueil) : texte seul (libellé, description) et chevron, sans picto ; bordure d'accent au survol.
 - **Carte de match** (`components/MatchCard.jsx`) : pastille de mode, barres de couleur d'équipe, vainqueur en gras, actions PDF / suppression.
 - **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne teintée par équipe, zone interdite au centre.
 - **En-tête d'écran** (`components/PageHeader.jsx`) : lien Retour avec chevron, titre, sous-titre, actions.
