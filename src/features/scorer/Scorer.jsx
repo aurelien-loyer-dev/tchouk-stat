@@ -96,23 +96,17 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
           {/* Final score */}
           <div className="sc-end-final">
             <div className="sc-end-team">
-              <div className="sc-end-logo-wrap">
-                {logos?.[0]
-                  ? <img src={logos[0]} className="sc-logo" alt={teams[0]?.name} />
-                  : <div className="sc-logo-placeholder" style={{ background: c1 + '22', ...teamTextStyle(c1) }}>{(teams[0]?.name || 'E')[0].toUpperCase()}</div>
-                }
-              </div>
+              {logos?.[0] && (
+                <div className="sc-end-logo-wrap"><img src={logos[0]} className="sc-logo" alt={teams[0]?.name} /></div>
+              )}
               <div className="sc-end-name">{teams[0]?.name}</div>
               <div className="sc-end-score" style={teamTextStyle(c1)}>{s0}</div>
             </div>
             {two && (
               <div className="sc-end-team">
-                <div className="sc-end-logo-wrap">
-                  {logos?.[1]
-                    ? <img src={logos[1]} className="sc-logo" alt={teams[1]?.name} />
-                    : <div className="sc-logo-placeholder" style={{ background: c2 + '22', ...teamTextStyle(c2) }}>{(teams[1]?.name || 'E')[0].toUpperCase()}</div>
-                  }
-                </div>
+                {logos?.[1] && (
+                  <div className="sc-end-logo-wrap"><img src={logos[1]} className="sc-logo" alt={teams[1]?.name} /></div>
+                )}
                 <div className="sc-end-name">{teams[1]?.name}</div>
                 <div className="sc-end-score" style={teamTextStyle(c2)}>{s1}</div>
               </div>
@@ -176,17 +170,12 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
       {/* Scoreboard */}
       <div className="sc-board">
         <div className="sc-team sc-team-left" style={{ '--tc': c1 }}>
-          <div className="sc-logo-wrap">
-            {logos?.[0]
-              ? <img src={logos[0]} className="sc-logo" alt={teams[0]?.name} />
-              : <div className="sc-logo-placeholder" style={{ background: c1 + '22', ...teamTextStyle(c1) }}>
-                  {(teams[0]?.name || 'E')[0].toUpperCase()}
-                </div>
-            }
-          </div>
+          {logos?.[0] && (
+            <div className="sc-logo-wrap"><img src={logos[0]} className="sc-logo" alt={teams[0]?.name} /></div>
+          )}
           <div className="sc-team-name">{teams[0]?.name}</div>
           <AnimScore value={s0} color={c1} />
-          <div className="sc-half-score" style={teamTextStyle(c1)}>+{halfScore0}</div>
+          <div className="sc-half-score">{t('scorer.halfPoints', { n: halfScore0 })}</div>
           <div className="sc-actions">
             <button className="sc-btn-neg" onClick={() => adjScore(0, -1)} disabled={!s0}>−1</button>
             <button className="sc-btn-score" onClick={() => adjScore(0, 1)}>+1</button>
@@ -195,17 +184,12 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
 
         {two && (
           <div className="sc-team sc-team-right" style={{ '--tc': c2 }}>
-            <div className="sc-logo-wrap">
-              {logos?.[1]
-                ? <img src={logos[1]} className="sc-logo" alt={teams[1]?.name} />
-                : <div className="sc-logo-placeholder" style={{ background: c2 + '22', ...teamTextStyle(c2) }}>
-                    {(teams[1]?.name || 'E')[0].toUpperCase()}
-                  </div>
-              }
-            </div>
+            {logos?.[1] && (
+              <div className="sc-logo-wrap"><img src={logos[1]} className="sc-logo" alt={teams[1]?.name} /></div>
+            )}
             <div className="sc-team-name">{teams[1]?.name}</div>
             <AnimScore value={s1} color={c2} />
-            <div className="sc-half-score" style={teamTextStyle(c2)}>+{halfScore1}</div>
+            <div className="sc-half-score">{t('scorer.halfPoints', { n: halfScore1 })}</div>
             <div className="sc-actions">
               <button className="sc-btn-neg" onClick={() => adjScore(1, -1)} disabled={!s1}>−1</button>
               <button className="sc-btn-score" onClick={() => adjScore(1, 1)}>+1</button>

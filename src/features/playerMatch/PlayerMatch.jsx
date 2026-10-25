@@ -105,7 +105,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
       <div className="pm-stats-panel">
         <div className={`pm-stats-hint${selectedDef ? ' pm-hint-active' : ''}`}>
           {selectedDef
-            ? <>{t('playerMatch.statHintPrefix')}<strong>{t(selectedDef.labelKey)}</strong>{t('playerMatch.statHintSuffix')}</>
+            ? <><span className={`stat-chip stat-${selectedDef.color}`} aria-hidden="true" />{t('playerMatch.statHintPrefix')}<strong>{t(selectedDef.labelKey)}</strong>{t('playerMatch.statHintSuffix')}</>
             : t('playerMatch.statHintDefault')}
         </div>
         <div className="pm-stat-groups">
@@ -120,11 +120,12 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
                       key={stat.id}
                       className={[
                         'pm-stat-btn',
-                        stat.color && `pm-stat-${stat.color}`,
+                        stat.color && `stat-${stat.color}`,
                         selectedStat === stat.id && 'pm-stat-sel',
                       ].filter(Boolean).join(' ')}
                       onClick={() => handleStatClick(stat.id)}
                     >
+                      <span className="stat-chip" aria-hidden="true" />
                       <span className="pm-stat-label">{t(stat.labelKey)}</span>
                     </button>
                   ))}
@@ -163,7 +164,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
       )}
 
       {/* ── Joueurs en grille ── */}
-      <div className={`pm-players-wrap${n === 1 ? ' pm-single-team' : ''}`}>
+      <div className={`pm-players-wrap${n === 1 ? ' pm-single-team' : ''}${selectedDef ? ` stat-${selectedDef.color}` : ''}`}>
         <TeamColumn
           teamName={teams[0]?.name}
           teamColor={c1}

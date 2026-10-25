@@ -63,7 +63,7 @@
   color: var(--shell-dim);
 }
 
-/* Tuiles de choix */
+/* Tuiles de choix : texte seul, bordure d'accent au survol. */
 .tiles {
   display: grid;
   gap: 12px;
@@ -76,9 +76,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  min-height: 150px;
-  padding: 18px 18px 20px;
+  gap: 6px;
+  padding: 20px 52px 20px 20px;
   border: 1px solid var(--bdr);
   border-radius: var(--r);
   background: var(--s1);
@@ -86,23 +85,12 @@
   transition: border-color 0.15s, box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
 }
 .tile:hover {
-  border-color: var(--bdr-strong);
+  border-color: var(--acc);
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
-.tile:hover .tile-chev { color: var(--acc); transform: translateX(3px); }
+.tile:hover .tile-chev { color: var(--acc); transform: translate(3px, -50%); }
 .tile:active { transform: translateY(0); }
-
-.tile-icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  background: var(--acc-soft);
-  color: var(--acc);
-}
 
 .tile-label {
   font-size: 18px;
@@ -112,45 +100,19 @@
 .tile-desc {
   font-size: 14px;
   color: var(--dim);
-  padding-right: 24px;
 }
 
 .tile-chev {
   position: absolute;
-  top: 18px;
-  right: 16px;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
   color: var(--dim);
   transition: transform 0.2s var(--ease), color 0.15s;
 }
 
-.tiles-2 .tile {
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-  min-height: 0;
-  padding: 16px 48px 16px 16px;
-  flex-wrap: wrap;
-}
-.tiles-2 .tile-icon { margin-bottom: 0; }
-.tiles-2 .tile-label { flex: 1; }
-.tiles-2 .tile-desc { flex-basis: 100%; padding: 0 0 0 64px; margin-top: -12px; }
-.tiles-2 .tile-chev { top: 50%; transform: translateY(-50%); }
-.tiles-2 .tile:hover .tile-chev { transform: translate(3px, -50%); }
-
 @media (max-width: 760px) {
   .tiles-3 { grid-template-columns: 1fr; }
-  .tile { min-height: 0; }
-  .tiles-3 .tile {
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 48px 16px 16px;
-    flex-wrap: wrap;
-  }
-  .tiles-3 .tile-icon { margin-bottom: 0; }
-  .tiles-3 .tile-label { flex: 1; }
-  .tiles-3 .tile-desc { flex-basis: 100%; padding: 0 0 0 64px; margin-top: -12px; }
-  .tiles-3 .tile-chev { top: 50%; transform: translateY(-50%); }
 }
 
 @media (max-width: 600px) {

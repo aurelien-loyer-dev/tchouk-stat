@@ -34,6 +34,15 @@
   --shell-txt:  #f3f8f7;
   --shell-dim:  #b7d2cf;
   --mode-player: #7048d4;
+  --st-green:   #008300;
+  --st-red:     #e34948;
+  --st-blue:    #2a78d6;
+  --st-orange:  #eb6834;
+  --st-violet:  #6250d6;
+  --st-magenta: #e87ba4;
+  --st-yellow:  #eda100;
+  --st-aqua:    #1baf7a;
+  --st-slate:   #6b7a89;
   --r:          12px;
   --r-sm:       8px;
   --ease:       cubic-bezier(0.22, 1, 0.36, 1);
@@ -65,6 +74,15 @@
     --shell-txt:  #eef6f5;
     --shell-dim:  #9fbebb;
     --mode-player: #a78bfa;
+    --st-green:   #008300;
+    --st-red:     #e66767;
+    --st-blue:    #3987e5;
+    --st-orange:  #d95926;
+    --st-violet:  #9085e9;
+    --st-magenta: #d55181;
+    --st-yellow:  #c98500;
+    --st-aqua:    #199e70;
+    --st-slate:   #8796a5;
     color-scheme: dark;
   }
 }
@@ -93,6 +111,15 @@
   --shell-txt:  #eef6f5;
   --shell-dim:  #9fbebb;
   --mode-player: #a78bfa;
+  --st-green:   #008300;
+  --st-red:     #e66767;
+  --st-blue:    #3987e5;
+  --st-orange:  #d95926;
+  --st-violet:  #9085e9;
+  --st-magenta: #d55181;
+  --st-yellow:  #c98500;
+  --st-aqua:    #199e70;
+  --st-slate:   #8796a5;
   color-scheme: dark;
 }
 
@@ -598,6 +625,29 @@ input[type=number]:focus,
 /* bump : retour visuel discret quand un compteur change */
 @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
 .bump { animation: bump 0.2s var(--ease); }
+
+/* ── Couleurs de stat ──
+   Une couleur par stat (palette validée daltonisme) pour repérer une ligne
+   d'un coup d'œil ; le libellé reste toujours visible à côté. */
+.stat-green   { --stat: var(--st-green); }
+.stat-red     { --stat: var(--st-red); }
+.stat-blue    { --stat: var(--st-blue); }
+.stat-orange  { --stat: var(--st-orange); }
+.stat-violet  { --stat: var(--st-violet); }
+.stat-magenta { --stat: var(--st-magenta); }
+.stat-yellow  { --stat: var(--st-yellow); }
+.stat-aqua    { --stat: var(--st-aqua); }
+.stat-slate   { --stat: var(--st-slate); }
+.stat-ink     { --stat: var(--txt); }
+
+.stat-chip {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--stat, var(--s3));
+  flex-shrink: 0;
+}
 
 /* Pastille de couleur d'équipe accolée à du texte simple. */
 .team-dot {

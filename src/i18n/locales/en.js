@@ -115,6 +115,7 @@ export default {
     endButton: 'End match',
   },
   scorer: {
+    halfPoints: 'This half: +{{n}}',
     matchEnded: 'Match ended',
     replay: 'Replay',
     halfScores: 'Score by half',

@@ -10,10 +10,9 @@ import LogoUpload from './components/LogoUpload'
 import PlayerNamesCol from './components/PlayerNamesCol'
 import './setup.css'
 
-function Tile({ icon, label, desc, onClick }) {
+function Tile({ label, desc, onClick }) {
   return (
     <button className="tile" onClick={onClick}>
-      <span className="tile-icon"><Icon name={icon} size={24} /></span>
       <span className="tile-label">{label}</span>
       <span className="tile-desc">{desc}</span>
       <Icon name="chevron" size={20} className="tile-chev" />
@@ -122,9 +121,9 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
   const recentHistory = (history || []).slice(0, 3)
 
   const startChoices = [
-    { mode: 'stats',  icon: 'sheet',      label: t('setup.statsChoice.sheetLabel'),   desc: t('setup.statsChoice.sheetDesc') },
-    { mode: 'player', icon: 'players',    label: t('setup.statsChoice.playersLabel'), desc: t('setup.statsChoice.playersDesc') },
-    { mode: 'scorer', icon: 'scoreboard', label: t('setup.home.scorerLabel'),         desc: t('setup.home.scorerDesc') },
+    { mode: 'stats',  label: t('setup.statsChoice.sheetLabel'),   desc: t('setup.statsChoice.sheetDesc') },
+    { mode: 'player', label: t('setup.statsChoice.playersLabel'), desc: t('setup.statsChoice.playersDesc') },
+    { mode: 'scorer', label: t('setup.home.scorerLabel'),         desc: t('setup.home.scorerDesc') },
   ]
 
   const formTitle = mode === 'scorer' ? t('setup.formTitle.scorer') : mode === 'player' ? t('setup.formTitle.player') : t('setup.formTitle.stats')
@@ -156,7 +155,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             <h2 className="sec-title">{t('setup.home.startTitle')}</h2>
             <div className="tiles tiles-3">
               {startChoices.map(c => (
-                <Tile key={c.mode} icon={c.icon} label={c.label} desc={c.desc} onClick={() => choose(c.mode)} />
+                <Tile key={c.mode} label={c.label} desc={c.desc} onClick={() => choose(c.mode)} />
               ))}
             </div>
           </section>
@@ -164,8 +163,8 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
             <div className="tiles tiles-2">
-              <Tile icon="trophy" label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} onClick={onViewTournament} />
-              <Tile icon="history" label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} onClick={onViewHistory} />
+              <Tile label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} onClick={onViewTournament} />
+              <Tile label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} onClick={onViewHistory} />
             </div>
           </section>
 

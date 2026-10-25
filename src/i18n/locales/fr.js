@@ -115,6 +115,7 @@ export default {
     endButton: 'Fin du match',
   },
   scorer: {
+    halfPoints: 'Cette mi-temps : +{{n}}',
     matchEnded: 'Fin du match',
     replay: 'Rejouer',
     halfScores: 'Score par mi-temps',
