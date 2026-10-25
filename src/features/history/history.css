@@ -1,13 +1,67 @@
 .hist {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 860px;
-  width: 100%;
-  margin: 0 auto;
+  gap: 24px;
 }
 
-/* Détail : en-tête, score et blocs pleine largeur ; une colonne par équipe. */
+.hist-tools {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search {
+  flex: 1 1 260px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--dim);
+}
+.search > svg { position: absolute; left: 12px; pointer-events: none; }
+.search input[type=text] { padding-left: 40px; padding-right: 40px; }
+
+.search-clear {
+  position: absolute;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--dim);
+}
+.search-clear:hover { background: var(--s2); color: var(--txt); }
+
+.hist-modes { flex: 0 1 auto; }
+.hist-modes button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.seg-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dim);
+  background: var(--bdr);
+  border-radius: 999px;
+  padding: 0 6px;
+  min-width: 20px;
+}
+.seg button.on .seg-count { background: var(--acc-soft); color: var(--acc); }
+
+.hist-day-title > span:first-child::first-letter { text-transform: uppercase; }
+.hist-day-count { font-weight: 600; }
+
+.btn-mini-danger { color: var(--err); }
+.btn-mini-danger:hover { background: var(--err-soft); }
+
+/* ── Détail d'un match ── */
 .hist-detail {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -15,8 +69,12 @@
   align-items: start;
 }
 .hist-detail > :not(.card-team) { grid-column: 1 / -1; }
-.hist-detail > .mr-detail-names { padding-top: 8px; }
-.hist-detail > .rf { padding-top: 0; }
+
+.hist-note {
+  font-size: 15px;
+  color: var(--dim);
+  text-align: center;
+}
 
 .tl-team { font-weight: 650; }
 
@@ -24,4 +82,6 @@
 
 @media (max-width: 720px) {
   .hist-detail { grid-template-columns: 1fr; }
+  .hist-modes { width: 100%; }
+  .hist-modes button { padding: 8px 6px; font-size: 14px; }
 }

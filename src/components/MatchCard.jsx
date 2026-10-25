@@ -1,55 +1,59 @@
 import { useTranslation } from 'react-i18next'
-import { fmtDateTime } from '../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../lib/teamColor'
+import { fmtClock, fmtTime, fmtWhen } from '../lib/format'
 import Icon from './Icon'
 import './MatchCard.css'
 
-// Ligne de match compacte — utilisée par le widget "Matchs récents" de Setup
-// et par la liste principale de History. onDownloadPdf/showFooter sont omis
-// par Setup, qui n'affiche ni bouton PDF ni détail de bas de ligne.
-export default function MatchCard({ match, onClick, onDownloadPdf, showFooter = false }) {
+// Carte de match — widget "Matchs récents" de Setup (date relative) et liste
+// de History (heure seule, la date est dans l'en-tête du groupe). Les actions
+// PDF / suppression ne s'affichent que si leurs callbacks sont fournis.
+export default function MatchCard({ match, onClick, onDownloadPdf, onDelete, timeOnly = false }) {
   const { t } = useTranslation()
-  const clickable = match.mode !== 'scorer' && !!onClick
-  const MainTag = clickable ? 'button' : 'div'
+  const teams  = match.teams || []
   const colors = match.settings?.teamColors || []
+  const mode   = match.mode || 'stats'
+  const two    = teams.length === 2
+  const winner = two && teams[0].score !== teams[1].score ? (teams[0].score > teams[1].score ? 0 : 1) : null
+  const MainTag = onClick ? 'button' : 'div'
+
+  const details = [
+    `${match.settings?.halfCount}×${match.settings?.halfDurationMin} min`,
+    match.durationSec ? fmtClock(match.durationSec) : null,
+    mode === 'player' ? t('history.footerPlayer', { count: match.players?.length || 0 }) : null,
+    mode === 'stats' ? t('history.footerStatsEvents', { count: match.shotEvents ?? 0 }) : null,
+  ].filter(Boolean)
 
   return (
-    <div className="mr-card">
-      <MainTag className="mr-main" {...(clickable ? { onClick: () => onClick(match) } : {})}>
-        <div className="mr-head">
-          <span>{fmtDateTime(match.playedAt)}</span>
-          <span>{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span>
+    <article className="mc">
+      <MainTag className="mc-main" {...(onClick ? { onClick: () => onClick(match) } : {})}>
+        <div className="mc-top">
+          <span className={`mode-badge mode-${mode}`}>{t(`history.modesShort.${mode}`)}</span>
+          <span className="mc-when">{timeOnly ? fmtTime(match.playedAt) : fmtWhen(match.playedAt)}</span>
         </div>
-        <div className="mr-body">
-          <div className="mr-names">
-            {(match.teams || []).map((tm, i) => (
-              <div className="mr-name" key={i}>
-                {colors[i] && <span className="team-dot" style={teamSwatchStyle(colors[i])} />}
-                <span className="mr-name-txt">{tm.name}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mr-score">
-            {(match.teams || []).map((tm, i) => (
-              <span key={i} style={colors[i] ? teamTextStyle(colors[i]) : undefined}>{tm.score}</span>
-            ))}
-          </div>
-          {clickable && <Icon name="chevron" size={20} className="mr-chev" />}
+        <div className="mc-teams">
+          {teams.map((tm, i) => (
+            <div key={i} className={`mc-team${winner === i ? ' win' : ''}${winner !== null && winner !== i ? ' lose' : ''}`}>
+              <span className="mc-bar" style={{ background: colors[i] || 'var(--s3)' }} />
+              <span className="mc-name">{tm.name}</span>
+              <span className="mc-score">{tm.score}</span>
+            </div>
+          ))}
         </div>
-        {showFooter && match.mode !== 'scorer' && (
-          <div className="mr-foot">
-            {match.mode === 'player'
-              ? t('history.footerPlayer', { count: match.players?.length || 0 })
-              : `${(match.teams || []).map(tm => t('history.footerStatsShots', { count: tm.tirs ?? 0 })).join(' · ')} · ${t('history.footerStatsEvents', { count: match.shotEvents ?? 0 })}`
-            }
-          </div>
-        )}
+        <div className="mc-foot">{details.join(' · ')}</div>
       </MainTag>
-      {onDownloadPdf && (
-        <button className="btn-mini mr-pdf" onClick={() => onDownloadPdf(match)}>
-          <Icon name="download" size={16} />{t('history.pdfBtn')}
-        </button>
+      {(onDownloadPdf || onDelete) && (
+        <div className="mc-actions">
+          {onDownloadPdf && (
+            <button className="mc-act" onClick={() => onDownloadPdf(match)}>
+              <Icon name="download" size={16} />{t('history.pdfBtn')}
+            </button>
+          )}
+          {onDelete && (
+            <button className="mc-act mc-act-danger" onClick={() => onDelete(match)} title={t('history.delete')} aria-label={t('history.delete')}>
+              <Icon name="trash" size={16} />
+            </button>
+          )}
+        </div>
       )}
-    </div>
+    </article>
   )
 }

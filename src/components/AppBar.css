@@ -1,10 +1,10 @@
+/* Bandeau « couleur terrain » : la seule surface franchement colorée. */
 .app-bar {
   position: sticky;
   top: 0;
   z-index: 15;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: saturate(1.2) blur(8px);
-  border-bottom: 1px solid var(--bdr);
+  background: var(--shell);
+  color: var(--shell-txt);
 }
 
 .app-bar-in {
@@ -33,7 +33,7 @@
   width: 24px;
   height: 24px;
   fill: none;
-  stroke: var(--acc);
+  stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
 }
@@ -43,6 +43,10 @@
   align-items: center;
   gap: 4px;
 }
+
+.app-bar .icon-btn { color: var(--shell-dim); }
+.app-bar .icon-btn:hover { color: var(--shell-txt); background: rgb(255 255 255 / 0.1); }
+.app-bar :focus-visible { outline-color: var(--shell-txt); }
 
 @media (max-width: 600px) {
   .app-bar-in { padding: 0 8px 0 16px; }

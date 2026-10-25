@@ -16,7 +16,7 @@ export default function MiniTimeline({ timeline, settings, teams }) {
         return (
           <g key={tick}>
             <line x1={tx} y1={pt} x2={tx} y2={h - pb} className="tg-grid" />
-            <text x={tx} y={h - 8} textAnchor="middle" className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
+            <text x={tx} y={h - 8} textAnchor={tick === 0 ? 'start' : tick === 1 ? 'end' : 'middle'} className="tg-label">{fmtClock(Math.round(maxT * tick))}</text>
           </g>
         )
       })}

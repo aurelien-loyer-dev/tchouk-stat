@@ -1,62 +1,55 @@
 import { useTranslation } from 'react-i18next'
-import { fmtClock, fmtDateTime } from '../../../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../../../lib/teamColor'
+import { fmtClock, fmtDayLabel, fmtTime } from '../../../lib/format'
+import { teamSwatchStyle } from '../../../lib/teamColor'
 import PageHeader from '../../../components/PageHeader'
+import ScoreHero from '../../../components/ScoreHero'
 import Icon from '../../../components/Icon'
 import { downloadMatchPdf } from '../pdf'
 import MiniTimeline from './MiniTimeline'
 
-export default function MatchDetail({ match, onClose }) {
+export function DetailActions({ match, onDelete }) {
+  const { t } = useTranslation()
+  return (
+    <>
+      <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>
+        <Icon name="download" size={16} />{t('history.pdfBtn')}
+      </button>
+      <button className="btn-mini btn-mini-danger" onClick={() => onDelete(match)}>
+        <Icon name="trash" size={16} />{t('history.delete')}
+      </button>
+    </>
+  )
+}
+
+export default function MatchDetail({ match, onClose, onDelete }) {
   const { t } = useTranslation()
   const { teams, timeline, settings } = match
   const shotEvents = (timeline || []).filter(e => e.category === 'tirs')
   const isScorerOnly = match.mode === 'scorer'
+  const colors = settings?.teamColors || []
 
   return (
     <div className="hist-detail">
       <PageHeader
-        title={fmtDateTime(match.playedAt)}
+        title={t(`history.modes.${match.mode || 'stats'}`)}
+        subtitle={`${fmtDayLabel(match.playedAt)} · ${fmtTime(match.playedAt)}`}
         onBack={onClose}
-        actions={(
-          <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>
-            <Icon name="download" size={16} />{t('history.pdfBtn')}
-          </button>
-        )}
+        actions={<DetailActions match={match} onDelete={onDelete} />}
       />
 
-      <div className="mr-detail-names">
-        {teams.map((tm, i) => (
-          <span className="mr-name" key={i}>
-            {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
-            {tm.name}
-          </span>
-        ))}
-      </div>
-      <div className="rf">
-        {teams.map((tm, i) => (
-          <span key={i}>
-            {i > 0 && <span className="rf-sep">–</span>}
-            <span style={settings?.teamColors?.[i] ? teamTextStyle(settings.teamColors[i]) : undefined}>{tm.score}</span>
-          </span>
-        ))}
-      </div>
+      <ScoreHero
+        teams={teams.map((tm, i) => ({ name: tm.name, score: tm.score, color: colors[i] }))}
+        meta={`${settings?.halfCount}×${settings?.halfDurationMin} min · ${t('history.duration')} ${fmtClock(match.durationSec)}`}
+      />
 
-      <div className="card">
-        <div className="ctitle">{t('history.summaryTitle')}</div>
-        <div className="si"><div className="si-l">{t('results.ui.format')}</div><span className="si-v sub">{match.settings?.halfCount}×{match.settings?.halfDurationMin} min</span></div>
-        <div className="si"><div className="si-l">{t('history.actualDuration')}</div><span className="si-v sub">{fmtClock(match.durationSec)}</span></div>
-        {!isScorerOnly && (
-          <div className="si"><div className="si-l">{t('history.shotEventsLabel')}</div><span className="si-v sub">{match.shotEvents}</span></div>
-        )}
-      </div>
+      {isScorerOnly && <p className="hist-note">{t('history.scorerOnlyNote')}</p>}
 
       {!isScorerOnly && teams.map((tm, i) => (
         <div className="card card-team" key={i}>
           <div className="ctitle">
-            {settings?.teamColors?.[i] && <span className="team-dot" style={teamSwatchStyle(settings.teamColors[i])} />}
+            {colors[i] && <span className="team-dot" style={teamSwatchStyle(colors[i])} />}
             {tm.name}
           </div>
-          <div className="si"><div className="si-l">{t('history.score')}</div><span className="si-v">{tm.score}</span></div>
           <div className="si"><div className="si-l">{t('results.ui.shotsTitle')}</div><span className="si-v sub">{tm.tirs}</span></div>
           <div className="si"><div className="si-l">{t('results.ui.won')}</div><span className="si-v sub">{tm.tGagne}</span></div>
           <div className="si"><div className="si-l">{t('results.ui.given')}</div><span className="si-v sub">{tm.tDonne}</span></div>
@@ -73,14 +66,14 @@ export default function MatchDetail({ match, onClose }) {
         </div>
       ))}
 
-      {!isScorerOnly && (
+      {shotEvents.length > 0 && (
         <div className="card">
           <div className="ctitle">{t('history.timelineTitle')}</div>
           <MiniTimeline timeline={timeline} settings={settings} teams={(match.teamsSnapshot || []).map((tm, i) => ({ ...tm, name: teams[i]?.name || tm.name }))} />
           <div className="tg-legend">
             {teams.map((tm, i) => (
               <div className="tg-leg-item" key={i}>
-                <span className="tg-leg-dot" style={settings?.teamColors?.[i] ? teamSwatchStyle(settings.teamColors[i]) : { background: 'var(--dim)' }} />
+                <span className="tg-leg-dot" style={colors[i] ? teamSwatchStyle(colors[i]) : { background: 'var(--dim)' }} />
                 <span>{tm.name}</span>
               </div>
             ))}
@@ -88,12 +81,12 @@ export default function MatchDetail({ match, onClose }) {
         </div>
       )}
 
-      {!isScorerOnly && shotEvents.length > 0 && (
+      {shotEvents.length > 0 && (
         <div className="card">
           <div className="ctitle">{t('history.eventsTitle', { count: shotEvents.length })}</div>
           <div className="tl-list">
             {shotEvents.map((ev, i) => {
-              const color = settings?.teamColors?.[ev.teamIdx]
+              const color = colors[ev.teamIdx]
               return (
                 <div className="tl-item" key={`${ev.at}-${i}`}>
                   <div className="tl-time">{fmtClock(ev.elapsedSec)}</div>
@@ -103,6 +96,7 @@ export default function MatchDetail({ match, onClose }) {
                       <span className="tl-team">{ev.teamName}</span>
                       {t(`shotLabels.${ev.id}`, ev.id)}
                       <span className={`tl-delta ${ev.d > 0 ? 'pos' : 'neg'}`}>{ev.d > 0 ? '+1' : '-1'}</span>
+                      {ev.scores && <span className="tl-score">{ev.scores.join('–')}</span>}
                     </div>
                   </div>
                 </div>

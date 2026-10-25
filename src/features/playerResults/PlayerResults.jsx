@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playerTeamScore } from '../../lib/playerStats'
 import { pct } from '../../lib/format'
-import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import Icon from '../../components/Icon'
+import ScoreHero from '../../components/ScoreHero'
 import { offScore, defScore, mvpScore, topPlayers, AWARDS } from './awards'
 import { generatePlayerPdf, generateFullPdf } from './pdf'
 import './playerResults.css'
@@ -43,26 +43,13 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
 
   return (
     <>
-      <div className="res-hero">
-        <div className="mr-detail-names">
-          {teams.slice(0, n).map((team, i) => (
-            <span className="mr-name" key={i}>
-              <span className="team-dot" style={teamSwatchStyle(i === 0 ? c1 : c2)} />{team.name}
-            </span>
-          ))}
-        </div>
-        <div className="rf">
-          {n === 2 ? (
-            <>
-              <span style={teamTextStyle(c1)}>{score0}</span>
-              <span className="rf-sep">–</span>
-              <span style={teamTextStyle(c2)}>{score1}</span>
-            </>
-          ) : (
-            <span style={teamTextStyle(c1)}>{score0}</span>
-          )}
-        </div>
-      </div>
+      <ScoreHero
+        teams={teams.slice(0, n).map((team, i) => ({
+          name:  team.name,
+          score: i === 0 ? score0 : score1,
+          color: i === 0 ? c1 : c2,
+        }))}
+      />
 
       {/* ── Distinctions automatiques ── */}
       {players.length > 0 && (

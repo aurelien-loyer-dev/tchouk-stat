@@ -1,17 +1,3 @@
-.res-hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding-top: 8px;
-}
-
-.rf-sep {
-  color: var(--dim);
-  font-weight: 300;
-  margin: 0 0.3em;
-}
-
 .res-tabs {
   align-self: center;
   width: 100%;

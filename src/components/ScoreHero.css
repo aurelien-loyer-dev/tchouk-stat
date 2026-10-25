@@ -1,0 +1,89 @@
+.score-hero {
+  background: var(--s1);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.sh-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--bdr-strong);
+}
+.sh-board.sh-single { grid-template-columns: 1fr; }
+
+/* Zone interdite au centre, posée sur la ligne de fond. */
+.sh-board:not(.sh-single)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 120px;
+  height: 60px;
+  transform: translateX(-50%);
+  border: 1px solid var(--bdr-strong);
+  border-bottom: none;
+  border-radius: 120px 120px 0 0;
+  background: var(--s1);
+}
+
+.sh-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px 16px 22px;
+  border-top: 4px solid var(--tc);
+  background: color-mix(in srgb, var(--tc) 6%, var(--s1));
+}
+
+.sh-name {
+  max-width: 100%;
+  font-size: 17px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sh-score {
+  font-size: 72px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sh-lost .sh-score { opacity: 0.55; }
+
+.sh-sep {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--dim);
+}
+
+.sh-foot {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 12px 16px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.sh-result { font-weight: 650; }
+.sh-meta { color: var(--dim); }
+
+@media (max-width: 600px) {
+  .sh-score { font-size: 56px; }
+  .sh-board:not(.sh-single)::after { width: 88px; height: 44px; border-radius: 88px 88px 0 0; }
+  .sh-sep { bottom: 8px; font-size: 20px; }
+}

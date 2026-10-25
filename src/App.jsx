@@ -36,6 +36,7 @@ const HISTORY_KEY     = 'tchouk_match_history'
 const TOURNAMENTS_KEY = 'tchouk_tournaments'
 const TOURNAMENTS_BACKUP_KEY = 'tchouk_tournaments_backup'
 const SCREEN_KEY      = 'tchouk_screen'
+const HISTORY_LIMIT   = 200
 
 function loadScreen() {
   try {
@@ -50,8 +51,17 @@ function loadHistory() {
   catch { return [] }
 }
 
+// Fusionne deux listes de matchs par id (la version locale l'emporte), du plus
+// récent au plus ancien — la synchro cloud ne doit jamais effacer un match local.
+function mergeHistory(local, remote) {
+  const byId = new Map()
+  for (const m of remote) if (m?.id) byId.set(m.id, m)
+  for (const m of local)  if (m?.id) byId.set(m.id, m)
+  return [...byId.values()].sort((a, b) => String(b.playedAt).localeCompare(String(a.playedAt)))
+}
+
 function saveHistory(history) {
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50))) }
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, HISTORY_LIMIT))) }
   catch {}
 }
 
@@ -129,12 +139,15 @@ export default function App() {
       .from('matches')
       .select('data')
       .order('played_at', { ascending: false })
-      .limit(50)
+      .limit(HISTORY_LIMIT)
       .then(({ data, error }) => {
         if (error || !data || data.length === 0) return
-        const matches = data.map(row => row.data)
-        setHistory(matches)
-        saveHistory(matches)
+        const remote = data.map(row => row.data).filter(Boolean)
+        setHistory(local => {
+          const merged = mergeHistory(local, remote)
+          saveHistory(merged)
+          return merged
+        })
       })
   }, [])
 
@@ -338,7 +351,17 @@ export default function App() {
   function clearHistory() {
     setHistory([])
     saveHistory([])
-    if (supabase) supabase.from('matches').delete().neq('id', '')
+    if (supabase) supabase.from('matches').delete().neq('id', '').then(() => {})
+  }
+
+  function deleteMatch(id) {
+    setHistory(prev => {
+      const next = prev.filter(m => m.id !== id)
+      saveHistory(next)
+      return next
+    })
+    // Le client Supabase est paresseux : sans .then la requête n'est jamais envoyée.
+    if (supabase) supabase.from('matches').delete().eq('id', id).then(() => {})
   }
 
   function handleSaveTournaments(list) {
@@ -361,6 +384,7 @@ export default function App() {
             onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
             onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
             onViewTournament={() => setScreen('tournament')}
+            tournamentCount={tournaments.length}
           />
         )}
         {screen === 'match' && (
@@ -419,6 +443,8 @@ export default function App() {
             history={history}
             onBack={() => setScreen('setup')}
             onClear={clearHistory}
+            onDelete={deleteMatch}
+            onStartNew={() => setScreen('setup')}
             initialMatch={historyInitialMatch}
           />
         )}
