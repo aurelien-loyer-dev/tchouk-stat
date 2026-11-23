@@ -526,3 +526,166 @@
   .trn-podium { gap: 8px; }
   .trn-end-subtitle { font-size: 26px; }
 }
+
+/* ── Partage ── */
+.trn-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.trn-body:disabled .trn-si { background: transparent; border-color: transparent; color: var(--txt); opacity: 1; }
+.trn-body:disabled button { display: none; }
+
+.shr {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+}
+
+.shr-intro {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+}
+.shr-intro-text { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 4px; }
+.shr-intro h2 { font-size: 17px; font-weight: 650; }
+.shr-intro p { font-size: 14px; color: var(--dim); }
+
+.shr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+}
+.shr-code-block { display: flex; flex-direction: column; gap: 2px; }
+.shr-code-label { font-size: 13px; font-weight: 600; color: var(--dim); }
+.shr-code {
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.shr-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 650;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.shr-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.shr-status-ok .shr-dot { animation: shr-pulse 2s ease-in-out infinite; }
+.shr-status-saving { background: var(--s2); color: var(--dim); }
+.shr-status-offline { background: var(--warn-soft); color: var(--warn); }
+
+@keyframes shr-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+.shr-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  border-top: 1px solid var(--bdr);
+}
+.shr-link-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.shr-link-label { font-size: 15px; font-weight: 650; }
+.shr-link-hint { font-size: 13px; color: var(--dim); }
+.shr-link-actions { display: flex; gap: 8px; }
+
+.shr-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--bdr);
+}
+.shr-stop { color: var(--err); margin-left: auto; }
+
+.shr-viewer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--bdr);
+  font-size: 14px;
+  color: var(--dim);
+}
+
+.shr-error { font-size: 14px; font-weight: 550; color: var(--err); }
+
+.shr-join { display: flex; flex-direction: column; gap: 6px; max-width: 420px; }
+.shr-join-row { display: flex; gap: 8px; }
+.shr-join-row input {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 650;
+}
+.shr-join-row input::placeholder { letter-spacing: 0.06em; font-weight: 500; text-transform: none; }
+
+.shr-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+  background: var(--acc-soft);
+  color: var(--acc);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+.shr-badge-view { background: var(--s2); color: var(--dim); }
+
+.shr-notice {
+  position: sticky;
+  top: 72px;
+  z-index: 5;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--warn) 30%, transparent), var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 10px 10px 16px;
+  border-radius: var(--r-sm);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 14px;
+  font-weight: 550;
+}
+.shr-notice p { padding-top: 9px; }
+.shr-notice .icon-btn { color: inherit; }
+
+@media (max-width: 600px) {
+  .shr-head, .shr-link, .shr-foot, .shr-viewer { padding-left: 16px; padding-right: 16px; }
+  .shr-link-actions { width: 100%; }
+  .shr-link-actions .btn-mini { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shr-status-ok .shr-dot { animation: none; }
+}
