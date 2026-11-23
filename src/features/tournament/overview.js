@@ -2,6 +2,7 @@
 // avec leur contexte (poule, ronde, phase finale…) et la fonction qui enregistre
 // leur score, les prochains matchs, les derniers résultats, la forme des équipes
 // et l'action qui débloque la suite.
+import i18n from '../../i18n'
 import {
   addSwissRound, calcStandings, canStartFullPlacement, canStartKnockout,
   isRoundComplete, setKnockoutScore, setMatchScore, setPlacementScore,
@@ -16,15 +17,16 @@ export function listFixtures(tour) {
   const list = []
   const push = (match, label, stage, save) => list.push({ match, label, stage, order: list.length, save })
 
+  const leg = (m, label) => (m.leg === 2 ? [label, i18n.t('tournament.schedule.returnLeg')].filter(Boolean).join(' · ') : label)
   if (tour.format === 'roundrobin') {
-    tour.matches.forEach(m => push(m, null, 'league', (t, a, b) => setMatchScore(t, m.id, a, b)))
+    tour.matches.forEach(m => push(m, leg(m, null), 'league', (t, a, b) => setMatchScore(t, m.id, a, b)))
   } else if (tour.format === 'groups') {
     // Les poules jouent en parallèle : on entrelace leurs matchs (A1, B1, A2, B2…).
     const longest = Math.max(0, ...tour.groups.map(g => g.matches.length))
     for (let i = 0; i < longest; i++) {
       tour.groups.forEach(g => {
         const m = g.matches[i]
-        if (m) push(m, g.name, 'group', (t, a, b) => setMatchScore(t, m.id, a, b))
+        if (m) push(m, leg(m, g.name), 'group', (t, a, b) => setMatchScore(t, m.id, a, b))
       })
     }
   } else if (tour.format === 'swiss') {
@@ -162,4 +164,74 @@ export function clockRemainingMs(clock, now = Date.now()) {
   if (!clock?.durationSec) return null
   if (clock.running && clock.endsAt) return Math.max(0, clock.endsAt - now)
   return Math.max(0, (clock.remainingSec ?? clock.durationSec) * 1000)
+}
+
+// ── Horaires ─────────────────────────────────────────────────────────────
+// tour.schedule : { startAt (ISO), halves, halfMin, halfBreakMin, changeMin }
+// tour.courtsSince : id du match → heure (ISO) où il a été mis sur un terrain.
+export const DEFAULT_SCHEDULE = { halves: 2, halfMin: 10, halfBreakMin: 2, changeMin: 3 }
+
+const n0 = v => Math.max(0, Number(v) || 0)
+export const matchMinutes = s => n0(s.halves) * n0(s.halfMin) + Math.max(0, n0(s.halves) - 1) * n0(s.halfBreakMin)
+export const slotMinutes  = s => matchMinutes(s) + n0(s.changeMin)
+
+// Créneaux des phases pas encore générées (phase finale, classement, rondes suisses).
+// Les tours d'une phase finale se jouent l'un après l'autre.
+function futureSlots(tour, courts) {
+  const per = n => Math.ceil(n / courts)
+  const pairs = Math.floor(tour.teams.length / 2)
+  let slots = 0
+  if (tour.knockoutSize && !tour.knockoutRounds) for (let n = tour.knockoutSize / 2; n >= 1; n /= 2) slots += per(n)
+  if (tour.format === 'groups' && tour.fullPlacement && !tour.placementRounds) slots += per(pairs)
+  if (tour.format === 'swiss') slots += Math.max(0, (tour.numSwissRounds || 0) - tour.rounds.length) * per(pairs)
+  return slots
+}
+
+// Matchs dont les équipes ne sont pas encore connues : un groupe de créneaux par tour.
+function waitingSlots(waiting, courts) {
+  const byRound = new Map()
+  waiting.forEach(f => byRound.set(f.label || '', (byRound.get(f.label || '') || 0) + 1))
+  let slots = 0
+  byRound.forEach(n => { slots += Math.ceil(n / courts) })
+  return slots
+}
+
+// Estimation, recalculée avec l'avancement réel. null si pas d'horaires.
+// { start, matchMin, slotMin, courtEnds[], slotStarts[], endAt, finished }
+export function estimateSchedule(tour, plan, now = Date.now()) {
+  const s = tour.schedule
+  const start = s?.startAt ? Date.parse(s.startAt) : NaN
+  if (Number.isNaN(start) || !matchMinutes(s)) return null
+  const MIN = 60000
+  const matchMs = matchMinutes(s) * MIN
+  const slotMs = slotMinutes(s) * MIN
+  const changeMs = n0(s.changeMin) * MIN
+  const since = tour.courtsSince || {}
+
+  const courtEnds = plan.onCourt.map(f => {
+    if (!f) return null
+    const placed = Date.parse(since[f.match.id])
+    const began = Math.max(start, Number.isNaN(placed) ? Math.max(now, start) : placed)
+    return Math.max(now, began + matchMs) // en retard : on considère qu'il finit maintenant
+  })
+  const ends = courtEnds.filter(v => v !== null)
+  const nextFree = ends.length ? Math.max(...ends) + changeMs : Math.max(now, start)
+  const slotStarts = plan.slots.map((_, k) => nextFree + k * slotMs)
+  const remaining = plan.slots.length + waitingSlots(plan.waiting, plan.count) + futureSlots(tour, plan.count)
+  const endAt = remaining ? nextFree + remaining * slotMs - changeMs : ends.length ? Math.max(...ends) : null
+
+  return {
+    start,
+    matchMin: matchMinutes(s),
+    slotMin: slotMinutes(s),
+    courtEnds,
+    slotStarts,
+    endAt,
+    finished: !ends.length && !remaining,
+  }
+}
+
+export function fmtHour(ms) {
+  if (ms == null) return ''
+  return new Date(ms).toLocaleTimeString(i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })
 }

@@ -860,3 +860,28 @@
 .pub-state h1 { font-size: 28px; }
 .pub-state p { color: var(--dim); }
 .pub-loading { color: var(--dim); }
+
+/* ═════════════ Horaires ═════════════ */
+.schb {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+}
+.schb-empty { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--dim); }
+.schb-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.schb-facts { display: flex; gap: 8px 24px; flex-wrap: wrap; margin: 0; }
+.schb-facts div { display: flex; flex-direction: column; gap: 1px; }
+.schb-facts dt { font-size: 12px; font-weight: 650; color: var(--dim); }
+.schb-facts dd { margin: 0; font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.schb-end dd { color: var(--acc); font-size: 18px; font-weight: 750; }
+.schb-chev-open { transform: rotate(180deg); }
+.schb-edit { padding-top: 12px; border-top: 1px solid var(--bdr); align-items: end; }
+.schb-remove { color: var(--err); justify-self: start; }
+
+.plan-time { font-variant-numeric: tabular-nums; color: var(--txt); font-weight: 650; }
+.fx-time { margin-left: auto; font-size: 12px; font-weight: 650; color: var(--dim); font-variant-numeric: tabular-nums; }
+.sp-end { color: var(--shell-txt); font-weight: 650; }

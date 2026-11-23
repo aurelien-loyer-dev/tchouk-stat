@@ -17,6 +17,11 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Ajouté
+- Horaires de tournoi : heure de début, nombre et durée des mi-temps, pauses, temps de changement. Heure estimée de chaque créneau et de chaque match en cours, heure de fin estimée (phases à venir comprises), recalculées selon l'avancement. Modifiables à tout moment ; visibles sur la page publique.
+- Aller-retour pour les formats tous contre tous et poules.
+- Les matchs lancés depuis un tournoi reprennent son nombre et sa durée de mi-temps.
+
 ## [2.1.0] - 2026-11-23
 
 ### Ajouté

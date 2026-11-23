@@ -416,7 +416,9 @@ export default function App() {
     const payload = {
       names: [team1, team2],
       mode,
-      settings: matchSettings,
+      settings: tour.schedule
+        ? { ...matchSettings, halfCount: tour.schedule.halves, halfDurationMin: tour.schedule.halfMin }
+        : matchSettings,
       origin: { tournamentId: tour.id, matchId: fixture.match.id, label: fixture.label || null },
     }
     if (mode === 'player') {

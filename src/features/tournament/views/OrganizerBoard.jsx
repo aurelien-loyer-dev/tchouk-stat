@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
-import { involves, isPlayed, listFixtures, nextStep, planCourts, recentResults, sameCourts, standingTables } from '../overview'
+import { estimateSchedule, fmtHour, involves, isPlayed, listFixtures, nextStep, planCourts, recentResults, sameCourts, standingTables } from '../overview'
 import MatchRow from '../components/MatchRow'
 import CrossTable from '../components/CrossTable'
 import ValidationBanner from '../components/ValidationBanner'
@@ -11,6 +11,8 @@ import BracketBoard from '../components/board/BracketBoard'
 import TeamFilter from '../components/board/TeamFilter'
 import RosterCard from '../components/board/RosterCard'
 import TournamentClock from '../components/board/TournamentClock'
+import ScheduleBar from '../components/board/ScheduleBar'
+import { useNow } from '../useNow'
 
 const TABS = ['plan', 'done', 'table', 'rosters']
 
@@ -47,11 +49,17 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
   const done     = useMemo(() => recentResults(fixtures), [fixtures])
   const plan     = useMemo(() => planCourts(tournament, fixtures), [tournament, fixtures])
   const step     = nextStep(tournament)
+  const now      = useNow(30000)
+  const est      = estimateSchedule(tournament, plan, now)
 
   // Les terrains attribués sont enregistrés dans le tournoi : les numéros
   // restent stables et les spectateurs voient la même chose.
   useEffect(() => {
-    if (!sameCourts(plan.courts, tournament.courts || {})) onUpdate({ ...tournament, courts: plan.courts })
+    if (sameCourts(plan.courts, tournament.courts || {})) return
+    // Heure de mise sur le terrain : sert à estimer la fin de chaque match.
+    const stamp = new Date().toISOString()
+    const courtsSince = Object.fromEntries(Object.keys(plan.courts).map(id => [id, tournament.courtsSince?.[id] || stamp]))
+    onUpdate({ ...tournament, courts: plan.courts, courtsSince })
   }, [plan.courts])
 
   const playedCount = fixtures.filter(f => isPlayed(f.match)).length
@@ -73,6 +81,8 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
         </div>
         <div className="trn-prog-track"><div className="trn-prog-fill" style={{ width: `${pct}%` }} /></div>
       </div>
+
+      <ScheduleBar schedule={tournament.schedule} estimate={est} onChange={schedule => onUpdate({ ...tournament, schedule })} />
 
       <TournamentClock clock={tournament.clock} editable onChange={clock => onUpdate({ ...tournament, clock })} />
 
@@ -109,7 +119,10 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
             {plan.onCourt.map((f, i) => f ? (
               <ScoreEntry
                 key={`${i}-${f.match.id}`}
-                kicker={plan.count > 1 ? t('tournament.courts.court', { n: i + 1 }) : t('tournament.board.nextMatch')}
+                kicker={[
+                  plan.count > 1 ? t('tournament.courts.court', { n: i + 1 }) : t('tournament.board.nextMatch'),
+                  est?.courtEnds[i] && t('tournament.schedule.untilTime', { time: fmtHour(est.courtEnds[i]) }),
+                ].filter(Boolean).join(' · ')}
                 fixture={f}
                 knockout={f.stage === 'knockout'}
                 onSave={(s1, s2) => onUpdate(f.save(tournament, s1, s2))}
@@ -152,6 +165,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
                 <section key={si} className="plan-slot">
                   <h3 className="plan-slot-title">
                     {t('tournament.courts.slot', { n: si + 1 })}
+                    {est?.slotStarts[si] && <span className="plan-time">~{fmtHour(est.slotStarts[si])}</span>}
                     {si === 0 && <span className="plan-next">{t('tournament.courts.nextSlot')}</span>}
                   </h3>
                   <div className="ob-list">

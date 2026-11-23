@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { isPlayed } from '../../overview'
 
 // Un match en lecture seule : contexte, équipes, score (ou « contre »).
-export default function FixtureCard({ fixture, focusTeam, isNew, featured, live, court, dim }) {
+export default function FixtureCard({ fixture, focusTeam, isNew, featured, live, court, dim, time }) {
   const { t } = useTranslation()
   const m = fixture.match
   const played = isPlayed(m)
@@ -26,6 +26,7 @@ export default function FixtureCard({ fixture, focusTeam, isNew, featured, live,
         <header className="fx-meta">
           {court && <span className="court-tag">{t('tournament.courts.court', { n: court })}</span>}
           {live && <span className="fx-live-tag"><span className="fx-live-dot" aria-hidden="true" />{t('tournament.courts.inProgress')}</span>}
+          {time && <span className="fx-time">{time}</span>}
           {featured && <span className="fx-next">{t('tournament.board.nextMatch')}</span>}
           {fixture.label && <span className="fx-label">{fixture.label}</span>}
           {isNew && <span className="fx-new-tag">{t('tournament.board.justIn')}</span>}

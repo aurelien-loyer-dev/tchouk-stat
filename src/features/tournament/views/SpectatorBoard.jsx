@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
 import { formatCode } from '../cloud'
-import { involves, isPlayed, listFixtures, planCourts, recentResults, standingTables } from '../overview'
+import { estimateSchedule, fmtHour, involves, isPlayed, listFixtures, planCourts, recentResults, standingTables } from '../overview'
+import { useNow } from '../useNow'
 import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
@@ -71,6 +72,8 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
   const fixtures = useMemo(() => listFixtures(tournament), [tournament])
   const tables   = useMemo(() => standingTables(tournament), [tournament])
   const plan     = useMemo(() => planCourts(tournament, fixtures), [tournament, fixtures])
+  const now      = useNow(30000)
+  const est      = estimateSchedule(tournament, plan, now)
   const results  = useMemo(() => recentResults(fixtures), [fixtures])
   const fresh    = useFreshResults(results)
   const ago      = useAgo(updatedAt)
@@ -119,6 +122,7 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
           <h1 className="sp-name">{tournament.name}</h1>
           <p className="sp-sub">
             {formatLabel[tournament.format]} · {t('tournament.teamsCount', { count: tournament.teams.length })}
+            {est?.endAt && <> · <span className="sp-nowrap sp-end">{est.finished ? t('tournament.schedule.ended') : t('tournament.schedule.endShort')} ~{fmtHour(est.endAt)}</span></>}
             {code && <> · <span className="sp-nowrap">{t('tournament.share.codeLabel')} {formatCode(code)}</span></>}
           </p>
         </div>
@@ -154,7 +158,8 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
           <div className={`sp-courts${onCourt.length > 1 ? ' sp-courts-multi' : ''}`}>
             {onCourt.map(({ fixture, court }) => (
               <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} live
-                           court={plan.count > 1 ? court : null} dim={focus && !involves(fixture, focus)} />
+                           court={plan.count > 1 ? court : null} dim={focus && !involves(fixture, focus)}
+                           time={est?.courtEnds[court - 1] ? t('tournament.schedule.untilTime', { time: fmtHour(est.courtEnds[court - 1]) }) : null} />
             ))}
           </div>
         </section>
@@ -173,6 +178,7 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
                 <li key={i} className="sp-slot">
                   <h3 className="plan-slot-title">
                     {t('tournament.courts.slot', { n: i + 1 })}
+                    {est?.slotStarts[i] && <span className="plan-time">~{fmtHour(est.slotStarts[i])}</span>}
                     {i === 0 && <span className="plan-next">{t('tournament.courts.nextSlot')}</span>}
                   </h3>
                   <div className="sp-list">

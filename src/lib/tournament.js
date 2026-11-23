@@ -33,7 +33,13 @@ export function genRoundRobinMatches(teams) {
   return rounds.flat()
 }
 
-export function genGroups(teams, numGroups) {
+// Aller-retour : après la phase aller, chaque affiche est rejouée en inversant
+// qui reçoit (team1 = équipe « à domicile »). Les matchs retour portent leg: 2.
+export function withReturnLegs(matches) {
+  return [...matches, ...matches.map(m => ({ ...mkMatch(m.team2, m.team1), leg: 2 }))]
+}
+
+export function genGroups(teams, numGroups, doubleRound = false) {
   const shuffled = [...teams].sort(() => Math.random() - 0.5)
   const groups = Array.from({ length: numGroups }, (_, i) => ({
     id: newId(),
@@ -42,7 +48,10 @@ export function genGroups(teams, numGroups) {
     matches: [],
   }))
   shuffled.forEach((t, i) => groups[i % numGroups].teams.push(t))
-  groups.forEach(g => { g.matches = genRoundRobinMatches(g.teams) })
+  groups.forEach(g => {
+    const first = genRoundRobinMatches(g.teams)
+    g.matches = doubleRound ? withReturnLegs(first) : first
+  })
   return groups
 }
 
@@ -236,12 +245,15 @@ export function setPlacementScore(tournament, roundIdx, score1, score2) {
   }
 }
 
-export function mkTournament({ name, format, teams, numGroups, knockoutSize, fullPlacement, numSwissRounds }) {
+export function mkTournament({ name, format, teams, numGroups, knockoutSize, fullPlacement, numSwissRounds, doubleRound }) {
   const base = { id: newId(), name, format, teams, createdAt: new Date().toISOString() }
-  if (format === 'roundrobin')
-    return { ...base, matches: genRoundRobinMatches(teams), knockoutSize: knockoutSize || null, knockoutRounds: null }
+  const dbl = !!doubleRound && format !== 'swiss'
+  if (format === 'roundrobin') {
+    const first = genRoundRobinMatches(teams)
+    return { ...base, doubleRound: dbl, matches: dbl ? withReturnLegs(first) : first, knockoutSize: knockoutSize || null, knockoutRounds: null }
+  }
   if (format === 'groups')
-    return { ...base, groups: genGroups(teams, numGroups || 2), knockoutSize: knockoutSize || null, knockoutRounds: null, fullPlacement: !!fullPlacement, placementRounds: null }
+    return { ...base, doubleRound: dbl, groups: genGroups(teams, numGroups || 2, dbl), knockoutSize: knockoutSize || null, knockoutRounds: null, fullPlacement: !!fullPlacement, placementRounds: null }
   if (format === 'swiss') {
     const standings = teams.map(t => ({ team: t, pts: 0, gd: 0 }))
     return {

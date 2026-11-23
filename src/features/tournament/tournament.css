@@ -587,3 +587,44 @@
 .trn-courts-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .trn-courts-row input { width: 96px; }
 .trn-courts-hint { font-size: 14px; color: var(--dim); }
+
+/* ── Horaires ── */
+.trn-sched {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+}
+.trn-sched legend { padding: 0 6px; }
+.trn-sched-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.trn-sched-grid .field { min-width: 0; }
+.trn-time {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--bdr-strong);
+  border-radius: var(--r-sm);
+  background: var(--s1);
+  color: var(--txt);
+  font: inherit;
+  font-size: 16px;
+  color-scheme: light dark;
+}
+.trn-time:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); }
+.trn-sched-sum { font-size: 14px; color: var(--dim); }
+.trn-preview {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  background: var(--acc-soft);
+  font-size: 15px;
+}
+.trn-preview strong { font-weight: 700; }

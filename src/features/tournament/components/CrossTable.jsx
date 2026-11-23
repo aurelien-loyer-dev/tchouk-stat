@@ -1,9 +1,12 @@
 // Tableau croisé (round-robin / poule)
 export default function CrossTable({ teams, matches }) {
+  // Ligne = équipe qui reçoit. En aller-retour, chaque case a son propre match ;
+  // sinon la case symétrique reprend le même match, vu de l'autre équipe.
   const map = {}
+  matches.forEach(m => { map[`${m.team1}||${m.team2}`] = m })
   matches.forEach(m => {
-    map[`${m.team1}||${m.team2}`] = m
-    map[`${m.team2}||${m.team1}`] = { score1: m.score2, score2: m.score1 }
+    const back = `${m.team2}||${m.team1}`
+    if (!map[back]) map[back] = { score1: m.score2, score2: m.score1 }
   })
 
   return (
