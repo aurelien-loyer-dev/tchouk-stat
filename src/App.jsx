@@ -24,6 +24,7 @@ function AppFooter() {
     <footer className="app-footer">
       <img src={logoAl} alt="AL" className="app-footer-logo" />
       <span>{t('common.copyright', { year: new Date().getFullYear() })}</span>
+      <span className="app-footer-version">v{__APP_VERSION__}</span>
     </footer>
   )
 }
