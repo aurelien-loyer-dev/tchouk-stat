@@ -869,3 +869,32 @@ input[type=number]:focus,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── Match lancé depuis un tournoi ── */
+.tlink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 12px 10px 16px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--bdr);
+  background: var(--s1);
+  font-size: 14px;
+}
+.tlink-icon { flex-shrink: 0; color: var(--acc); }
+.tlink-text { flex: 1; min-width: 200px; font-weight: 550; }
+.tlink-label {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--s2);
+  color: var(--dim);
+  font-size: 12px;
+  font-weight: 650;
+}
+.tlink-ok { border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: var(--ok-soft); }
+.tlink-ok .tlink-icon { color: var(--ok); }
+.tlink-warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-soft); }
+.tlink-warn .tlink-icon { color: var(--warn); }

@@ -9,7 +9,7 @@ import SharePanel from '../components/SharePanel'
 import PageHeader from '../../../components/PageHeader'
 import Icon from '../../../components/Icon'
 
-export default function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated, syncStatus, onShare, onUnshare }) {
+export default function TournamentDetail({ tournament, onUpdate, onBack, onValidate, validated, syncStatus, onShare, onUnshare, onPlayMatch }) {
   const { t } = useTranslation()
   const [shareOpen, setShareOpen] = useState(false)
   const formatLabel = t('tournament.formatLabel', { returnObjects: true })
@@ -60,6 +60,7 @@ export default function TournamentDetail({ tournament, onUpdate, onBack, onValid
           onUpdate={onUpdate}
           finished={finished}
           onValidate={() => onValidate(tournament.id)}
+          onPlayMatch={onPlayMatch}
         />
       )}
     </div>

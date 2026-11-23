@@ -24,6 +24,10 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 - Page « introuvable » pour les adresses inconnues.
 - Accessibilité : lien d'évitement, titre d'onglet par page, focus placé sur le titre à chaque changement d'écran, libellés sur tous les champs, classement utilisable au clavier, annonce des nouveaux résultats aux lecteurs d'écran.
 
+- Équipes aléatoires → tournoi : on peut nommer les équipes tirées, puis « Créer un tournoi avec ces équipes ». Le formulaire de tournoi propose aussi « Importer le dernier tirage ». Les compositions suivent : onglet « Équipes » côté organisateur, composition de l'équipe suivie côté spectateur.
+- Tournoi → match : depuis le prochain match d'un tournoi, lancer le scoreur, la feuille de stats ou les stats joueurs (avec les joueurs du tirage). À la fin du match, le score est reporté automatiquement dans le tournoi, et envoyé au serveur s'il est partagé. « Jouer maintenant » choisit un autre match à mettre en avant (plusieurs terrains).
+- Accessibilité : les boutons +1 / −1 de la feuille de stats disent à quelle équipe ils s'appliquent.
+
 ### Corrigé
 - Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.
 

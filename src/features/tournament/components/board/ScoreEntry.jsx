@@ -26,7 +26,7 @@ function Side({ team, value, onChange, onStep, align }) {
 }
 
 // Saisie du prochain match : gros compteurs, validation en un geste.
-export default function ScoreEntry({ fixture, onSave, knockout }) {
+export default function ScoreEntry({ fixture, onSave, knockout, onPlay, canPlayers }) {
   const { t } = useTranslation()
   const m = fixture.match
   const [s1, setS1] = useState('')
@@ -61,6 +61,24 @@ export default function ScoreEntry({ fixture, onSave, knockout }) {
       <button type="submit" className="btn-acc se-save" disabled={!ready || drawInKnockout}>
         {t('tournament.board.saveScore')}
       </button>
+      {onPlay && (
+        <div className="se-play">
+          <span className="se-play-label">{t('tournament.board.playLive')}</span>
+          <div className="se-play-btns">
+            <button type="button" className="btn-mini" onClick={() => onPlay('scorer')}>
+              <Icon name="scoreboard" size={16} />{t('setup.formTitle.scorer')}
+            </button>
+            <button type="button" className="btn-mini" onClick={() => onPlay('stats')}>
+              <Icon name="sheet" size={16} />{t('setup.formTitle.stats')}
+            </button>
+            {canPlayers && (
+              <button type="button" className="btn-mini" onClick={() => onPlay('player')}>
+                <Icon name="players" size={16} />{t('setup.formTitle.player')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </form>
   )
 }

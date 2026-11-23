@@ -13,7 +13,7 @@ import './board.css'
 
 // Routes : /tournaments (liste), /tournaments/new, /tournaments/:id,
 // /t/:code (lien de partage ; la clé organisateur arrive dans #key=…).
-export default function Tournament({ tournaments, onSave, route }) {
+export default function Tournament({ tournaments, onSave, route, onPlayMatch }) {
   const { t } = useTranslation()
   const [validatedIds, setValidatedIds] = useState([])
   const [joinState, setJoinState] = useState(null) // null | 'loading' | { error }
@@ -111,6 +111,7 @@ export default function Tournament({ tournaments, onSave, route }) {
           syncStatus={cloud.sync[active.id]}
           onShare={() => cloud.share(active)}
           onUnshare={() => cloud.unshare(active)}
+          onPlayMatch={onPlayMatch}
         />
       </>
     )

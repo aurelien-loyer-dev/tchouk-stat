@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
-import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
+import { applyPlayerAdj, mkPlayer, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
 import { teamBtnTxt } from './lib/teamColor'
-import { parseJoinHash } from './features/tournament/cloud'
+import { parseJoinHash, pushScore } from './features/tournament/cloud'
+import { applyScore } from './features/tournament/overview'
 import { navigate, useRoute } from './lib/router'
 import { clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
 import AppBar from './components/AppBar'
@@ -18,6 +19,7 @@ import PlayerResults from './features/playerResults/PlayerResults'
 import Tournament from './features/tournament/Tournament'
 import TeamDraw from './features/teamDraw/TeamDraw'
 import NotFound from './components/NotFound'
+import TournamentLink from './components/TournamentLink'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -140,6 +142,9 @@ export default function App() {
   const [matchSettings, setMatchSettings] = useState(live?.settings || DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
   const [tournaments, setTournaments] = useState(loadTournaments)
+  // Match lancé depuis un tournoi : { tournamentId, matchId, label } ; son score y est reporté à la fin.
+  const [origin, setOrigin]         = useState(live?.origin || null)
+  const [report, setReport]         = useState(live?.report || null) // { status, tournamentId }
 
   // Chargement depuis Supabase au démarrage
   useEffect(() => {
@@ -176,12 +181,12 @@ export default function App() {
   useEffect(() => {
     if (!screen) return
     saveLive({
-      screen, appMode, numTeams, teams, timeline, players, playerNumTeams,
+      screen, appMode, numTeams, teams, timeline, players, playerNumTeams, origin, report,
       settings: matchSettings,
       lastSummary,
       matchStartedAt: matchStartRef.current,
     })
-  }, [screen, appMode, numTeams, teams, timeline, players, playerNumTeams, matchSettings, lastSummary])
+  }, [screen, appMode, numTeams, teams, timeline, players, playerNumTeams, origin, report, matchSettings, lastSummary])
 
   useEffect(() => { saveLiveLogos(teamLogos) }, [teamLogos])
 
@@ -261,6 +266,8 @@ export default function App() {
 
     const nextTeams = names.map(mkTeam)
     clearLive()
+    setOrigin(payload.origin || null)
+    setReport(null)
     matchStartRef.current = Date.now()
     teamsRef.current = nextTeams
     setAppMode(mode)
@@ -335,6 +342,7 @@ export default function App() {
     setHistory(newHistory)
     saveHistory(newHistory)
     saveMatchToCloud(summary)
+    reportToTournament(summary.teams[0]?.score, summary.teams[1]?.score)
   }
 
   function endMatch() {
@@ -369,6 +377,7 @@ export default function App() {
     setHistory(newHistory)
     saveHistory(newHistory)
     saveMatchToCloud(summary)
+    if (nt === 2) reportToTournament(s0, s1)
     setSession('results')
     navigate('/match/results', { replace: true })
   }
@@ -393,7 +402,54 @@ export default function App() {
     setPlayers([])
     setPlayerNumTeams(2)
     setSession(null)
+    setOrigin(null)
+    setReport(null)
     navigate('/')
+  }
+
+  // ── Lien tournoi ↔ match ──────────────────────────────────────────────
+  function playTournamentMatch(tour, fixture, mode) {
+    const { team1, team2 } = fixture.match
+    const payload = {
+      names: [team1, team2],
+      mode,
+      settings: matchSettings,
+      origin: { tournamentId: tour.id, matchId: fixture.match.id, label: fixture.label || null },
+    }
+    if (mode === 'player') {
+      payload.playerNumTeams = 2
+      payload.players = [
+        ...(tour.rosters?.[team1] || []).map(n => mkPlayer(n, 0)),
+        ...(tour.rosters?.[team2] || []).map(n => mkPlayer(n, 1)),
+      ]
+    }
+    startMatch(payload)
+  }
+
+  // Fin d'un match lancé depuis un tournoi : le score part dans le tournoi
+  // (et sur le serveur s'il est partagé et qu'on en est organisateur).
+  function reportToTournament(s1, s2) {
+    if (!origin || s1 == null || s2 == null) return
+    const tour = tournaments.find(x => x.id === origin.tournamentId)
+    if (!tour) { setReport({ status: 'missing', tournamentId: origin.tournamentId }); return }
+    if (tour.share && !tour.share.key) { setReport({ status: 'readonly', tournamentId: tour.id }); return }
+    const applied = applyScore(tour, origin.matchId, s1, s2)
+    if (applied.error) { setReport({ status: applied.error, tournamentId: tour.id }); return }
+
+    const next = tour.share ? { ...applied.tour, share: { ...tour.share, dirty: true } } : applied.tour
+    handleSaveTournaments(list => list.map(x => (x.id === tour.id ? next : x)))
+    setReport({ status: tour.share ? 'sending' : 'ok', tournamentId: tour.id })
+    if (!tour.share) return
+
+    pushScore(next, origin.matchId, s1, s2).then(r => {
+      if (r.ok) {
+        handleSaveTournaments(list => list.map(x => (x.id === tour.id ? r.tour : x)))
+        setReport({ status: 'ok', tournamentId: tour.id })
+      } else {
+        // Reste marqué « dirty » : renvoyé dès que le tournoi sera rouvert en ligne.
+        setReport({ status: 'pending', tournamentId: tour.id })
+      }
+    })
   }
 
   function clearHistory() {
@@ -469,6 +525,13 @@ export default function App() {
             onDiscardLive={newMatch}
           />
         )}
+        {(route.name === 'match' || route.name === 'matchResults') && origin && (
+          <TournamentLink
+            origin={origin}
+            report={report}
+            tournament={tournaments.find(x => x.id === origin.tournamentId)}
+          />
+        )}
         {route.name === 'match' && screen === 'match' && (
           <Match
             teams={teams}
@@ -540,6 +603,7 @@ export default function App() {
             tournaments={tournaments}
             onSave={handleSaveTournaments}
             route={route}
+            onPlayMatch={playTournamentMatch}
           />
         )}
         {route.name === 'notFound' && <NotFound />}
