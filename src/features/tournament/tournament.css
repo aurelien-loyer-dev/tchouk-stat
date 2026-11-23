@@ -156,12 +156,6 @@
   gap: 8px;
 }
 
-.trn-prog-label {
-  font-size: 14px;
-  font-weight: 550;
-  color: var(--dim);
-}
-
 .trn-prog-track {
   height: 6px;
   border-radius: 999px;
@@ -224,9 +218,6 @@
 .trn-th-pts { color: var(--txt) !important; }
 .trn-pos  { color: var(--ok); }
 .trn-neg  { color: var(--err); }
-
-.trn-qualified td { background: color-mix(in srgb, var(--acc) 7%, transparent); }
-.trn-qualified .trn-rank { color: var(--acc); }
 
 .trn-rank-first td  { font-weight: 650; }
 
@@ -333,91 +324,7 @@
 .trn-si::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .trn-match-done .trn-si { background: var(--s2); }
 
-.trn-dash { color: var(--dim); }
-
-.trn-match-tbd { color: var(--dim); }
-.trn-match-tbd .trn-mt:last-child { text-align: right; }
-
-/* Poules */
-.trn-groups-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
-  gap: 20px;
-}
-
-.trn-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-
-.trn-group-hd {
-  font-size: 17px;
-  font-weight: 700;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--bdr-strong);
-}
-
-/* Phase finale */
-.trn-bracket {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(280px, 1fr);
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.trn-bround {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.trn-bround-name {
-  font-size: 14px;
-  font-weight: 650;
-  color: var(--dim);
-}
-
-.trn-bround-matches {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  gap: 8px;
-  flex: 1;
-}
-.trn-bround-matches .trn-match {
-  background: var(--s1);
-  border: 1px solid var(--bdr);
-  border-radius: var(--r-sm);
-}
-
-.trn-placement-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.trn-placement-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.trn-placement-row .trn-match {
-  background: var(--s1);
-  border: 1px solid var(--bdr);
-  border-radius: var(--r);
-}
-
-.trn-placement-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--dim);
-}
-
-.trn-ko-btn { align-self: center; min-width: 280px; }
+.trn-dash { color: var(--dim); }/* Poules *//* Phase finale */
 
 /* Validation */
 .trn-validate-banner {
@@ -522,24 +429,11 @@
   .trn-match { gap: 8px; padding: 10px 12px; }
   .trn-mt { font-size: 14px; }
   .trn-si { width: 48px !important; }
-  .trn-ko-btn { align-self: stretch; min-width: 0; }
   .trn-podium { gap: 8px; }
   .trn-end-subtitle { font-size: 26px; }
 }
 
 /* ── Partage ── */
-.trn-body {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-.trn-body:disabled .trn-si { background: transparent; border-color: transparent; color: var(--txt); opacity: 1; }
-.trn-body:disabled button { display: none; }
-
 .shr {
   display: flex;
   flex-direction: column;
@@ -560,14 +454,6 @@
 .shr-intro h2 { font-size: 17px; font-weight: 650; }
 .shr-intro p { font-size: 14px; color: var(--dim); }
 
-.shr-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 14px 20px;
-}
 .shr-code-block { display: flex; flex-direction: column; gap: 2px; }
 .shr-code-label { font-size: 13px; font-weight: 600; color: var(--dim); }
 .shr-code {
@@ -623,16 +509,6 @@
 }
 .shr-stop { color: var(--err); margin-left: auto; }
 
-.shr-viewer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-top: 1px solid var(--bdr);
-  font-size: 14px;
-  color: var(--dim);
-}
-
 .shr-error { font-size: 14px; font-weight: 550; color: var(--err); }
 
 .shr-join { display: flex; flex-direction: column; gap: 6px; max-width: 420px; }
@@ -681,7 +557,7 @@
 .shr-notice .icon-btn { color: inherit; }
 
 @media (max-width: 600px) {
-  .shr-head, .shr-link, .shr-foot, .shr-viewer { padding-left: 16px; padding-right: 16px; }
+  .shr-link, .shr-foot { padding-left: 16px; padding-right: 16px; }
   .shr-link-actions { width: 100%; }
   .shr-link-actions .btn-mini { flex: 1; }
 }

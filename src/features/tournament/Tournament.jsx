@@ -8,6 +8,7 @@ import TournamentSetup from './views/TournamentSetup'
 import TournamentDetail from './views/TournamentDetail'
 import CloudNotice from './components/CloudNotice'
 import './tournament.css'
+import './board.css'
 
 export default function Tournament({ tournaments, onSave, onBack, joinRequest, onJoinHandled }) {
   const { t } = useTranslation()

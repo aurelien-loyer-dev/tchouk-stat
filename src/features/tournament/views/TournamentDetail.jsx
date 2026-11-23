@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getTournamentEndState } from '../../../lib/tournament'
 import { isViewer } from '../cloud'
-import RoundRobinView from './RoundRobinView'
-import GroupsView from './GroupsView'
-import SwissView from './SwissView'
+import OrganizerBoard from './OrganizerBoard'
+import SpectatorBoard from './SpectatorBoard'
 import TournamentEnd from './TournamentEnd'
 import SharePanel from '../components/SharePanel'
 import PageHeader from '../../../components/PageHeader'
@@ -15,10 +14,20 @@ export default function TournamentDetail({ tournament, onUpdate, onBack, onValid
   const [shareOpen, setShareOpen] = useState(false)
   const formatLabel = t('tournament.formatLabel', { returnObjects: true })
   const { finished } = getTournamentEndState(tournament)
-  const readOnly = isViewer(tournament)
-  // Un spectateur n'a pas à valider : le classement final s'affiche dès la fin.
-  const showEnd = validated || (readOnly && finished)
-  const viewProps = { tournament, onUpdate, finished, onValidate: () => onValidate(tournament.id) }
+  const viewer = isViewer(tournament)
+
+  // Spectateur : tableau en direct, puis le classement final dès la fin.
+  if (viewer) {
+    return (
+      <div className="trn-detail">
+        <button className="btn-back" onClick={onBack}>
+          <Icon name="back" size={18} />{t('tournament.back')}
+        </button>
+        {finished && <TournamentEnd tournament={tournament} onBack={onBack} />}
+        <SpectatorBoard tournament={tournament} syncStatus={syncStatus} />
+      </div>
+    )
+  }
 
   return (
     <div className="trn-detail">
@@ -43,15 +52,15 @@ export default function TournamentDetail({ tournament, onUpdate, onBack, onValid
         />
       )}
 
-      {showEnd ? (
+      {validated ? (
         <TournamentEnd tournament={tournament} onBack={onBack} />
       ) : (
-        /* fieldset désactivé : tous les champs et boutons du tournoi passent en lecture seule */
-        <fieldset className="trn-body" disabled={readOnly}>
-          {tournament.format === 'roundrobin' && <RoundRobinView {...viewProps} />}
-          {tournament.format === 'groups'     && <GroupsView     {...viewProps} />}
-          {tournament.format === 'swiss'      && <SwissView      {...viewProps} />}
-        </fieldset>
+        <OrganizerBoard
+          tournament={tournament}
+          onUpdate={onUpdate}
+          finished={finished}
+          onValidate={() => onValidate(tournament.id)}
+        />
       )}
     </div>
   )

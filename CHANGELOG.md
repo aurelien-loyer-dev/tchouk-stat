@@ -13,6 +13,12 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 
 ### Ajouté
 - Tournois partagés : un code et deux liens par tournoi. Le lien spectateur affiche le tournoi en lecture seule, mis à jour en direct (toutes les 4 s). Le lien organisateur permet aussi de saisir les scores. On peut aussi suivre un tournoi en tapant son code. Stockage : fonction Vercel `api/tournament.js` + Upstash Redis.
+- Tableau spectateur : bandeau « En direct », classements lisibles avec la forme récente (V/N/D) et les qualifiés, prochains matchs, derniers résultats (les nouveaux sont signalés), tableau final en colonnes, suivi d'une équipe, mode plein écran pour projeter.
+- Poste organisateur : prochain match en grand avec compteurs +/−, aperçu des matchs suivants, étape à débloquer mise en avant (phase finale, ronde suivante…), onglets À jouer / Résultats / Classement, filtre par équipe.
+- QR code du lien spectateur, affichable en grand pour la salle.
+
+### Corrigé
+- Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.
 
 ## [2.0.0] - 2026-11-23
 

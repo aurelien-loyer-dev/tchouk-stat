@@ -190,7 +190,7 @@ export function advanceKnockout(rounds, roundIdx, matchIdx) {
   const slot = matchIdx % 2 === 0 ? 'team1' : 'team2'
   return rounds.map((r, ri) => ri !== roundIdx + 1 ? r : {
     ...r,
-    matches: r.matches.map((nm, mi) => mi !== nmi ? nm : { ...nm, [slot]: winner, score1: null, score2: null })
+    matches: r.matches.map((nm, mi) => mi !== nmi ? nm : { ...nm, [slot]: winner, score1: null, score2: null, playedAt: null })
   })
 }
 
@@ -231,7 +231,7 @@ export function setPlacementScore(tournament, roundIdx, score1, score2) {
   return {
     ...tournament,
     placementRounds: tournament.placementRounds.map((r, ri) =>
-      ri !== roundIdx ? r : { ...r, match: { ...r.match, score1, score2 } }
+      ri !== roundIdx ? r : { ...r, match: { ...r.match, score1, score2, playedAt: playedStamp(score1) } }
     ),
   }
 }
@@ -253,19 +253,22 @@ export function mkTournament({ name, format, teams, numGroups, knockoutSize, ful
   return base
 }
 
+// Heure de saisie du score : sert à afficher les derniers résultats dans l'ordre.
+const playedStamp = score => (score === null ? null : new Date().toISOString())
+
 export function setMatchScore(tournament, matchId, score1, score2) {
   if (tournament.format === 'roundrobin')
-    return { ...tournament, matches: tournament.matches.map(m => m.id === matchId ? { ...m, score1, score2 } : m) }
+    return { ...tournament, matches: tournament.matches.map(m => m.id === matchId ? { ...m, score1, score2, playedAt: playedStamp(score1) } : m) }
   if (tournament.format === 'groups')
-    return { ...tournament, groups: tournament.groups.map(g => ({ ...g, matches: g.matches.map(m => m.id === matchId ? { ...m, score1, score2 } : m) })) }
+    return { ...tournament, groups: tournament.groups.map(g => ({ ...g, matches: g.matches.map(m => m.id === matchId ? { ...m, score1, score2, playedAt: playedStamp(score1) } : m) })) }
   if (tournament.format === 'swiss')
-    return { ...tournament, rounds: tournament.rounds.map(r => ({ ...r, matches: r.matches.map(m => m.id === matchId ? { ...m, score1, score2 } : m) })) }
+    return { ...tournament, rounds: tournament.rounds.map(r => ({ ...r, matches: r.matches.map(m => m.id === matchId ? { ...m, score1, score2, playedAt: playedStamp(score1) } : m) })) }
   return tournament
 }
 
 export function setKnockoutScore(tournament, roundIdx, matchIdx, score1, score2) {
   const updated = tournament.knockoutRounds.map((r, ri) =>
-    ri !== roundIdx ? r : { ...r, matches: r.matches.map((m, mi) => mi !== matchIdx ? m : { ...m, score1, score2 }) }
+    ri !== roundIdx ? r : { ...r, matches: r.matches.map((m, mi) => mi !== matchIdx ? m : { ...m, score1, score2, playedAt: playedStamp(score1) }) }
   )
   return { ...tournament, knockoutRounds: advanceKnockout(updated, roundIdx, matchIdx) }
 }
