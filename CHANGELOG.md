@@ -24,14 +24,14 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 - QR code du lien spectateur, affichable en grand pour la salle.
 
 - Vraies adresses pour chaque écran : `/stats`, `/players`, `/scoreboard`, `/match`, `/match/results`, `/history/…`, `/tournaments/…`, `/teams`. Le bouton Précédent du navigateur fonctionne, et les liens peuvent s'ouvrir dans un nouvel onglet.
-- Lien de partage plus court : `/t/CODE` (les anciens liens `#trn=` marchent toujours).
+- Liens de partage plus courts : `/live/CODE` pour suivre, `/t/CODE#key=…` pour co-organiser (les anciens liens `#trn=` marchent toujours).
 - Le logo et le nom de l'app ramènent à l'accueil.
 - Accueil : carte « Match en cours » pour reprendre ou abandonner un match laissé ouvert.
 - Page « introuvable » pour les adresses inconnues.
 - Accessibilité : lien d'évitement, titre d'onglet par page, focus placé sur le titre à chaque changement d'écran, libellés sur tous les champs, classement utilisable au clavier, annonce des nouveaux résultats aux lecteurs d'écran.
 
 - Équipes aléatoires → tournoi : on peut nommer les équipes tirées, puis « Créer un tournoi avec ces équipes ». Le formulaire de tournoi propose aussi « Importer le dernier tirage ». Les compositions suivent : onglet « Équipes » côté organisateur, composition de l'équipe suivie côté spectateur.
-- Tournoi → match : depuis le prochain match d'un tournoi, lancer le scoreur, la feuille de stats ou les stats joueurs (avec les joueurs du tirage). À la fin du match, le score est reporté automatiquement dans le tournoi, et envoyé au serveur s'il est partagé. « Jouer maintenant » choisit un autre match à mettre en avant (plusieurs terrains).
+- Tournoi → match : depuis le prochain match d'un tournoi, lancer le scoreur, la feuille de stats ou les stats joueurs (avec les joueurs du tirage). À la fin du match, le score est reporté automatiquement dans le tournoi, et envoyé au serveur s'il est partagé.
 - Accessibilité : les boutons +1 / −1 de la feuille de stats disent à quelle équipe ils s'appliquent.
 
 - Terrains : nombre de terrains disponibles (à la création ou à tout moment). Les matchs sont répartis sur les terrains sans qu'une équipe joue deux fois en même temps ; un terrain libéré prend automatiquement le match suivant. Une carte de saisie par terrain, et un onglet « Planning » qui montre l'ordre des matchs par créneau.
