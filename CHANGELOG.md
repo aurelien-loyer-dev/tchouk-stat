@@ -33,6 +33,7 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 - Page publique `/live/CODE` (lien spectateur et QR code) : toujours en lecture seule, même sur l'appareil de l'organisateur. Elle montre les matchs en cours par terrain, l'ordre des matchs à venir, les résultats, le classement et le chrono.
 
 ### Corrigé
+- Historique vide : la page plantait (`onStartNew is not defined`), son bouton « Commencer » mène maintenant à l'accueil.
 - Historique : ouvrir un match aux données incomplètes (ancienne version, ligne Supabase abîmée) faisait planter toute l'app (écran noir). Les matchs sont maintenant remis en forme au chargement, et un écran qui plante affiche un message avec un retour à l'accueil au lieu d'un écran noir.
 - Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.
 
