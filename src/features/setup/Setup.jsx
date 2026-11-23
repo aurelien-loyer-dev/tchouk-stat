@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link, navigate } from '../../lib/router'
 import { useTranslation } from 'react-i18next'
 import { mkPlayer } from '../../lib/playerStats'
 import Icon from '../../components/Icon'
@@ -10,20 +11,45 @@ import LogoUpload from './components/LogoUpload'
 import PlayerNamesCol from './components/PlayerNamesCol'
 import './setup.css'
 
-function Tile({ label, desc, onClick }) {
+const MODE_PATHS = { stats: '/stats', player: '/players', scorer: '/scoreboard' }
+
+function Tile({ label, desc, to }) {
   return (
-    <button className="tile" onClick={onClick}>
+    <Link className="tile" to={to}>
       <span className="tile-label">{label}</span>
       <span className="tile-desc">{desc}</span>
       <Icon name="chevron" size={20} className="tile-chev" />
-    </button>
+    </Link>
   )
 }
 
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament, onViewTeamDraw, tournamentCount }) {
+// Match laissé en cours (sauvegardé automatiquement) : on propose de le reprendre.
+function ResumeCard({ live, onDiscard }) {
   const { t } = useTranslation()
-  const [step, setStep]   = useState('home') // 'home' | 'form'
-  const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
+  const modeLabel = live.mode === 'player' ? t('setup.formTitle.player') : live.mode === 'scorer' ? t('setup.formTitle.scorer') : t('setup.formTitle.stats')
+  return (
+    <section className="resume" aria-labelledby="resume-title">
+      <span className="resume-dot" aria-hidden="true" />
+      <div className="resume-text">
+        <h2 id="resume-title" className="resume-title">{live.finished ? t('setup.resume.finishedTitle') : t('setup.resume.title')}</h2>
+        <p className="resume-meta">{modeLabel} · {live.names.join(` ${t('setup.resume.vs')} `)}</p>
+      </div>
+      <div className="resume-actions">
+        <button className="btn-link resume-discard" onClick={() => { if (window.confirm(t('setup.resume.discardConfirm'))) onDiscard() }}>
+          {t('setup.resume.discard')}
+        </button>
+        <Link className="btn-acc" to={live.finished ? '/match/results' : '/match'}>
+          {live.finished ? t('setup.resume.seeResults') : t('setup.resume.resume')}
+        </Link>
+      </div>
+    </section>
+  )
+}
+
+export default function Setup({ mode: routeMode, numTeams, setNumTeams, onStart, defaultSettings, history, tournamentCount, liveMatch, onDiscardLive }) {
+  const { t } = useTranslation()
+  const step = routeMode ? 'form' : 'home'
+  const mode = routeMode || 'stats'
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
   const [color1, setColor1] = useState(defaultSettings?.teamColors?.[0] || '#5de8d6')
@@ -115,8 +141,7 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
     if (e.key === 'Enter') handleStart()
   }
 
-  function choose(nextMode) { setMode(nextMode); setStep('form') }
-  function backToHome()      { setStep('home') }
+  function backToHome() { navigate('/') }
 
   const recentHistory = (history || []).slice(0, 3)
 
@@ -153,11 +178,13 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             </div>
           </section>
 
+          {liveMatch && <ResumeCard live={liveMatch} onDiscard={onDiscardLive} />}
+
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.startTitle')}</h2>
             <div className="tiles tiles-3">
               {startChoices.map(c => (
-                <Tile key={c.mode} label={c.label} desc={c.desc} onClick={() => choose(c.mode)} />
+                <Tile key={c.mode} label={c.label} desc={c.desc} to={MODE_PATHS[c.mode]} />
               ))}
             </div>
           </section>
@@ -165,9 +192,9 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
             <div className="tiles tiles-3">
-              <Tile label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} onClick={onViewTournament} />
-              <Tile label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} onClick={onViewTeamDraw} />
-              <Tile label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} onClick={onViewHistory} />
+              <Tile label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} to="/tournaments" />
+              <Tile label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} to="/teams" />
+              <Tile label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} to="/history" />
             </div>
           </section>
 
@@ -175,13 +202,13 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
             <section className="sec">
               <h2 className="sec-title">
                 {t('setup.recentMatches')}
-                <button className="btn-link" onClick={onViewHistory}>
+                <Link className="btn-link" to="/history">
                   {t('setup.viewAll')}<Icon name="chevron" size={16} />
-                </button>
+                </Link>
               </h2>
               <div className="mc-grid">
                 {recentHistory.map(m => (
-                  <MatchCard key={m.id} match={m} onClick={onOpenMatch} />
+                  <MatchCard key={m.id} match={m} to={`/history/${m.id}`} />
                 ))}
               </div>
             </section>

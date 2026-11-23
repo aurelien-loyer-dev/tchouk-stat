@@ -33,6 +33,7 @@ export default function PlayerNamesCol({ teamLabel, teamColor, names, onChange, 
           <input
             type="text"
             placeholder={t('setup.compos.playerPlaceholder', { n: i + 1 })}
+            aria-label={`${teamLabel} · ${t('setup.compos.playerPlaceholder', { n: i + 1 })}`}
             value={name}
             onChange={e => updateName(i, e.target.value)}
           />

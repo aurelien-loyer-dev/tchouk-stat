@@ -80,6 +80,7 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
   const teamNext    = focus ? next.filter(f => involves(f, focus)) : next
   const teamResults = focus ? results.filter(f => involves(f, focus)) : results
   const live = syncStatus !== 'offline'
+  const latestFresh = results.find(f => (fresh[f.match.id] || 0) > Date.now())
 
   function setFocus(team) {
     setFocusState(team)
@@ -110,7 +111,7 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
             </span>
             {ago != null && <span className="sp-ago">{t('tournament.board.updated', { ago: agoLabel(t, ago) })}</span>}
           </div>
-          <h2 className="sp-name">{tournament.name}</h2>
+          <h1 className="sp-name">{tournament.name}</h1>
           <p className="sp-sub">
             {formatLabel[tournament.format]} · {t('tournament.teamsCount', { count: tournament.teams.length })}
             {tournament.share && <> · <span className="sp-nowrap">{t('tournament.share.codeLabel')} {formatCode(tournament.share.code)}</span></>}
@@ -131,6 +132,13 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
           )}
         </div>
       </header>
+
+      <p className="sr-only" aria-live="polite">
+        {latestFresh ? t('tournament.board.newResult', {
+          team1: latestFresh.match.team1, s1: latestFresh.match.score1,
+          team2: latestFresh.match.team2, s2: latestFresh.match.score2,
+        }) : ''}
+      </p>
 
       <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.followTeam')} />
 

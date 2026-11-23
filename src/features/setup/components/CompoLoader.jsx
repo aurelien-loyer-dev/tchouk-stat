@@ -58,6 +58,7 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
                         <input
                           className="ps-compo-edit-input"
                           placeholder={t('setup.compos.namePlaceholder')}
+                          aria-label={t('setup.compos.namePlaceholder')}
                           value={draft.name}
                           onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
                         />
@@ -66,12 +67,14 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
                         <input
                           className="ps-compo-edit-input"
                           placeholder={t('setup.compos.teamNamePlaceholder')}
+                          aria-label={t('setup.compos.teamNamePlaceholder')}
                           value={draft.teamName}
                           onChange={e => setDraft(d => ({ ...d, teamName: e.target.value }))}
                         />
                         <input
                           type="color"
                           className="color-in ps-compo-edit-color"
+                          aria-label={t('setup.color')}
                           value={draft.color}
                           onChange={e => setDraft(d => ({ ...d, color: e.target.value }))}
                         />
@@ -82,6 +85,7 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
                             <input
                               type="text"
                               placeholder={t('setup.compos.playerPlaceholder', { n: i + 1 })}
+                              aria-label={t('setup.compos.playerPlaceholder', { n: i + 1 })}
                               value={p}
                               onChange={e => draftSetPlayer(i, e.target.value)}
                             />
@@ -118,6 +122,7 @@ export default function CompoLoader({ compos, onLoad, onSave, onDelete, onUpdate
             <input
               type="text"
               placeholder={currentTeamLabel ? t('setup.compos.saveNamedPlaceholder', { name: currentTeamLabel }) : t('setup.compos.savePlaceholder')}
+              aria-label={t('setup.compos.savePlaceholder')}
               value={saveName}
               onChange={e => setSaveName(e.target.value)}
               onFocus={() => { if (!saveName && currentTeamLabel) setSaveName(currentTeamLabel) }}

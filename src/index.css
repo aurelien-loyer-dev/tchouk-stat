@@ -145,6 +145,41 @@ body {
 }
 
 button, input, select { font: inherit; color: inherit; }
+
+/* Les liens de l'app sont des tuiles, cartes ou boutons : ils gardent le style
+   du composant. */
+a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+
+/* Lien d'évitement : visible seulement au clavier. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  background: var(--acc);
+  color: var(--acc-txt);
+  font-weight: 650;
+  transform: translateY(-160%);
+  transition: transform 0.15s var(--ease);
+}
+.skip-link:focus { transform: none; }
+
+#main:focus, #main h1:focus { outline: none; }
+
+/* Lu par les lecteurs d'écran, invisible à l'œil. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:disabled { cursor: not-allowed; }
 

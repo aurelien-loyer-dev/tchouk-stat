@@ -13,7 +13,7 @@
   overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.mc:has(> button.mc-main:hover) {
+.mc:has(> .mc-main:is(button, a):hover) {
   border-color: var(--bdr-strong);
   box-shadow: var(--shadow);
   transform: translateY(-1px);

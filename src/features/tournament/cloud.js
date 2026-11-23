@@ -37,20 +37,15 @@ export const isViewer = tour => !!tour?.share && !tour.share.key
 export const formatCode = code => (code ? `${code.slice(0, 3)}-${code.slice(3)}` : '')
 export const normalizeCode = raw => String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 
-// Liens : le code (et la clé) passent dans le fragment #, jamais envoyé au serveur.
-function baseUrl() {
-  return `${window.location.origin}${window.location.pathname}`
-}
-export const viewerLink = share => `${baseUrl()}#trn=${share.code}`
-export const editorLink = share => `${baseUrl()}#trn=${share.code}.${share.key}`
+// Liens : /t/CODE pour suivre ; la clé organisateur passe dans le fragment
+// (#key=…), qui n'est jamais envoyé au serveur ni gardé dans ses journaux.
+export const viewerLink = share => `${window.location.origin}/t/${share.code}`
+export const editorLink = share => `${window.location.origin}/t/${share.code}#key=${share.key}`
 
+// Ancien format de lien (#trn=CODE.CLÉ), encore accepté.
 export function parseJoinHash(hash = window.location.hash) {
   const m = /^#trn=([A-Za-z0-9-]+)(?:\.([A-Za-z0-9]+))?$/.exec(hash || '')
   if (!m) return null
   const code = normalizeCode(m[1])
   return code.length === 6 ? { code, key: m[2] || null } : null
-}
-
-export function clearJoinHash() {
-  history.replaceState(null, '', window.location.pathname + window.location.search)
 }

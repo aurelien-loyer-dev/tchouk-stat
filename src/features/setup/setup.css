@@ -376,3 +376,37 @@
   color: var(--acc-txt);
 }
 .ps-compo-ok:hover { background: var(--acc-hover); }
+
+/* ── Match en cours (reprise) ── */
+.resume {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in srgb, var(--acc) 45%, var(--bdr));
+  border-radius: var(--r);
+  background: color-mix(in srgb, var(--acc) 7%, var(--s1));
+}
+.resume-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 0 4px var(--acc-soft);
+  flex-shrink: 0;
+}
+.resume-text { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px; }
+.resume-title { font-size: 17px; font-weight: 700; }
+.resume-meta { font-size: 14px; color: var(--dim); }
+.resume-actions { display: flex; align-items: center; gap: 16px; }
+.resume-discard { color: var(--dim); font-weight: 550; }
+.resume-discard:hover { color: var(--err); }
+
+@media (max-width: 600px) {
+  .resume-actions { width: 100%; justify-content: space-between; }
+}
+
+/* ── Page introuvable ── */
+.not-found { display: flex; flex-direction: column; gap: 24px; max-width: 760px; }
+.not-found-actions { display: flex; gap: 12px; flex-wrap: wrap; }

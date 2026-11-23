@@ -1,4 +1,14 @@
 export default {
+  nav: {
+    skip: 'Aller au contenu',
+    homeLink: "Tchoukball Assistant, retour à l'accueil",
+    titles: { match: 'Feuille de stats', scorer: 'Scoreur', playermatch: 'Stats joueurs', results: 'Résultats du match' },
+    notFound: {
+      title: 'Page introuvable',
+      text: "Ce lien ne mène nulle part. Il a peut-être été mal copié.",
+      home: "Retour à l'accueil",
+    },
+  },
   common: {
     theme: {
       toLight: 'Passer en thème clair',
@@ -31,6 +41,15 @@ export default {
       playersCount: '{{count}} j',
     },
     logo: 'Logo',
+    resume: {
+      title: 'Match en cours',
+      finishedTitle: 'Match terminé',
+      vs: 'contre',
+      resume: 'Reprendre le match',
+      seeResults: 'Voir les résultats',
+      discard: 'Abandonner',
+      discardConfirm: 'Abandonner ce match ? Ce qui n’a pas été enregistré sera perdu.',
+    },
     home: {
       historyLabel: 'Historique',
       historyDesc: 'Revoir, filtrer et exporter les matchs joués',
@@ -293,6 +312,9 @@ export default {
     newMatch: 'Nouveau match',
   },
   history: {
+    notFoundTitle: 'Match introuvable',
+    notFoundText: "Ce match n'existe pas ou a été supprimé de l'historique.",
+    filterLabel: 'Filtrer par type de match',
     title: 'Historique',
     noMatches: 'Aucun match enregistré pour le moment.',
     noMatchesHint: 'Les matchs terminés apparaîtront ici, avec leurs stats et leur PDF.',
@@ -343,6 +365,8 @@ export default {
     },
   },
   tournament: {
+    notFoundTitle: 'Tournoi introuvable',
+    notFoundText: "Ce tournoi n'est pas sur cet appareil. Pour suivre le tournoi de quelqu'un d'autre, utilisez son lien ou son code.",
     standings: {
       team: 'Équipe', played: 'J', won: 'V', drawn: 'N', lost: 'D',
       gf: 'BP', ga: 'BC', diff: 'Diff', pts: 'Pts',
@@ -441,6 +465,9 @@ export default {
       nextMatch: 'Prochain match',
       justIn: 'Nouveau',
       vs: 'contre',
+      rank: 'Rang',
+      followThis: 'Suivre {{team}}',
+      newResult: 'Nouveau résultat : {{team1}} {{s1}}, {{team2}} {{s2}}',
       tbd: 'À déterminer',
       formTitle: 'Forme',
       form: { W: 'Victoire', D: 'Nul', L: 'Défaite' },

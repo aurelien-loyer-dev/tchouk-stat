@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatCode, isViewer, normalizeCode } from '../cloud'
 import { fmtDateTime } from '../../../lib/format'
+import { Link } from '../../../lib/router'
 import PageHeader from '../../../components/PageHeader'
 import Icon from '../../../components/Icon'
 
@@ -33,7 +34,7 @@ function JoinForm({ onJoin, joinState }) {
   )
 }
 
-export default function TournamentList({ tournaments, onBack, onCreate, onOpen, onDelete, onJoin, joinState }) {
+export default function TournamentList({ tournaments, onBack, onCreate, onDelete, onJoin, joinState }) {
   const { t } = useTranslation()
 
   return (
@@ -69,7 +70,7 @@ export default function TournamentList({ tournaments, onBack, onCreate, onOpen, 
             const formatLabel = t('tournament.formatLabel', { returnObjects: true })
             return (
               <div key={tour.id} className="trn-item">
-                <button className="trn-item-info" onClick={() => onOpen(tour)}>
+                <Link className="trn-item-info" to={`/tournaments/${tour.id}`}>
                   <div className="trn-item-name">
                     {tour.name}
                     {tour.share && (
@@ -82,8 +83,8 @@ export default function TournamentList({ tournaments, onBack, onCreate, onOpen, 
                     {t('tournament.itemMeta', { format: formatLabel[tour.format], teams: tour.teams.length, done, total: allMatches.length })}
                     {tour.createdAt && <> · {fmtDateTime(tour.createdAt)}</>}
                   </div>
-                </button>
-                <button className="icon-btn danger" onClick={() => onDelete(tour.id)} title={t('common.delete')} aria-label={t('common.delete')}>
+                </Link>
+                <button className="icon-btn danger" onClick={() => onDelete(tour.id)} title={t('common.delete')} aria-label={`${t('common.delete')} : ${tour.name}`}>
                   <Icon name="close" size={18} />
                 </button>
               </div>

@@ -4,8 +4,9 @@ import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
 import { teamBtnTxt } from './lib/teamColor'
-import { clearJoinHash, parseJoinHash } from './features/tournament/cloud'
-import { LIVE_SCREENS, clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
+import { parseJoinHash } from './features/tournament/cloud'
+import { navigate, useRoute } from './lib/router'
+import { clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
 import AppBar from './components/AppBar'
 import Setup from './features/setup/Setup'
 import Match from './features/match/Match'
@@ -16,6 +17,7 @@ import PlayerMatch from './features/playerMatch/PlayerMatch'
 import PlayerResults from './features/playerResults/PlayerResults'
 import Tournament from './features/tournament/Tournament'
 import TeamDraw from './features/teamDraw/TeamDraw'
+import NotFound from './components/NotFound'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -39,15 +41,14 @@ const DEFAULT_SETTINGS = {
 const HISTORY_KEY     = 'tchouk_match_history'
 const TOURNAMENTS_KEY = 'tchouk_tournaments'
 const TOURNAMENTS_BACKUP_KEY = 'tchouk_tournaments_backup'
-const SCREEN_KEY      = 'tchouk_screen'
 const HISTORY_LIMIT   = 200
+const RESULT_SCREENS  = ['results', 'playerresults']
+const TOURNAMENT_ROUTES = ['tournaments', 'tournamentNew', 'tournament', 'tournamentJoin']
 
-function loadScreen() {
-  try {
-    const saved = localStorage.getItem(SCREEN_KEY)
-    if (saved === 'tournament') return 'tournament'
-  } catch {}
-  return 'setup'
+// Anciens liens de partage (#trn=CODE.CLÉ) → /t/CODE#key=CLÉ
+function legacyJoinUrl() {
+  const req = parseJoinHash()
+  return req ? `/t/${req.code}${req.key ? `#key=${req.key}` : ''}` : null
 }
 
 function loadHistory() {
@@ -126,9 +127,10 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings, mode)
 export default function App() {
   // Match en cours restauré après un rechargement (null s'il n'y en a pas).
   const [live] = useState(loadLive)
-  // Lien de partage d'un tournoi (#trn=CODE ou #trn=CODE.CLÉ) : ouvre les tournois.
-  const [joinRequest, setJoinRequest] = useState(parseJoinHash)
-  const [screen, setScreen]         = useState(() => (joinRequest ? 'tournament' : live?.screen || loadScreen()))
+  const { t } = useTranslation()
+  const route = useRoute()
+  // Match en cours : 'live' (en jeu), 'results' (écran de fin) ou null.
+  const [session, setSession]       = useState(() => (live ? (RESULT_SCREENS.includes(live.screen) ? 'results' : 'live') : null))
   const [appMode, setAppMode]       = useState(live?.appMode || 'stats') // 'stats' | 'scorer' | 'player'
   const [numTeams, setNumTeams]     = useState(live?.numTeams || 2)
   const [teams, setTeams]           = useState(live?.teams || [])
@@ -137,7 +139,6 @@ export default function App() {
   const [lastSummary, setLastSummary] = useState(live?.lastSummary || null)
   const [matchSettings, setMatchSettings] = useState(live?.settings || DEFAULT_SETTINGS)
   const [history, setHistory]       = useState(loadHistory)
-  const [historyInitialMatch, setHistoryInitialMatch] = useState(null)
   const [tournaments, setTournaments] = useState(loadTournaments)
 
   // Chargement depuis Supabase au démarrage
@@ -167,9 +168,13 @@ export default function App() {
   const playersRef    = useRef(live?.players || [])
   const matchStartRef = useRef(live?.matchStartedAt || null)
 
+  const matchScreen   = appMode === 'player' ? 'playermatch' : appMode === 'scorer' ? 'scorer' : 'match'
+  const resultsScreen = appMode === 'player' ? 'playerresults' : 'results'
+  const screen = session === 'live' ? matchScreen : session === 'results' ? resultsScreen : null
+
   // ── Sauvegarde automatique du match en cours ─────────────────────────────
   useEffect(() => {
-    if (!LIVE_SCREENS.includes(screen)) return
+    if (!screen) return
     saveLive({
       screen, appMode, numTeams, teams, timeline, players, playerNumTeams,
       settings: matchSettings,
@@ -191,27 +196,32 @@ export default function App() {
     document.documentElement.style.setProperty('--c2-btn-txt', teamBtnTxt(c2))
   }, [matchSettings])
 
-  useEffect(() => { window.scrollTo(0, 0) }, [screen])
-
+  // ── Redirections : écran de match sans match, anciens liens de partage ──
+  const redirect =
+    route.name === 'match'        && session !== 'live'    ? (session === 'results' ? '/match/results' : '/') :
+    route.name === 'matchResults' && session !== 'results' ? (session === 'live' ? '/match' : '/') :
+    legacyJoinUrl()
   useEffect(() => {
-    if (joinRequest) clearJoinHash()
-    function onHash() {
-      const req = parseJoinHash()
-      if (!req) return
-      clearJoinHash()
-      setJoinRequest(req)
-      setScreen('tournament')
-    }
+    if (redirect) navigate(redirect, { replace: true })
+  }, [redirect])
+  useEffect(() => {
+    const onHash = () => { const url = legacyJoinUrl(); if (url) navigate(url, { replace: true }) }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
+  // ── Après chaque navigation : haut de page, focus sur le titre (lecteurs d'écran) ──
   useEffect(() => {
-    try {
-      if (screen === 'tournament') localStorage.setItem(SCREEN_KEY, screen)
-      else localStorage.removeItem(SCREEN_KEY)
-    } catch {}
-  }, [screen])
+    if (!route.nav) return
+    window.scrollTo(0, 0)
+    const id = requestAnimationFrame(() => {
+      const target = document.querySelector('#main h1') || document.getElementById('main')
+      if (!target) return
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+      target.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [route.nav, route.pathname])
 
   useEffect(() => {
     function handleStorage(e) {
@@ -265,11 +275,10 @@ export default function App() {
       playersRef.current = playerList
       setPlayers(playerList)
       setPlayerNumTeams(pnt)
-      setScreen('playermatch')
-      return
     }
 
-    setScreen(mode === 'scorer' ? 'scorer' : 'match')
+    setSession('live')
+    navigate('/match', { replace: true })
   }
 
   // ── Ajustement stats équipe (mode stats / scorer) ─────────────────────────
@@ -330,7 +339,8 @@ export default function App() {
 
   function endMatch() {
     saveMatchToHistory()
-    setScreen('results')
+    setSession('results')
+    navigate('/match/results', { replace: true })
   }
 
   // ── Fin du match (mode player) ────────────────────────────────────────────
@@ -359,7 +369,8 @@ export default function App() {
     setHistory(newHistory)
     saveHistory(newHistory)
     saveMatchToCloud(summary)
-    setScreen('playerresults')
+    setSession('results')
+    navigate('/match/results', { replace: true })
   }
 
   function resetScorer() {
@@ -381,7 +392,8 @@ export default function App() {
     setTeamLogos([null, null])
     setPlayers([])
     setPlayerNumTeams(2)
-    setScreen('setup')
+    setSession(null)
+    navigate('/')
   }
 
   function clearHistory() {
@@ -410,26 +422,54 @@ export default function App() {
     })
   }, [])
 
+  // ── Titre de l'onglet ───────────────────────────────────────────────────
+  const tournamentInRoute = route.name === 'tournament' ? tournaments.find(x => x.id === route.params.id) : null
+  const matchInRoute = route.name === 'historyMatch' ? history.find(m => m.id === route.params.id) : null
+  const pageTitle = {
+    newStats:      t('setup.formTitle.stats'),
+    newPlayers:    t('setup.formTitle.player'),
+    newScoreboard: t('setup.formTitle.scorer'),
+    match:         t(`nav.titles.${matchScreen}`),
+    matchResults:  t('nav.titles.results'),
+    history:       t('history.title'),
+    historyMatch:  matchInRoute ? (matchInRoute.teams || []).map(tm => tm.name).join(' – ') : t('history.title'),
+    tournaments:   t('tournament.title'),
+    tournamentNew: t('tournament.setup.title'),
+    tournament:    tournamentInRoute?.name || t('tournament.title'),
+    tournamentJoin: t('tournament.title'),
+    teams:         t('teamDraw.title'),
+    notFound:      t('nav.notFound.title'),
+  }[route.name]
+  useEffect(() => {
+    document.title = pageTitle ? `${pageTitle} · ${t('setup.appTitle')}` : t('setup.appTitle')
+  }, [pageTitle, t])
+
+  const setupMode = { newStats: 'stats', newPlayers: 'player', newScoreboard: 'scorer' }[route.name] || null
+  const liveInfo = session && teams.length ? {
+    mode: appMode,
+    finished: session === 'results',
+    names: (appMode === 'player' ? teams.slice(0, playerNumTeams) : teams).map(tm => tm.name),
+  } : null
+
   return (
     <>
+      <a className="skip-link" href="#main">{t('nav.skip')}</a>
       <AppBar />
-      <main className="app-main">
-        {screen === 'setup' && (
+      <main className="app-main" id="main" tabIndex={-1}>
+        {(route.name === 'home' || setupMode) && (
           <Setup
+            mode={setupMode}
             numTeams={numTeams}
             setNumTeams={setNumTeams}
             onStart={startMatch}
             defaultSettings={matchSettings}
             history={history}
-            onClearHistory={clearHistory}
-            onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
-            onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
-            onViewTournament={() => setScreen('tournament')}
-            onViewTeamDraw={() => setScreen('teamdraw')}
             tournamentCount={tournaments.length}
+            liveMatch={liveInfo}
+            onDiscardLive={newMatch}
           />
         )}
-        {screen === 'match' && (
+        {route.name === 'match' && screen === 'match' && (
           <Match
             teams={teams}
             numTeams={numTeams}
@@ -438,7 +478,7 @@ export default function App() {
             settings={matchSettings}
           />
         )}
-        {screen === 'scorer' && (
+        {route.name === 'match' && screen === 'scorer' && (
           <Scorer
             teams={teams}
             numTeams={numTeams}
@@ -450,7 +490,7 @@ export default function App() {
             logos={teamLogos}
           />
         )}
-        {screen === 'playermatch' && (
+        {route.name === 'match' && screen === 'playermatch' && (
           <PlayerMatch
             teams={teams}
             players={players}
@@ -460,7 +500,7 @@ export default function App() {
             settings={matchSettings}
           />
         )}
-        {screen === 'results' && (
+        {route.name === 'matchResults' && screen === 'results' && (
           <Results
             teams={teams}
             numTeams={numTeams}
@@ -470,7 +510,7 @@ export default function App() {
             onNew={newMatch}
           />
         )}
-        {screen === 'playerresults' && (
+        {route.name === 'matchResults' && screen === 'playerresults' && (
           <PlayerResults
             teams={teams}
             players={players}
@@ -480,31 +520,29 @@ export default function App() {
             onNew={newMatch}
           />
         )}
-        {screen === 'history' && (
+        {(route.name === 'history' || route.name === 'historyMatch') && (
           <History
             history={history}
-            onBack={() => setScreen('setup')}
+            selectedId={route.name === 'historyMatch' ? route.params.id : null}
+            onBack={() => navigate('/')}
             onClear={clearHistory}
             onDelete={deleteMatch}
-            onStartNew={() => setScreen('setup')}
-            initialMatch={historyInitialMatch}
           />
         )}
-        {screen === 'teamdraw' && (
+        {route.name === 'teams' && (
           <TeamDraw
-            onBack={() => setScreen('setup')}
+            onBack={() => navigate('/')}
             onStartMatch={payload => startMatch({ ...payload, settings: matchSettings })}
           />
         )}
-        {screen === 'tournament' && (
+        {TOURNAMENT_ROUTES.includes(route.name) && (
           <Tournament
             tournaments={tournaments}
             onSave={handleSaveTournaments}
-            onBack={() => setScreen('setup')}
-            joinRequest={joinRequest}
-            onJoinHandled={() => setJoinRequest(null)}
+            route={route}
           />
         )}
+        {route.name === 'notFound' && <NotFound />}
       </main>
       <AppFooter />
       <Analytics />

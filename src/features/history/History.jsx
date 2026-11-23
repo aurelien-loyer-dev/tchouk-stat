@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchCard from '../../components/MatchCard'
 import PageHeader from '../../components/PageHeader'
+import { navigate } from '../../lib/router'
 import Icon from '../../components/Icon'
 import { dayKey, fmtDayLabel } from '../../lib/format'
 import { downloadMatchPdf } from './pdf'
@@ -15,9 +16,8 @@ function normalize(s) {
   return String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 }
 
-export default function History({ history, onBack, onClear, onDelete, onStartNew, initialMatch }) {
+export default function History({ history, selectedId, onBack, onClear, onDelete }) {
   const { t } = useTranslation()
-  const [selectedId, setSelectedId] = useState(initialMatch?.id || null)
   const [mode, setMode]   = useState('all')
   const [query, setQuery] = useState('')
 
@@ -49,10 +49,20 @@ export default function History({ history, onBack, onClear, onDelete, onStartNew
   function handleDelete(match) {
     if (!window.confirm(t('history.deleteConfirm'))) return
     onDelete(match.id)
+    if (selectedId === match.id) navigate('/history', { replace: true })
+  }
+
+  if (selectedId && !selected) {
+    return (
+      <div className="hist">
+        <PageHeader title={t('history.notFoundTitle')} onBack={() => navigate('/history')} backLabel={t('history.title')} />
+        <div className="empty-state">{t('history.notFoundText')}</div>
+      </div>
+    )
   }
 
   if (selected) {
-    const props = { match: selected, onClose: () => setSelectedId(null), onDelete: handleDelete }
+    const props = { match: selected, onClose: () => navigate('/history'), onDelete: handleDelete }
     return selected.mode === 'player' ? <PlayerMatchDetail {...props} /> : <MatchDetail {...props} />
   }
 
@@ -99,12 +109,11 @@ export default function History({ history, onBack, onClear, onDelete, onStartNew
                 </button>
               )}
             </label>
-            <div className="seg hist-modes" role="tablist">
+            <div className="seg hist-modes" role="group" aria-label={t('history.filterLabel')}>
               {MODES.map(m => (
                 <button
                   key={m}
-                  role="tab"
-                  aria-selected={mode === m}
+                  aria-pressed={mode === m}
                   className={mode === m ? 'on' : ''}
                   onClick={() => setMode(m)}
                   disabled={m !== 'all' && !counts[m]}
@@ -130,7 +139,7 @@ export default function History({ history, onBack, onClear, onDelete, onStartNew
                     key={m.id}
                     match={m}
                     timeOnly
-                    onClick={() => setSelectedId(m.id)}
+                    to={`/history/${m.id}`}
                     onDownloadPdf={downloadMatchPdf}
                     onDelete={handleDelete}
                   />

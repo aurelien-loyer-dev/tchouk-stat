@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // Score input pour un match
 export default function MatchRow({ match, onScore, compact }) {
+  const { t } = useTranslation()
   const [s1, setS1] = useState(match.score1 !== null ? String(match.score1) : '')
   const [s2, setS2] = useState(match.score2 !== null ? String(match.score2) : '')
   const played = match.score1 !== null && match.score2 !== null
@@ -23,13 +25,15 @@ export default function MatchRow({ match, onScore, compact }) {
     <div className={`trn-match${played ? ' trn-match-done' : ''}${compact ? ' trn-match-compact' : ''}`}>
       <div className={`trn-mt${winner1 ? ' trn-mt-win' : ''}`}>{match.team1}</div>
       <div className="trn-score-wrap">
-        <input className="trn-si" type="number" min="0" value={s1}
+        <input className="trn-si" type="number" min="0" inputMode="numeric" value={s1}
+          aria-label={t('tournament.board.scoreOf', { team: match.team1 })}
           onChange={e => setS1(e.target.value)}
           onBlur={e => save(e.target.value, s2)}
           onKeyDown={e => e.key === 'Enter' && save(s1, s2)}
         />
         <span className="trn-dash">–</span>
-        <input className="trn-si" type="number" min="0" value={s2}
+        <input className="trn-si" type="number" min="0" inputMode="numeric" value={s2}
+          aria-label={t('tournament.board.scoreOf', { team: match.team2 })}
           onChange={e => setS2(e.target.value)}
           onBlur={e => save(s1, e.target.value)}
           onKeyDown={e => e.key === 'Enter' && save(s1, s2)}
