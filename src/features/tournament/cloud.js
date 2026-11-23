@@ -39,9 +39,9 @@ export const isViewer = tour => !!tour?.share && !tour.share.key
 export const formatCode = code => (code ? `${code.slice(0, 3)}-${code.slice(3)}` : '')
 export const normalizeCode = raw => String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 
-// Liens : /t/CODE pour suivre ; la clé organisateur passe dans le fragment
+// Liens : /live/CODE pour suivre (page publique) ; /t/CODE#key=… pour co-organiser : la clé passe dans le fragment
 // (#key=…), qui n'est jamais envoyé au serveur ni gardé dans ses journaux.
-export const viewerLink = share => `${window.location.origin}/t/${share.code}`
+export const viewerLink = share => `${window.location.origin}/live/${share.code}`
 export const editorLink = share => `${window.location.origin}/t/${share.code}#key=${share.key}`
 
 // Ancien format de lien (#trn=CODE.CLÉ), encore accepté.

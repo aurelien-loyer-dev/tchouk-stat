@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { isPlayed } from '../../overview'
 
 // Un match en lecture seule : contexte, équipes, score (ou « contre »).
-export default function FixtureCard({ fixture, focusTeam, isNew, featured }) {
+export default function FixtureCard({ fixture, focusTeam, isNew, featured, live, court, dim }) {
   const { t } = useTranslation()
   const m = fixture.match
   const played = isPlayed(m)
@@ -14,14 +14,18 @@ export default function FixtureCard({ fixture, focusTeam, isNew, featured }) {
     'fx',
     played ? 'fx-played' : 'fx-upcoming',
     featured && 'fx-featured',
+    live && 'fx-live',
+    dim && 'fx-dim',
     mine && 'fx-mine',
     isNew && 'fx-new',
   ].filter(Boolean).join(' ')
 
   return (
     <article className={cls}>
-      {(fixture.label || isNew || featured) && (
+      {(fixture.label || isNew || featured || live || court) && (
         <header className="fx-meta">
+          {court && <span className="court-tag">{t('tournament.courts.court', { n: court })}</span>}
+          {live && <span className="fx-live-tag"><span className="fx-live-dot" aria-hidden="true" />{t('tournament.courts.inProgress')}</span>}
           {featured && <span className="fx-next">{t('tournament.board.nextMatch')}</span>}
           {fixture.label && <span className="fx-label">{fixture.label}</span>}
           {isNew && <span className="fx-new-tag">{t('tournament.board.justIn')}</span>}

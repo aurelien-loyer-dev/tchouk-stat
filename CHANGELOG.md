@@ -28,6 +28,10 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 - Tournoi → match : depuis le prochain match d'un tournoi, lancer le scoreur, la feuille de stats ou les stats joueurs (avec les joueurs du tirage). À la fin du match, le score est reporté automatiquement dans le tournoi, et envoyé au serveur s'il est partagé. « Jouer maintenant » choisit un autre match à mettre en avant (plusieurs terrains).
 - Accessibilité : les boutons +1 / −1 de la feuille de stats disent à quelle équipe ils s'appliquent.
 
+- Terrains : nombre de terrains disponibles (à la création ou à tout moment). Les matchs sont répartis sur les terrains sans qu'une équipe joue deux fois en même temps ; un terrain libéré prend automatiquement le match suivant. Une carte de saisie par terrain, et un onglet « Planning » qui montre l'ordre des matchs par créneau.
+- Chrono global informatif : nom, durée, démarrer / pause / +1 min / remise à zéro. Visible en grand sur la page publique.
+- Page publique `/live/CODE` (lien spectateur et QR code) : toujours en lecture seule, même sur l'appareil de l'organisateur. Elle montre les matchs en cours par terrain, l'ordre des matchs à venir, les résultats, le classement et le chrono.
+
 ### Corrigé
 - Historique : ouvrir un match aux données incomplètes (ancienne version, ligne Supabase abîmée) faisait planter toute l'app (écran noir). Les matchs sont maintenant remis en forme au chargement, et un écran qui plante affiche un message avec un retour à l'accueil au lieu d'un écran noir.
 - Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.

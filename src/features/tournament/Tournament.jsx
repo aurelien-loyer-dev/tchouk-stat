@@ -22,6 +22,12 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
   const active = view === 'detail' ? tournaments.find(tour => tour.id === route.params.id) || null : null
   const cloud  = useTournamentCloud({ tournaments, save: onSave, activeId: active?.id, view })
 
+  // Copie suivie en spectateur (ancienne version) : on ouvre la page publique.
+  const viewerCode = active?.share && !active.share.key ? active.share.code : null
+  useEffect(() => {
+    if (viewerCode) navigate(`/live/${viewerCode}`, { replace: true })
+  }, [viewerCode])
+
   async function join(code, key) {
     setJoinState('loading')
     const r = await cloud.join(code, key)
@@ -44,6 +50,8 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
     const token = `${code}.${key}`
     if (joined.current === token) return
     joined.current = token
+    // Sans clé, c'est un lien spectateur : page publique, rien n'est importé.
+    if (!key) { navigate(`/live/${code}`, { replace: true }); return }
     join(code.toUpperCase().replace(/[^A-Z0-9]/g, ''), key)
   }, [view, route.params.code, route.hash])
 
@@ -99,6 +107,7 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
         </div>
       )
     }
+    if (viewerCode) return null
     return (
       <>
         {notice}
@@ -125,7 +134,7 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
         onBack={() => navigate('/')}
         onCreate={() => navigate('/tournaments/new')}
         onDelete={handleDelete}
-        onJoin={code => join(code, null)}
+        onJoin={code => navigate(`/live/${code}`)}
         joinState={joinState}
       />
     </>

@@ -102,3 +102,64 @@ export function applyScore(tour, matchId, s1, s2) {
   if (fx.stage === 'knockout' && s1 === s2) return { error: 'draw' }
   return { tour: fx.save(tour, s1, s2), fixture: fx }
 }
+
+// ── Terrains et planning ─────────────────────────────────────────────────
+const teamsOf = f => [f.match.team1, f.match.team2]
+
+// Répartit les matchs prêts sur `tour.courtCount` terrains.
+// - Un match déjà sur un terrain y reste (tour.courts : id du match → n° de terrain).
+// - Un terrain libre prend le prochain match dont aucune équipe ne joue déjà.
+// - Le reste est rangé en créneaux, sans qu'une équipe joue deux fois dans le même.
+// Résultat : { count, onCourt: [fixture|null par terrain], slots: [[{ fixture, court }]],
+//              waiting: [fixtures dont les équipes ne sont pas encore connues], courts }
+export function planCourts(tour, fixtures = listFixtures(tour)) {
+  const count = Math.max(1, Math.min(32, Number(tour.courtCount) || 1))
+  const pending = upcoming(fixtures)
+  const kept = tour.courts || {}
+  const onCourt = Array(count).fill(null)
+  const used = new Set()
+  const busy = new Set()
+  const place = (f, i) => { onCourt[i] = f; used.add(f.match.id); teamsOf(f).forEach(tm => busy.add(tm)) }
+
+  pending.forEach(f => {
+    const c = kept[f.match.id]
+    if (Number.isInteger(c) && c >= 1 && c <= count && !onCourt[c - 1] && !teamsOf(f).some(tm => busy.has(tm))) place(f, c - 1)
+  })
+  for (let i = 0; i < count; i++) {
+    if (onCourt[i]) continue
+    const f = pending.find(x => !used.has(x.match.id) && !teamsOf(x).some(tm => busy.has(tm)))
+    if (f) place(f, i)
+  }
+
+  const slots = []
+  let queue = pending.filter(f => !used.has(f.match.id))
+  while (queue.length) {
+    const slot = []
+    const inSlot = new Set()
+    for (const f of queue) {
+      if (slot.length >= count) break
+      if (teamsOf(f).some(tm => inSlot.has(tm))) continue
+      slot.push({ fixture: f, court: slot.length + 1 })
+      teamsOf(f).forEach(tm => inSlot.add(tm))
+    }
+    queue = queue.filter(f => !slot.some(s => s.fixture === f))
+    slots.push(slot)
+  }
+
+  const waiting = fixtures.filter(f => !isPlayed(f.match) && isTbd(f.match))
+  const courts = Object.fromEntries(onCourt.map((f, i) => f && [f.match.id, i + 1]).filter(Boolean))
+  return { count, onCourt, slots, waiting, courts }
+}
+
+export const sameCourts = (a = {}, b = {}) => {
+  const ka = Object.keys(a), kb = Object.keys(b)
+  return ka.length === kb.length && ka.every(k => a[k] === b[k])
+}
+
+// ── Chrono informatif ────────────────────────────────────────────────────
+// clock : { label, durationSec, remainingSec, endsAt (ms, si en marche), running }
+export function clockRemainingMs(clock, now = Date.now()) {
+  if (!clock?.durationSec) return null
+  if (clock.running && clock.endsAt) return Math.max(0, clock.endsAt - now)
+  return Math.max(0, (clock.remainingSec ?? clock.durationSec) * 1000)
+}

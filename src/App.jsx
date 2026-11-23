@@ -17,6 +17,7 @@ import History from './features/history/History'
 import PlayerMatch from './features/playerMatch/PlayerMatch'
 import PlayerResults from './features/playerResults/PlayerResults'
 import Tournament from './features/tournament/Tournament'
+import PublicBoard from './features/tournament/views/PublicBoard'
 import TeamDraw from './features/teamDraw/TeamDraw'
 import NotFound from './components/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -609,6 +610,7 @@ export default function App() {
             onPlayMatch={playTournamentMatch}
           />
         )}
+        {route.name === 'live' && <PublicBoard code={route.params.code} />}
         {route.name === 'notFound' && <NotFound />}
         </ErrorBoundary>
       </main>

@@ -26,7 +26,7 @@ function Side({ team, value, onChange, onStep, align }) {
 }
 
 // Saisie du prochain match : gros compteurs, validation en un geste.
-export default function ScoreEntry({ fixture, onSave, knockout, onPlay, canPlayers }) {
+export default function ScoreEntry({ fixture, onSave, knockout, onPlay, canPlayers, kicker, compact }) {
   const { t } = useTranslation()
   const m = fixture.match
   const [s1, setS1] = useState('')
@@ -47,9 +47,9 @@ export default function ScoreEntry({ fixture, onSave, knockout, onPlay, canPlaye
   }
 
   return (
-    <form className="se" onSubmit={submit}>
+    <form className={`se${compact ? ' se-compact' : ''}`} onSubmit={submit}>
       <header className="se-head">
-        <span className="se-kicker">{t('tournament.board.nextMatch')}</span>
+        <span className="se-kicker">{kicker || t('tournament.board.nextMatch')}</span>
         {fixture.label && <span className="fx-label">{fixture.label}</span>}
       </header>
       <div className="se-board">
