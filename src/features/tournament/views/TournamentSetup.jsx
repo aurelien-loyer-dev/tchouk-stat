@@ -42,8 +42,8 @@ export default function TournamentSetup({ onStart, onCancel }) {
         <PageHeader title={t('tournament.setup.title')} onBack={onCancel} backLabel={t('tournament.setup.cancel')} />
 
         <div className="trn-field">
-          <div className="flabel">{t('tournament.setup.nameLabel')}</div>
-          <input type="text" placeholder={t('tournament.setup.namePlaceholder')} value={name}
+ <label className="flabel" htmlFor="trn-name">{t('tournament.setup.nameLabel')}</label>
+          <input id="trn-name" type="text" placeholder={t('tournament.setup.namePlaceholder')} value={name}
             onChange={e => setName(e.target.value)} autoFocus />
         </div>
 
@@ -75,8 +75,8 @@ export default function TournamentSetup({ onStart, onCancel }) {
 
         {format === 'swiss' && (
           <div className="trn-field">
-            <div className="flabel">{t('tournament.setup.swissRoundsLabel')}</div>
-            <input type="number" min="2" max="15" value={swissRounds}
+            <label className="flabel" htmlFor="trn-swiss">{t('tournament.setup.swissRoundsLabel')}</label>
+            <input id="trn-swiss" type="number" min="2" max="15" value={swissRounds}
               onChange={e => setSwissRounds(e.target.value)} />
           </div>
         )}
@@ -94,9 +94,9 @@ export default function TournamentSetup({ onStart, onCancel }) {
         )}
 
         <div className="trn-field">
-          <div className="flabel">{t('tournament.setup.teamsLabel', { count: teams.length })}</div>
+          <label className="flabel" htmlFor="trn-team">{t('tournament.setup.teamsLabel', { count: teams.length })}</label>
           <div className="trn-team-row">
-            <input type="text" placeholder={t('tournament.setup.teamNamePlaceholder')} value={teamInput}
+            <input id="trn-team" type="text" placeholder={t('tournament.setup.teamNamePlaceholder')} value={teamInput}
               onChange={e => setTeamInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addTeam()} />
             <button className="btn-mini" onClick={addTeam} disabled={!teamInput.trim()}>{t('tournament.setup.addTeam')}</button>

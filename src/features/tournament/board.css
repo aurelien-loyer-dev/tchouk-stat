@@ -145,8 +145,20 @@
 .stb-focus td { background: var(--acc-soft); }
 .stb-table tbody tr:hover td { background: var(--s2); }
 .stb-focus:hover td { background: var(--acc-soft) !important; }
-.stb-table tbody tr { cursor: pointer; }
-.stb-detailed tbody tr { cursor: default; }
+/* Nom d'équipe cliquable (suivre l'équipe) : bouton sans habillage. */
+.stb-pick {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stb-pick:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .stb-form { display: inline-flex; gap: 3px; }
 .stb-form-empty { color: var(--s3); }

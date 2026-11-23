@@ -1,62 +1,55 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { loadTournamentUi, TOURNAMENT_UI_KEY } from './storage'
+import { navigate } from '../../lib/router'
 import { canEdit } from './cloud'
 import { useTournamentCloud } from './useTournamentCloud'
 import TournamentList from './views/TournamentList'
 import TournamentSetup from './views/TournamentSetup'
 import TournamentDetail from './views/TournamentDetail'
 import CloudNotice from './components/CloudNotice'
+import PageHeader from '../../components/PageHeader'
 import './tournament.css'
 import './board.css'
 
-export default function Tournament({ tournaments, onSave, onBack, joinRequest, onJoinHandled }) {
+// Routes : /tournaments (liste), /tournaments/new, /tournaments/:id,
+// /t/:code (lien de partage ; la clé organisateur arrive dans #key=…).
+export default function Tournament({ tournaments, onSave, route }) {
   const { t } = useTranslation()
-  const [initialUi] = useState(loadTournamentUi)
-  const [view, setView]         = useState(initialUi.view)
-  const [activeId, setActiveId] = useState(initialUi.activeId)
   const [validatedIds, setValidatedIds] = useState([])
   const [joinState, setJoinState] = useState(null) // null | 'loading' | { error }
 
-  const active = tournaments.find(tour => tour.id === activeId) || null
+  const view = { tournaments: 'list', tournamentNew: 'setup', tournament: 'detail', tournamentJoin: 'join' }[route.name]
+  const active = view === 'detail' ? tournaments.find(tour => tour.id === route.params.id) || null : null
   const cloud  = useTournamentCloud({ tournaments, save: onSave, activeId: active?.id, view })
-
-  // Tournoi supprimé (ici ou dans un autre onglet) : retour à la liste.
-  useEffect(() => {
-    if (view === 'detail' && activeId && !active && joinState !== 'loading') setView('list')
-  }, [view, activeId, active, joinState])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(TOURNAMENT_UI_KEY, JSON.stringify({ view, activeId: active?.id || null }))
-    } catch {}
-  }, [view, active])
 
   async function join(code, key) {
     setJoinState('loading')
     const r = await cloud.join(code, key)
     if (r.ok) {
       setJoinState(null)
-      setActiveId(r.id)
-      setView('detail')
+      navigate(`/tournaments/${r.id}`, { replace: view === 'join' })
     } else {
       setJoinState({ error: r.status === 404 ? 'notFound' : r.status === 503 ? 'notConfigured' : 'offline' })
-      setView('list')
+      if (view === 'join') navigate('/tournaments', { replace: true })
     }
     return r
   }
 
-  // Ouverture via un lien partagé.
+  // Ouverture via un lien partagé /t/CODE[#key=CLÉ].
+  const joined = useRef(null)
   useEffect(() => {
-    if (!joinRequest) return
-    onJoinHandled()
-    join(joinRequest.code, joinRequest.key)
-  }, [joinRequest])
+    if (view !== 'join') return
+    const code = route.params.code
+    const key = new URLSearchParams(route.hash.slice(1)).get('key')
+    const token = `${code}.${key}`
+    if (joined.current === token) return
+    joined.current = token
+    join(code.toUpperCase().replace(/[^A-Z0-9]/g, ''), key)
+  }, [view, route.params.code, route.hash])
 
   function handleStart(tour) {
     onSave(list => [tour, ...list])
-    setActiveId(tour.id)
-    setView('detail')
+    navigate(`/tournaments/${tour.id}`, { replace: true })
   }
 
   function handleUpdate(updated) {
@@ -76,7 +69,7 @@ export default function Tournament({ tournaments, onSave, onBack, joinRequest, o
     if (!window.confirm(msg)) return
     onSave(list => list.filter(x => x.id !== id))
     setValidatedIds(ids => ids.filter(vId => vId !== id))
-    if (activeId === id) setView('list')
+    if (active?.id === id) navigate('/tournaments', { replace: true })
   }
 
   const notice = cloud.notice && (
@@ -88,16 +81,31 @@ export default function Tournament({ tournaments, onSave, onBack, joinRequest, o
   )
 
   if (view === 'setup')
-    return <TournamentSetup onStart={handleStart} onCancel={() => setView('list')} />
+    return <TournamentSetup onStart={handleStart} onCancel={() => navigate('/tournaments')} />
 
-  if (view === 'detail' && active)
+  if (view === 'join')
+    return (
+      <div className="trn-list-screen" aria-busy="true">
+        <PageHeader title={t('tournament.share.joining')} onBack={() => navigate('/tournaments')} backLabel={t('tournament.title')} />
+      </div>
+    )
+
+  if (view === 'detail') {
+    if (!active) {
+      return (
+        <div className="trn-list-screen">
+          <PageHeader title={t('tournament.notFoundTitle')} subtitle={t('tournament.notFoundText')}
+                      onBack={() => navigate('/tournaments')} backLabel={t('tournament.title')} />
+        </div>
+      )
+    }
     return (
       <>
         {notice}
         <TournamentDetail
           tournament={active}
           onUpdate={handleUpdate}
-          onBack={() => setView('list')}
+          onBack={() => navigate('/tournaments')}
           onValidate={handleValidate}
           validated={validatedIds.includes(active.id)}
           syncStatus={cloud.sync[active.id]}
@@ -106,15 +114,15 @@ export default function Tournament({ tournaments, onSave, onBack, joinRequest, o
         />
       </>
     )
+  }
 
   return (
     <>
       {notice}
       <TournamentList
         tournaments={tournaments}
-        onBack={onBack}
-        onCreate={() => setView('setup')}
-        onOpen={tour => { setActiveId(tour.id); setView('detail') }}
+        onBack={() => navigate('/')}
+        onCreate={() => navigate('/tournaments/new')}
         onDelete={handleDelete}
         onJoin={code => join(code, null)}
         joinState={joinState}

@@ -1,19 +1,21 @@
 import { useTranslation } from 'react-i18next'
 import { fmtClock, fmtTime, fmtWhen } from '../lib/format'
 import Icon from './Icon'
+import { Link } from '../lib/router'
 import './MatchCard.css'
 
 // Carte de match — widget "Matchs récents" de Setup (date relative) et liste
 // de History (heure seule, la date est dans l'en-tête du groupe). Les actions
 // PDF / suppression ne s'affichent que si leurs callbacks sont fournis.
-export default function MatchCard({ match, onClick, onDownloadPdf, onDelete, timeOnly = false }) {
+export default function MatchCard({ match, to, onClick, onDownloadPdf, onDelete, timeOnly = false }) {
   const { t } = useTranslation()
   const teams  = match.teams || []
   const colors = match.settings?.teamColors || []
   const mode   = match.mode || 'stats'
   const two    = teams.length === 2
   const winner = two && teams[0].score !== teams[1].score ? (teams[0].score > teams[1].score ? 0 : 1) : null
-  const MainTag = onClick ? 'button' : 'div'
+  const MainTag = to ? Link : onClick ? 'button' : 'div'
+  const mainProps = to ? { to } : onClick ? { onClick: () => onClick(match), type: 'button' } : {}
 
   const details = [
     `${match.settings?.halfCount}×${match.settings?.halfDurationMin} min`,
@@ -24,7 +26,7 @@ export default function MatchCard({ match, onClick, onDownloadPdf, onDelete, tim
 
   return (
     <article className="mc">
-      <MainTag className="mc-main" {...(onClick ? { onClick: () => onClick(match) } : {})}>
+      <MainTag className="mc-main" {...mainProps}>
         <div className="mc-top">
           <span className={`mode-badge mode-${mode}`}>{t(`history.modesShort.${mode}`)}</span>
           <span className="mc-when">{timeOnly ? fmtTime(match.playedAt) : fmtWhen(match.playedAt)}</span>

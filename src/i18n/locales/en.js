@@ -1,4 +1,14 @@
 export default {
+  nav: {
+    skip: 'Skip to content',
+    homeLink: 'Tchoukball Assistant, back to home',
+    titles: { match: 'Stat sheet', scorer: 'Scoreboard', playermatch: 'Player stats', results: 'Match results' },
+    notFound: {
+      title: 'Page not found',
+      text: 'This link leads nowhere. It may have been copied wrong.',
+      home: 'Back to home',
+    },
+  },
   common: {
     theme: {
       toLight: 'Switch to light theme',
@@ -31,6 +41,15 @@ export default {
       playersCount: '{{count}} p',
     },
     logo: 'Logo',
+    resume: {
+      title: 'Match in progress',
+      finishedTitle: 'Match finished',
+      vs: 'vs',
+      resume: 'Resume match',
+      seeResults: 'See results',
+      discard: 'Discard',
+      discardConfirm: 'Discard this match? Anything not saved will be lost.',
+    },
     home: {
       historyLabel: 'History',
       historyDesc: 'Review, filter and export past matches',
@@ -293,6 +312,9 @@ export default {
     newMatch: 'New match',
   },
   history: {
+    notFoundTitle: 'Match not found',
+    notFoundText: 'This match does not exist or was removed from the history.',
+    filterLabel: 'Filter by match type',
     title: 'History',
     noMatches: 'No matches recorded yet.',
     noMatchesHint: 'Finished matches show up here, with their stats and PDF.',
@@ -343,6 +365,8 @@ export default {
     },
   },
   tournament: {
+    notFoundTitle: 'Tournament not found',
+    notFoundText: "This tournament is not on this device. To follow someone else's tournament, use their link or code.",
     standings: {
       team: 'Team', played: 'P', won: 'W', drawn: 'D', lost: 'L',
       gf: 'GF', ga: 'GA', diff: 'Diff', pts: 'Pts',
@@ -441,6 +465,9 @@ export default {
       nextMatch: 'Next match',
       justIn: 'New',
       vs: 'vs',
+      rank: 'Rank',
+      followThis: 'Follow {{team}}',
+      newResult: 'New result: {{team1}} {{s1}}, {{team2}} {{s2}}',
       tbd: 'To be decided',
       formTitle: 'Form',
       form: { W: 'Win', D: 'Draw', L: 'Loss' },

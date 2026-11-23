@@ -25,7 +25,7 @@ export default function StandingsBoard({ table, fixtures, focusTeam, onPickTeam,
         <table className={`stb-table${detailed ? ' stb-detailed' : ''}`}>
           <thead>
             <tr>
-              <th className="stb-rank-h">#</th>
+              <th className="stb-rank-h" scope="col"><span aria-hidden="true">#</span><span className="sr-only">{t('tournament.board.rank')}</span></th>
               <th className="stb-team-h">{s.team}</th>
               <th className="stb-form-h">{t('tournament.board.formTitle')}</th>
               <th title={s.playedTitle}>{s.played}</th>
@@ -49,9 +49,14 @@ export default function StandingsBoard({ table, fixtures, focusTeam, onPickTeam,
                 focusTeam === r.team && 'stb-focus',
               ].filter(Boolean).join(' ')
               return (
-                <tr key={r.team} className={cls} onClick={onPickTeam ? () => onPickTeam(r.team) : undefined}>
+                <tr key={r.team} className={cls}>
                   <td className="stb-rank"><span>{i + 1}</span></td>
-                  <td className="stb-team">{r.team}</td>
+                  <td className="stb-team">
+                    {onPickTeam ? (
+                      <button className="stb-pick" onClick={() => onPickTeam(r.team)} aria-pressed={focusTeam === r.team}
+                              title={t('tournament.board.followThis', { team: r.team })}>{r.team}</button>
+                    ) : r.team}
+                  </td>
                   <td className="stb-form-c"><FormDots form={teamForm(r.team, fixtures)} /></td>
                   <td>{r.played}</td>
                   {detailed && <><td>{r.won}</td><td>{r.drawn}</td><td>{r.lost}</td><td>{r.gf}</td><td>{r.ga}</td></>}

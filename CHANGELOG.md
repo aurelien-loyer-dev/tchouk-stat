@@ -17,6 +17,13 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 - Poste organisateur : prochain match en grand avec compteurs +/−, aperçu des matchs suivants, étape à débloquer mise en avant (phase finale, ronde suivante…), onglets À jouer / Résultats / Classement, filtre par équipe.
 - QR code du lien spectateur, affichable en grand pour la salle.
 
+- Vraies adresses pour chaque écran : `/stats`, `/players`, `/scoreboard`, `/match`, `/match/results`, `/history/…`, `/tournaments/…`, `/teams`. Le bouton Précédent du navigateur fonctionne, et les liens peuvent s'ouvrir dans un nouvel onglet.
+- Lien de partage plus court : `/t/CODE` (les anciens liens `#trn=` marchent toujours).
+- Le logo et le nom de l'app ramènent à l'accueil.
+- Accueil : carte « Match en cours » pour reprendre ou abandonner un match laissé ouvert.
+- Page « introuvable » pour les adresses inconnues.
+- Accessibilité : lien d'évitement, titre d'onglet par page, focus placé sur le titre à chaque changement d'écran, libellés sur tous les champs, classement utilisable au clavier, annonce des nouveaux résultats aux lecteurs d'écran.
+
 ### Corrigé
 - Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.
 
