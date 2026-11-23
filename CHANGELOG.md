@@ -7,7 +7,13 @@ Le projet suit le [versionnage sémantique](https://semver.org/lang/fr/) : `MAJE
 - **MINEUR** : nouvelle fonctionnalité compatible.
 - **CORRECTIF** : correction de bug, sans nouvelle fonctionnalité.
 
-Pour publier une version : mettre à jour `version` dans `package.json` (`npm version <majeur|mineur|correctif> --no-git-tag-version`), ajouter la section ci-dessous, commiter, puis taguer `vX.Y.Z`.
+**Chaque push sur `main` publie une version.** Notez les changements au fil de l'eau dans « [Non publié] », puis :
+
+- `npm run release` : correctif (2.1.0 → 2.1.1), le cas par défaut ;
+- `npm run release -- minor` : nouvelle fonctionnalité (→ 2.2.0) ;
+- `npm run release -- major` : changement qui casse l'existant (→ 3.0.0).
+
+Le script incrémente `package.json`, transforme « [Non publié] » en section datée, commite, tague `vX.Y.Z` et pousse. Un hook git (`.githooks/pre-push`, installé par `npm install`) refuse un push sur `main` dont la version n'a pas changé.
 
 ## [Non publié]
 

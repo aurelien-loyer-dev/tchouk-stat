@@ -1,0 +1,30 @@
+#!/bin/sh
+# Refuse un push sur main si la version de package.json n'a pas changé par
+# rapport à ce qui est déjà en ligne : chaque push doit publier une version.
+# Utilisez « npm run release » (ou « npm run release -- minor »), qui
+# incrémente la version, met à jour le CHANGELOG, tague et pousse.
+# En cas d'urgence : git push --no-verify (déconseillé).
+
+zero=0000000000000000000000000000000000000000
+
+while read local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = "refs/heads/main" ] || continue
+  [ "$local_sha" = "$zero" ] && continue          # suppression de branche
+  [ "$remote_sha" = "$zero" ] && continue         # main n'existe pas encore en ligne
+
+  local_version=$(git show "$local_sha:package.json" 2>/dev/null | sed -n 's/^  "version": "\(.*\)",$/\1/p' | head -n 1)
+  remote_version=$(git show "$remote_sha:package.json" 2>/dev/null | sed -n 's/^  "version": "\(.*\)",$/\1/p' | head -n 1)
+
+  if [ -n "$local_version" ] && [ "$local_version" = "$remote_version" ]; then
+    echo ""
+    echo "✖ Push refusé : la version est toujours $local_version, comme en ligne."
+    echo "  Chaque push sur main doit publier une nouvelle version :"
+    echo "    npm run release            (correctif, ex. 2.1.0 → 2.1.1)"
+    echo "    npm run release -- minor   (nouvelle fonctionnalité)"
+    echo "    npm run release -- major   (changement qui casse l'existant)"
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0
