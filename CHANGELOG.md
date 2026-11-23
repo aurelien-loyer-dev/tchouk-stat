@@ -29,6 +29,7 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 - Accessibilité : les boutons +1 / −1 de la feuille de stats disent à quelle équipe ils s'appliquent.
 
 ### Corrigé
+- Historique : ouvrir un match aux données incomplètes (ancienne version, ligne Supabase abîmée) faisait planter toute l'app (écran noir). Les matchs sont maintenant remis en forme au chargement, et un écran qui plante affiche un message avec un retour à l'accueil au lieu d'un écran noir.
 - Le bouton « Valider le tournoi » n'apparaît plus avant la phase finale quand celle-ci reste à jouer.
 
 ## [2.0.0] - 2026-11-23

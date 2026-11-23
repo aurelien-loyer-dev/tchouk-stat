@@ -1,4 +1,11 @@
 export default {
+  crash: {
+    title: 'Oups, cet écran a planté',
+    text: "Vos données ne sont pas perdues. Revenez à l'accueil ou rechargez la page.",
+    home: "Retour à l'accueil",
+    reload: 'Recharger',
+    details: 'Détails techniques',
+  },
   matchLink: {
     linked: 'Match du tournoi « {{name}} » : le score y sera reporté à la fin.',
     sending: 'Envoi du score au tournoi « {{name}} »…',

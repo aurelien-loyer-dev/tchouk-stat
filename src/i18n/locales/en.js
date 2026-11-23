@@ -1,4 +1,11 @@
 export default {
+  crash: {
+    title: 'Oops, this screen crashed',
+    text: 'Your data is not lost. Go back home or reload the page.',
+    home: 'Back to home',
+    reload: 'Reload',
+    details: 'Technical details',
+  },
   matchLink: {
     linked: 'Match from the “{{name}}” tournament: the score will be sent there at the end.',
     sending: 'Sending the score to “{{name}}”…',

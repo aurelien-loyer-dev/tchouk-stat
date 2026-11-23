@@ -898,3 +898,21 @@ input[type=number]:focus,
 .tlink-ok .tlink-icon { color: var(--ok); }
 .tlink-warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-soft); }
 .tlink-warn .tlink-icon { color: var(--warn); }
+
+/* ── Écran en erreur ── */
+.crash { display: flex; flex-direction: column; gap: 16px; max-width: 640px; padding: 24px 0; }
+.crash h1 { font-size: 28px; }
+.crash p { color: var(--dim); }
+.crash-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.crash-details summary { cursor: pointer; font-size: 14px; color: var(--dim); }
+.crash-details pre {
+  margin-top: 8px;
+  padding: 12px;
+  max-height: 240px;
+  overflow: auto;
+  border-radius: var(--r-sm);
+  background: var(--s2);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
