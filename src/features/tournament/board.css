@@ -523,7 +523,6 @@
 
 .ob-list { display: flex; flex-direction: column; gap: 8px; }
 .ob-row { display: flex; flex-direction: column; gap: 6px; }
-.ob-row-label { align-self: flex-start; }
 .ob-row-mine .trn-match { border-color: color-mix(in srgb, var(--acc) 45%, var(--bdr)); }
 .ob-empty { padding: 24px; text-align: center; color: var(--dim); border: 1px dashed var(--bdr-strong); border-radius: var(--r); }
 .ob-hint { font-size: 13px; color: var(--dim); }
@@ -628,4 +627,45 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sp-live-dot, .fx-new, .qro { animation: none; }
+}
+
+/* ── Compositions d'équipe ── */
+.rst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.rst {
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+  overflow: hidden;
+}
+.rst-hl { border-color: color-mix(in srgb, var(--acc) 50%, var(--bdr)); }
+.rst-hd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bdr);
+}
+.rst-name { font-size: 16px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rst-count { font-size: 13px; color: var(--dim); white-space: nowrap; }
+.rst-list { list-style: none; margin: 0; padding: 6px 0; }
+.rst-list li { padding: 5px 14px; font-size: 15px; }
+
+/* ── Lancer un match du tournoi ── */
+.se-play {
+  display: flex;
+  align-items: center;
+  gap: 10px 12px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid var(--bdr);
+}
+.se-play-label { font-size: 14px; font-weight: 600; color: var(--dim); }
+.se-play-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.ob-row-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ob-pick { font-size: 13px; margin-left: auto; }
+@media (max-width: 600px) {
+  .se-play-btns { width: 100%; }
+  .se-play-btns .btn-mini { flex: 1; }
 }

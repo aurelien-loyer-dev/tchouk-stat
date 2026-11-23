@@ -8,12 +8,13 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
   const cls = numTeams === 2 ? `p${teamIdx}` : 'ps'
 
   return (
-    <div className={`panel ${cls}`}>
+    <div className={`panel ${cls}`} role="group" aria-label={team.name}>
       <div className="ph"><span className="ph-name">{team.name}</span></div>
 
       {/* Possession */}
       <div className="cat-hd cat-first"><span>{t('match.categories.possession')}</span></div>
       <StatRow
+        team={team.name}
         label={t('match.stats.balls')}
         count={team.pos}
         color="yellow"
@@ -30,6 +31,7 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
           />
           {cat.items.map(item => (
             <StatRow
+        team={team.name}
               key={item.id}
               label={t(item.labelKey)}
               count={team[item.id]}
@@ -46,6 +48,7 @@ export default function Panel({ team, teamIdx, numTeams, onAdj }) {
         <>
           <div className="cat-hd"><span>{t('match.categories.opponent')}</span></div>
           <StatRow
+        team={team.name}
             label={t('match.stats.opponentScore')}
             count={team.padv}
             color="slate"

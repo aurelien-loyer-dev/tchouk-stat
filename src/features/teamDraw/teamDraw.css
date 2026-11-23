@@ -238,7 +238,20 @@
   border-radius: 3px;
   background: var(--stat);
 }
-.td-team-hd h3 { font-size: 17px; font-weight: 650; }
+.td-team-hd .td-team-name {
+  min-height: 0;
+  margin: -4px 0 -4px -6px;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: transparent;
+  font-size: 17px;
+  font-weight: 650;
+}
+.td-team-hd .td-team-name:hover { border-color: var(--bdr); }
+.td-team-hd .td-team-name:focus { border-color: var(--acc); background: var(--bg); }
+.td-team-hd .td-team-name::placeholder { color: var(--txt); opacity: 1; }
+.td-to-trn { border-color: color-mix(in srgb, var(--acc) 50%, var(--bdr-strong)); color: var(--acc); }
 .td-team-meta {
   grid-column: 1 / -1;
   font-size: 13px;

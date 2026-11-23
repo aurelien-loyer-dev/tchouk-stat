@@ -7,6 +7,7 @@ import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
 import TeamFilter from '../components/board/TeamFilter'
+import RosterCard from '../components/board/RosterCard'
 
 const FOCUS_KEY = 'tchouk_trn_focus'
 const NEW_MS = 12000
@@ -162,6 +163,13 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
         </div>
 
         <aside className="sp-col sp-col-side">
+          {focus && tournament.rosters?.[focus]?.length > 0 && (
+            <section className="sp-sec">
+              <h3 className="sp-sec-title">{t('tournament.board.roster')}</h3>
+              <RosterCard team={focus} players={tournament.rosters[focus]} highlight />
+            </section>
+          )}
+
           <section className="sp-sec">
             <h3 className="sp-sec-title">
               {focus ? t('tournament.board.teamUpcoming', { team: focus }) : t('tournament.board.upcoming')}

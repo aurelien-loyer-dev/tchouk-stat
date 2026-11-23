@@ -86,3 +86,24 @@ export function parsePeopleList(text) {
     })
     .filter(p => p.name)
 }
+
+// ── Passage vers les tournois ────────────────────────────────────────────
+export const DRAW_KEY = 'tchouk_team_draw'
+
+// Dernier tirage enregistré → [{ name, players: [noms] }], ou null.
+// `defaultName(i)` donne le nom d'une équipe que l'utilisateur n'a pas nommée.
+export function loadDrawnTeams(defaultName) {
+  try {
+    const s = JSON.parse(localStorage.getItem(DRAW_KEY) || 'null')
+    if (!Array.isArray(s?.teams) || s.teams.length < 2) return null
+    const used = new Set()
+    return s.teams.map((tm, i) => {
+      let name = String(s.teamNames?.[i] || '').trim() || defaultName(i)
+      while (used.has(name)) name += ` (${i + 1})`
+      used.add(name)
+      return { name, players: (tm.members || []).map(m => m.name).filter(Boolean) }
+    })
+  } catch {
+    return null
+  }
+}

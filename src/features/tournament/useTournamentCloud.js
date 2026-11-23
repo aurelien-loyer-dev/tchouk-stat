@@ -26,7 +26,8 @@ export function useTournamentCloud({ tournaments, save, activeId, view }) {
     save(list => list.map(t => (t.id === id ? fn(t) : t)))
   }, [save])
 
-  const knownRev = tour => revs.current[tour.id] ?? tour.share?.rev ?? 0
+  // La révision la plus récente connue, qu'elle vienne d'ici ou d'un envoi fait ailleurs (App).
+  const knownRev = tour => Math.max(revs.current[tour.id] ?? 0, tour.share?.rev ?? 0)
 
   const applyRemote = useCallback((id, remote) => {
     revs.current[id] = remote.rev
@@ -51,7 +52,7 @@ export function useTournamentCloud({ tournaments, save, activeId, view }) {
       if (r.ok) {
         revs.current[next.id] = r.rev
         dirty.current.delete(next.id)
-        patch(next.id, t => ({ ...t, share: { ...t.share, rev: r.rev, updatedAt: r.updatedAt } }))
+        patch(next.id, t => ({ ...t, share: { ...t.share, rev: r.rev, updatedAt: r.updatedAt, dirty: false } }))
         setStatus(next.id, 'ok')
       } else if (r.status === 409) {
         // Quelqu'un d'autre a modifié entre-temps : on reprend sa version.
@@ -80,6 +81,8 @@ export function useTournamentCloud({ tournaments, save, activeId, view }) {
     if (!tour?.share) return
     const q = queues.current.get(tour.id)
     if (q?.running) return
+    // Score reporté depuis un match pendant une coupure : à renvoyer.
+    if (tour.share.dirty && tour.share.key) dirty.current.add(tour.id)
     if (dirty.current.has(tour.id)) return push(tour)
 
     const r = await fetchShared(tour.share.code)

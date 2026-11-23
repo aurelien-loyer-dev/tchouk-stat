@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../../../i18n'
 import { mkTournament } from '../../../lib/tournament'
 import { KNOCKOUT_OPTIONS } from '../constants'
 import PageHeader from '../../../components/PageHeader'
 import Icon from '../../../components/Icon'
+import { Link } from '../../../lib/router'
+import { loadDrawnTeams } from '../../../lib/teamDraw'
 
 export default function TournamentSetup({ onStart, onCancel }) {
   const { t } = useTranslation()
@@ -16,6 +18,23 @@ export default function TournamentSetup({ onStart, onCancel }) {
   const [knockoutSize, setKoSize]     = useState(null)
   const [swissRounds, setSwissRounds] = useState(5)
   const [fullPlacement, setFull]      = useState(false)
+  const [rosters, setRosters]         = useState({}) // nom d'équipe → joueurs
+  const [imported, setImported]       = useState(false)
+
+  const drawn = loadDrawnTeams(i => t('teamDraw.teamN', { n: i + 1 }))
+
+  function importDraw() {
+    if (!drawn) return
+    const names = drawn.map(d => d.name)
+    setTeams(prev => [...prev.filter(n => !names.includes(n)), ...names])
+    setRosters(prev => ({ ...prev, ...Object.fromEntries(drawn.map(d => [d.name, d.players])) }))
+    setImported(true)
+  }
+
+  // Arrivée depuis « Créer un tournoi avec ces équipes » : import direct.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('from') === 'draw') importDraw()
+  }, [])
 
   function addTeam() {
     const name = teamInput.trim()
@@ -25,13 +44,13 @@ export default function TournamentSetup({ onStart, onCancel }) {
   function handleStart() {
     if (teams.length < 2) return
     const n = name.trim() || t('tournament.setup.defaultName', { date: new Date().toLocaleDateString(i18n.language?.startsWith('en') ? 'en-GB' : 'fr-FR') })
-    onStart(mkTournament({
+    onStart({ ...mkTournament({
       name: n, format, teams,
       numGroups: Number(numGroups),
       knockoutSize: fullPlacement ? null : knockoutSize,
       fullPlacement: format === 'groups' ? fullPlacement : false,
       numSwissRounds: Number(swissRounds),
-    }))
+    }), rosters: Object.fromEntries(teams.filter(tm => rosters[tm]?.length).map(tm => [tm, rosters[tm]])) })
   }
 
   const showKo = (format === 'roundrobin' || format === 'groups') && !fullPlacement
@@ -101,11 +120,21 @@ export default function TournamentSetup({ onStart, onCancel }) {
               onKeyDown={e => e.key === 'Enter' && addTeam()} />
             <button className="btn-mini" onClick={addTeam} disabled={!teamInput.trim()}>{t('tournament.setup.addTeam')}</button>
           </div>
+          <div className="trn-import">
+            {drawn && !imported ? (
+              <button type="button" className="btn-mini" onClick={importDraw}>
+                <Icon name="players" size={16} />{t('tournament.setup.importDraw', { count: drawn.length })}
+              </button>
+            ) : imported ? (
+              <span className="trn-import-done" role="status"><Icon name="check" size={16} />{t('tournament.setup.importedDraw')}</span>
+            ) : null}
+            <Link className="btn-link" to="/teams">{t('tournament.setup.goDraw')}<Icon name="chevron" size={16} /></Link>
+          </div>
           {teams.length > 0 && (
             <div className="trn-chips">
               {teams.map(tm => (
                 <div key={tm} className="trn-chip">
-                  <span>{tm}</span>
+                  <span>{tm}{rosters[tm]?.length > 0 && <span className="trn-chip-count">{' · '}{t('tournament.setup.playersN', { count: rosters[tm].length })}</span>}</span>
                   <button onClick={() => setTeams(p => p.filter(x => x !== tm))} title={t('common.remove')} aria-label={`${t('common.remove')} ${tm}`}>
                     <Icon name="close" size={14} />
                   </button>

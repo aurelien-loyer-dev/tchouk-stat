@@ -9,15 +9,26 @@ import ScoreEntry from '../components/board/ScoreEntry'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
 import TeamFilter from '../components/board/TeamFilter'
+import RosterCard from '../components/board/RosterCard'
 
-const TABS = ['todo', 'done', 'table']
+const TABS = ['todo', 'done', 'table', 'rosters']
 
-function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam }) {
+function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam, onPick }) {
+  const { t } = useTranslation()
   const m = fixture.match
   const mine = focusTeam && involves(fixture, focusTeam)
   return (
     <div className={`ob-row${mine ? ' ob-row-mine' : ''}`}>
-      {fixture.label && <span className="fx-label ob-row-label">{fixture.label}</span>}
+      {(fixture.label || onPick) && (
+        <div className="ob-row-head">
+          {fixture.label && <span className="fx-label">{fixture.label}</span>}
+          {onPick && (
+            <button className="btn-link ob-pick" onClick={() => onPick(fixture)}>
+              {t('tournament.board.playNow')}
+            </button>
+          )}
+        </div>
+      )}
       <MatchRow
         key={m.id + m.score1 + m.score2 + m.team1 + m.team2}
         match={m}
@@ -29,10 +40,11 @@ function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam }) {
 
 // Poste de pilotage : prochain match en grand, ce qu'il reste à jouer,
 // l'action qui débloque la suite, puis résultats et classements.
-export default function OrganizerBoard({ tournament, onUpdate, finished, onValidate }) {
+export default function OrganizerBoard({ tournament, onUpdate, finished, onValidate, onPlayMatch }) {
   const { t } = useTranslation()
   const [tab, setTab]     = useState('todo')
   const [focus, setFocus] = useState(null)
+  const [pickedId, setPickedId] = useState(null) // match choisi pour « jouer maintenant »
 
   const fixtures = useMemo(() => listFixtures(tournament), [tournament])
   const tables   = useMemo(() => standingTables(tournament), [tournament])
@@ -44,10 +56,11 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
   const pct = fixtures.length ? Math.round((playedCount / fixtures.length) * 100) : 0
   const blocked = fixtures.length - playedCount - todo.length // en attente des tours précédents
 
-  const featured = todo[0]
+  const featured = todo.find(f => f.match.id === pickedId) || todo[0]
   const todoList = (focus ? todo.filter(f => involves(f, focus)) : todo).filter(f => f !== featured || focus)
   const doneList = focus ? done.filter(f => involves(f, focus)) : done
   const counts   = { todo: todo.length, done: done.length }
+  const hasRosters = Object.values(tournament.rosters || {}).some(p => p?.length)
 
 
   return (
@@ -79,14 +92,16 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
         <ScoreEntry
           fixture={featured}
           knockout={featured.stage === 'knockout'}
-          onSave={(s1, s2) => onUpdate(featured.save(tournament, s1, s2))}
+          onSave={(s1, s2) => { setPickedId(null); onUpdate(featured.save(tournament, s1, s2)) }}
+          onPlay={onPlayMatch ? mode => onPlayMatch(tournament, featured, mode) : null}
+          canPlayers={!!(tournament.rosters?.[featured.match.team1]?.length && tournament.rosters?.[featured.match.team2]?.length)}
         />
       )}
 
       {featured && todo.length > 1 && (
         <div className="ob-then">
           <span className="ob-then-label">{t('tournament.board.then')}</span>
-          {todo.slice(1, 4).map(f => (
+          {todo.filter(f => f !== featured).slice(0, 3).map(f => (
             <span key={f.match.id} className="ob-then-item">
               {f.match.team1} <span className="ob-then-vs">{t('tournament.board.vs')}</span> {f.match.team2}
             </span>
@@ -95,7 +110,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
       )}
 
       <div className="ob-tabs" role="tablist">
-        {TABS.map(id => (
+        {TABS.filter(id => id !== 'rosters' || hasRosters).map(id => (
           <button key={id} role="tab" aria-selected={tab === id} className={`ob-tab${tab === id ? ' on' : ''}`} onClick={() => setTab(id)}>
             {t(`tournament.board.tabs.${id}`)}
             {id in counts && <span className="ob-count">{counts[id]}</span>}
@@ -103,7 +118,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
         ))}
       </div>
 
-      {tab !== 'table' && (
+      {(tab === 'todo' || tab === 'done') && (
         <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.filterTeam')} />
       )}
 
@@ -114,7 +129,10 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
           <p className="ob-empty">{focus ? t('tournament.board.noUpcomingTeam', { team: focus }) : t('tournament.board.noUpcoming')}</p>
         )) : (
           <div className="ob-list">
-            {todoList.map(f => <FixtureEditRow key={f.match.id} fixture={f} tournament={tournament} onUpdate={onUpdate} focusTeam={focus} />)}
+            {todoList.map(f => (
+              <FixtureEditRow key={f.match.id} fixture={f} tournament={tournament} onUpdate={onUpdate} focusTeam={focus}
+                              onPick={f === featured ? null : fx => { setPickedId(fx.match.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
+            ))}
           </div>
         )
       )}
@@ -130,6 +148,14 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
             </div>
           </>
         )
+      )}
+
+      {tab === 'rosters' && hasRosters && (
+        <div className="rst-grid">
+          {tournament.teams.filter(tm => tournament.rosters[tm]?.length).map(tm => (
+            <RosterCard key={tm} team={tm} players={tournament.rosters[tm]} />
+          ))}
+        </div>
       )}
 
       {tab === 'table' && (

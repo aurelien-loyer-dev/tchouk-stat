@@ -2,6 +2,8 @@
 // Un tournoi partagé porte localement `share: { code, key, rev, updatedAt }` :
 // `key` présent = organisateur (peut modifier), absent = spectateur.
 
+import { applyScore } from './overview'
+
 const ENDPOINT = '/api/tournament'
 
 async function call(method, code, body) {
@@ -48,4 +50,22 @@ export function parseJoinHash(hash = window.location.hash) {
   if (!m) return null
   const code = normalizeCode(m[1])
   return code.length === 6 ? { code, key: m[2] || null } : null
+}
+
+// Envoie un tournoi dont on vient d'enregistrer un score (fin d'un match lancé
+// depuis le tournoi). Si un organisateur a modifié entre-temps (409), on repart
+// de sa version et on y réapplique ce score, sans rien écraser.
+export async function pushScore(tour, matchId, s1, s2) {
+  let base = tour
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const r = await pushShared(base.share, base)
+    if (r.ok) return { ok: true, tour: { ...base, share: { ...base.share, rev: r.rev, updatedAt: r.updatedAt, dirty: false } } }
+    if (r.status !== 409) return { ok: false, status: r.status }
+    const remote = await fetchShared(base.share.code)
+    if (!remote.ok) return { ok: false, status: remote.status }
+    const applied = applyScore(remote.data, matchId, s1, s2)
+    if (applied.error) return { ok: false, status: 409 }
+    base = { ...applied.tour, share: { ...base.share, rev: remote.rev, updatedAt: remote.updatedAt } }
+  }
+  return { ok: false, status: 409 }
 }

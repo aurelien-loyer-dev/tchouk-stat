@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
 import { mkPlayer } from '../../lib/playerStats'
-import { LEVELS, drawTeams, parsePeopleList } from '../../lib/teamDraw'
+import { DRAW_KEY, LEVELS, drawTeams, parsePeopleList } from '../../lib/teamDraw'
+import { navigate } from '../../lib/router'
 import './teamDraw.css'
 
-const STORAGE_KEY = 'tchouk_team_draw'
+const STORAGE_KEY = DRAW_KEY
 const TEAM_COLORS = ['blue', 'red', 'green', 'yellow', 'violet', 'orange', 'aqua', 'magenta']
 
 const newId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()))
@@ -27,6 +28,7 @@ export default function TeamDraw({ onBack, onStartMatch }) {
   const [mixity, setMixity]           = useState(saved?.mixity ?? true)
   const [balanceLevel, setBalanceLvl] = useState(saved?.balanceLevel ?? true)
   const [teams, setTeams]             = useState(saved?.teams || null)
+  const [teamNames, setTeamNames]     = useState(saved?.teamNames || [])
   const [paste, setPaste]             = useState('')
   const [newName, setNewName]         = useState('')
   const [copied, setCopied]           = useState(false)
@@ -39,9 +41,9 @@ export default function TeamDraw({ onBack, onStartMatch }) {
   }, [drawId])
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people, teamCount, mixity, balanceLevel, teams })) }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ people, teamCount, mixity, balanceLevel, teams, teamNames })) }
     catch {}
-  }, [people, teamCount, mixity, balanceLevel, teams])
+  }, [people, teamCount, mixity, balanceLevel, teams, teamNames])
 
   const girls     = people.filter(p => p.gender === 'f').length
   const boys      = people.filter(p => p.gender === 'm').length
@@ -90,7 +92,9 @@ export default function TeamDraw({ onBack, onStartMatch }) {
     setDrawId(n => n + 1)
   }
 
-  const teamLabel = i => t('teamDraw.teamN', { n: i + 1 })
+  const defaultLabel = i => t('teamDraw.teamN', { n: i + 1 })
+  const teamLabel = i => teamNames[i]?.trim() || defaultLabel(i)
+  const renameTeam = (i, value) => setTeamNames(prev => { const next = [...prev]; next[i] = value; return next })
   const levelLabel = lvl => t(`teamDraw.levels.${lvl}`)
 
   async function copy() {
@@ -248,6 +252,9 @@ export default function TeamDraw({ onBack, onStartMatch }) {
               {teams.length === 2 && (
                 <button className="btn-mini" onClick={startMatch}>{t('teamDraw.startMatch')}</button>
               )}
+              <button className="btn-mini td-to-trn" onClick={() => navigate('/tournaments/new?from=draw')}>
+                <Icon name="trophy" size={16} />{t('teamDraw.toTournament')}
+              </button>
             </span>
           </h2>
           <div className="td-teams">
@@ -257,7 +264,9 @@ export default function TeamDraw({ onBack, onStartMatch }) {
                 <article key={i} className={`td-team stat-${TEAM_COLORS[i % TEAM_COLORS.length]}`}>
                   <header className="td-team-hd">
                     <span className="td-team-dot" />
-                    <h3>{teamLabel(i)}</h3>
+                    <input className="td-team-name" type="text" value={teamNames[i] ?? ''} placeholder={defaultLabel(i)}
+                           maxLength={40} aria-label={t('teamDraw.teamNameLabel', { n: i + 1 })}
+                           onChange={e => renameTeam(i, e.target.value)} />
                     <span className="td-team-meta">
                       {t('teamDraw.playersCount', { count: tm.members.length })}
                       {mixity && <> · {t('teamDraw.girlsCount', { count: tGirls })}</>}

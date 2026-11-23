@@ -93,3 +93,12 @@ export function currentPhase(tour, fixtures) {
   if (next) return next.label
   return null
 }
+
+// Enregistre un score par identifiant de match, quel que soit le format.
+// Renvoie { tour } ou { error: 'missing' | 'draw' } (pas de nul en phase finale).
+export function applyScore(tour, matchId, s1, s2) {
+  const fx = listFixtures(tour).find(f => f.match.id === matchId)
+  if (!fx) return { error: 'missing' }
+  if (fx.stage === 'knockout' && s1 === s2) return { error: 'draw' }
+  return { tour: fx.save(tour, s1, s2), fixture: fx }
+}
