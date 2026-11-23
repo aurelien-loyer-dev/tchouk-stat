@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
 import { formatCode } from '../cloud'
-import { involves, isPlayed, listFixtures, recentResults, standingTables, upcoming } from '../overview'
+import { involves, isPlayed, listFixtures, planCourts, recentResults, standingTables } from '../overview'
 import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
 import TeamFilter from '../components/board/TeamFilter'
 import RosterCard from '../components/board/RosterCard'
+import TournamentClock from '../components/board/TournamentClock'
 
 const FOCUS_KEY = 'tchouk_trn_focus'
 const NEW_MS = 12000
@@ -59,8 +60,9 @@ function agoLabel(t, sec) {
   return t('tournament.board.agoHour', { n: Math.floor(sec / 3600) })
 }
 
-// Écran des spectateurs : grand, lisible, centré sur « qui joue, qui gagne ».
-export default function SpectatorBoard({ tournament, syncStatus }) {
+// Écran public : grand, lisible, centré sur « qui joue où, et ensuite ? ».
+// Rien n'y est modifiable.
+export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code }) {
   const { t } = useTranslation()
   const rootRef = useRef(null)
   const [focus, setFocusState] = useState(() => loadFocus(tournament.id))
@@ -68,17 +70,19 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
 
   const fixtures = useMemo(() => listFixtures(tournament), [tournament])
   const tables   = useMemo(() => standingTables(tournament), [tournament])
-  const next     = useMemo(() => upcoming(fixtures), [fixtures])
+  const plan     = useMemo(() => planCourts(tournament, fixtures), [tournament, fixtures])
   const results  = useMemo(() => recentResults(fixtures), [fixtures])
   const fresh    = useFreshResults(results)
-  const ago      = useAgo(tournament.share?.updatedAt)
+  const ago      = useAgo(updatedAt)
 
   const done  = fixtures.filter(f => isPlayed(f.match)).length
   const total = fixtures.length
   const pct   = total ? Math.round((done / total) * 100) : 0
   const formatLabel = t('tournament.formatLabel', { returnObjects: true })
 
-  const teamNext    = focus ? next.filter(f => involves(f, focus)) : next
+  const keep = f => !focus || involves(f, focus)
+  const onCourt = plan.onCourt.map((f, i) => f && { fixture: f, court: i + 1 }).filter(Boolean)
+  const slots = plan.slots.map(sl => sl.filter(x => keep(x.fixture))).map((sl, i) => ({ sl, i })).filter(x => x.sl.length)
   const teamResults = focus ? results.filter(f => involves(f, focus)) : results
   const live = syncStatus !== 'offline'
   const latestFresh = results.find(f => (fresh[f.match.id] || 0) > Date.now())
@@ -115,10 +119,11 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
           <h1 className="sp-name">{tournament.name}</h1>
           <p className="sp-sub">
             {formatLabel[tournament.format]} · {t('tournament.teamsCount', { count: tournament.teams.length })}
-            {tournament.share && <> · <span className="sp-nowrap">{t('tournament.share.codeLabel')} {formatCode(tournament.share.code)}</span></>}
+            {code && <> · <span className="sp-nowrap">{t('tournament.share.codeLabel')} {formatCode(code)}</span></>}
           </p>
         </div>
         <div className="sp-hero-side">
+          {tournament.clock?.durationSec > 0 && <TournamentClock clock={tournament.clock} variant="hero" />}
           <div className="sp-prog" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}
                aria-label={t('tournament.matchesPlayed', { done, total })}>
             <span className="sp-prog-num">{done}<small>/{total}</small></span>
@@ -143,52 +148,64 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
 
       <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.followTeam')} />
 
+      {onCourt.length > 0 && (
+        <section className="sp-sec" aria-labelledby="sp-oncourt">
+          <h2 id="sp-oncourt" className="sp-sec-title">{plan.count > 1 ? t('tournament.courts.onCourts') : t('tournament.courts.nowPlaying')}</h2>
+          <div className={`sp-courts${onCourt.length > 1 ? ' sp-courts-multi' : ''}`}>
+            {onCourt.map(({ fixture, court }) => (
+              <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} live
+                           court={plan.count > 1 ? court : null} dim={focus && !involves(fixture, focus)} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="sp-grid">
-        <div className="sp-col sp-col-main">
-          <section className="sp-sec">
-            <h3 className="sp-sec-title">{t('tournament.standingsTitle')}</h3>
-            <div className={`sp-tables${tables.length > 1 ? ' sp-tables-multi' : ''}`}>
-              {tables.map(table => (
-                <StandingsBoard key={table.id} table={table} fixtures={fixtures} focusTeam={focus} onPickTeam={team => setFocus(focus === team ? null : team)} />
+        <section className="sp-sec sp-a-plan" aria-labelledby="sp-plan">
+          <h2 id="sp-plan" className="sp-sec-title">
+            {focus ? t('tournament.board.teamUpcoming', { team: focus }) : t('tournament.courts.order')}
+          </h2>
+          {slots.length === 0 && plan.waiting.length === 0 ? (
+            <p className="sp-empty">{t('tournament.board.noUpcoming')}</p>
+          ) : (
+            <ol className="sp-slots">
+              {slots.map(({ sl, i }) => (
+                <li key={i} className="sp-slot">
+                  <h3 className="plan-slot-title">
+                    {t('tournament.courts.slot', { n: i + 1 })}
+                    {i === 0 && <span className="plan-next">{t('tournament.courts.nextSlot')}</span>}
+                  </h3>
+                  <div className="sp-list">
+                    {sl.map(({ fixture, court }) => (
+                      <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} court={plan.count > 1 ? court : null} />
+                    ))}
+                  </div>
+                </li>
               ))}
-            </div>
-          </section>
-
-          {tournament.knockoutRounds && (
-            <section className="sp-sec">
-              <h3 className="sp-sec-title">{t('tournament.pdf.knockoutStage')}</h3>
-              <BracketBoard rounds={tournament.knockoutRounds} focusTeam={focus} />
-            </section>
+              {plan.waiting.filter(keep).length > 0 && (
+                <li className="sp-slot">
+                  <h3 className="plan-slot-title">{t('tournament.courts.waitingTitle')}</h3>
+                  <div className="sp-list">
+                    {plan.waiting.filter(keep).map(f => <FixtureCard key={f.match.id} fixture={f} focusTeam={focus} />)}
+                  </div>
+                </li>
+              )}
+            </ol>
           )}
-        </div>
+        </section>
 
-        <aside className="sp-col sp-col-side">
+        <aside className="sp-col sp-a-side">
           {focus && tournament.rosters?.[focus]?.length > 0 && (
             <section className="sp-sec">
-              <h3 className="sp-sec-title">{t('tournament.board.roster')}</h3>
+              <h2 className="sp-sec-title">{t('tournament.board.roster')}</h2>
               <RosterCard team={focus} players={tournament.rosters[focus]} highlight />
             </section>
           )}
 
           <section className="sp-sec">
-            <h3 className="sp-sec-title">
-              {focus ? t('tournament.board.teamUpcoming', { team: focus }) : t('tournament.board.upcoming')}
-            </h3>
-            {teamNext.length === 0 ? (
-              <p className="sp-empty">{t('tournament.board.noUpcoming')}</p>
-            ) : (
-              <div className="sp-list">
-                {teamNext.slice(0, focus ? 6 : 4).map((f, i) => (
-                  <FixtureCard key={f.match.id} fixture={f} focusTeam={focus} featured={i === 0 && !focus} />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="sp-sec">
-            <h3 className="sp-sec-title">
+            <h2 className="sp-sec-title">
               {focus ? t('tournament.board.teamResults', { team: focus }) : t('tournament.board.results')}
-            </h3>
+            </h2>
             {teamResults.length === 0 ? (
               <p className="sp-empty">{t('tournament.board.noResults')}</p>
             ) : (
@@ -200,6 +217,22 @@ export default function SpectatorBoard({ tournament, syncStatus }) {
             )}
           </section>
         </aside>
+
+        <section className="sp-sec sp-a-table">
+          <h2 className="sp-sec-title">{t('tournament.standingsTitle')}</h2>
+          <div className={`sp-tables${tables.length > 1 ? ' sp-tables-multi' : ''}`}>
+            {tables.map(table => (
+              <StandingsBoard key={table.id} table={table} fixtures={fixtures} focusTeam={focus} onPickTeam={team => setFocus(focus === team ? null : team)} />
+            ))}
+          </div>
+        </section>
+
+        {tournament.knockoutRounds && (
+          <section className="sp-sec sp-a-bracket">
+            <h2 className="sp-sec-title">{t('tournament.pdf.knockoutStage')}</h2>
+            <BracketBoard rounds={tournament.knockoutRounds} focusTeam={focus} />
+          </section>
+        )}
       </div>
     </div>
   )

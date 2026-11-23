@@ -19,6 +19,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
   const [swissRounds, setSwissRounds] = useState(5)
   const [fullPlacement, setFull]      = useState(false)
   const [rosters, setRosters]         = useState({}) // nom d'équipe → joueurs
+  const [courtCount, setCourtCount]   = useState(1)
   const [imported, setImported]       = useState(false)
 
   const drawn = loadDrawnTeams(i => t('teamDraw.teamN', { n: i + 1 }))
@@ -50,7 +51,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
       knockoutSize: fullPlacement ? null : knockoutSize,
       fullPlacement: format === 'groups' ? fullPlacement : false,
       numSwissRounds: Number(swissRounds),
-    }), rosters: Object.fromEntries(teams.filter(tm => rosters[tm]?.length).map(tm => [tm, rosters[tm]])) })
+    }), courtCount: Math.max(1, Number(courtCount) || 1), rosters: Object.fromEntries(teams.filter(tm => rosters[tm]?.length).map(tm => [tm, rosters[tm]])) })
   }
 
   const showKo = (format === 'roundrobin' || format === 'groups') && !fullPlacement
@@ -111,6 +112,15 @@ export default function TournamentSetup({ onStart, onCancel }) {
             </select>
           </div>
         )}
+
+        <div className="trn-field">
+          <label className="flabel" htmlFor="trn-courts">{t('tournament.courts.setupLabel')}</label>
+          <div className="trn-courts-row">
+            <input id="trn-courts" type="number" min="1" max="32" inputMode="numeric" value={courtCount}
+                   onChange={e => setCourtCount(e.target.value)} />
+            <span className="trn-courts-hint">{t('tournament.courts.setupHint')}</span>
+          </div>
+        </div>
 
         <div className="trn-field">
           <label className="flabel" htmlFor="trn-team">{t('tournament.setup.teamsLabel', { count: teams.length })}</label>

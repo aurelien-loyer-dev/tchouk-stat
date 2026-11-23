@@ -583,3 +583,7 @@
   color: var(--ok);
 }
 .trn-chip-count { color: var(--dim); font-weight: 500; }
+
+.trn-courts-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.trn-courts-row input { width: 96px; }
+.trn-courts-hint { font-size: 14px; color: var(--dim); }

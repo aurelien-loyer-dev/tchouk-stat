@@ -70,7 +70,7 @@ export default function TournamentList({ tournaments, onBack, onCreate, onDelete
             const formatLabel = t('tournament.formatLabel', { returnObjects: true })
             return (
               <div key={tour.id} className="trn-item">
-                <Link className="trn-item-info" to={`/tournaments/${tour.id}`}>
+                <Link className="trn-item-info" to={isViewer(tour) ? `/live/${tour.share.code}` : `/tournaments/${tour.id}`}>
                   <div className="trn-item-name">
                     {tour.name}
                     {tour.share && (

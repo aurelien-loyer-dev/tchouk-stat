@@ -17,8 +17,11 @@ import History from './features/history/History'
 import PlayerMatch from './features/playerMatch/PlayerMatch'
 import PlayerResults from './features/playerResults/PlayerResults'
 import Tournament from './features/tournament/Tournament'
+import PublicBoard from './features/tournament/views/PublicBoard'
 import TeamDraw from './features/teamDraw/TeamDraw'
 import NotFound from './components/NotFound'
+import ErrorBoundary from './components/ErrorBoundary'
+import { normalizeHistory } from './lib/matchRecord'
 import TournamentLink from './components/TournamentLink'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
@@ -54,7 +57,7 @@ function legacyJoinUrl() {
 }
 
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') }
+  try { return normalizeHistory(JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')) }
   catch { return [] }
 }
 
@@ -156,7 +159,7 @@ export default function App() {
       .limit(HISTORY_LIMIT)
       .then(({ data, error }) => {
         if (error || !data || data.length === 0) return
-        const remote = data.map(row => row.data).filter(Boolean)
+        const remote = normalizeHistory(data.map(row => row?.data))
         setHistory(local => {
           const merged = mergeHistory(local, remote)
           saveHistory(merged)
@@ -512,6 +515,7 @@ export default function App() {
       <a className="skip-link" href="#main">{t('nav.skip')}</a>
       <AppBar />
       <main className="app-main" id="main" tabIndex={-1}>
+        <ErrorBoundary resetKey={route.pathname}>
         {(route.name === 'home' || setupMode) && (
           <Setup
             mode={setupMode}
@@ -606,7 +610,9 @@ export default function App() {
             onPlayMatch={playTournamentMatch}
           />
         )}
+        {route.name === 'live' && <PublicBoard code={route.params.code} />}
         {route.name === 'notFound' && <NotFound />}
+        </ErrorBoundary>
       </main>
       <AppFooter />
       <Analytics />
