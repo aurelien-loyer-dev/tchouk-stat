@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchCard from '../../components/MatchCard'
 import PageHeader from '../../components/PageHeader'
-import { navigate } from '../../lib/router'
+import { Link, navigate } from '../../lib/router'
 import Icon from '../../components/Icon'
 import { dayKey, fmtDayLabel } from '../../lib/format'
 import { downloadMatchPdf } from './pdf'
@@ -89,7 +89,7 @@ export default function History({ history, selectedId, onBack, onClear, onDelete
             <div className="empty-title">{t('history.noMatches')}</div>
             <div className="empty-text">{t('history.noMatchesHint')}</div>
           </div>
-          <button className="btn-acc" onClick={onStartNew}>{t('history.startCta')}</button>
+          <Link className="btn-acc" to="/">{t('history.startCta')}</Link>
         </div>
       ) : (
         <>
