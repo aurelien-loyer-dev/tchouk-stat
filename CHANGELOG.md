@@ -11,6 +11,9 @@ Pour publier une version : mettre à jour `version` dans `package.json` (`npm ve
 
 ## [Non publié]
 
+### Ajouté
+- Tournois partagés : un code et deux liens par tournoi. Le lien spectateur affiche le tournoi en lecture seule, mis à jour en direct (toutes les 4 s). Le lien organisateur permet aussi de saisir les scores. On peut aussi suivre un tournoi en tapant son code. Stockage : fonction Vercel `api/tournament.js` + Upstash Redis.
+
 ## [2.0.0] - 2026-11-23
 
 Première version numérotée. Elle regroupe la refonte complète de l'application.

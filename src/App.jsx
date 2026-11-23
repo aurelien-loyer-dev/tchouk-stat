@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
 import { applyPlayerAdj, playerTeamScore } from './lib/playerStats'
 import { supabase } from './lib/supabase'
 import { teamBtnTxt } from './lib/teamColor'
+import { clearJoinHash, parseJoinHash } from './features/tournament/cloud'
 import { LIVE_SCREENS, clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
 import AppBar from './components/AppBar'
 import Setup from './features/setup/Setup'
@@ -125,7 +126,9 @@ function buildMatchSummary(teams, numTeams, startedAt, timeline, settings, mode)
 export default function App() {
   // Match en cours restauré après un rechargement (null s'il n'y en a pas).
   const [live] = useState(loadLive)
-  const [screen, setScreen]         = useState(() => live?.screen || loadScreen())
+  // Lien de partage d'un tournoi (#trn=CODE ou #trn=CODE.CLÉ) : ouvre les tournois.
+  const [joinRequest, setJoinRequest] = useState(parseJoinHash)
+  const [screen, setScreen]         = useState(() => (joinRequest ? 'tournament' : live?.screen || loadScreen()))
   const [appMode, setAppMode]       = useState(live?.appMode || 'stats') // 'stats' | 'scorer' | 'player'
   const [numTeams, setNumTeams]     = useState(live?.numTeams || 2)
   const [teams, setTeams]           = useState(live?.teams || [])
@@ -189,6 +192,19 @@ export default function App() {
   }, [matchSettings])
 
   useEffect(() => { window.scrollTo(0, 0) }, [screen])
+
+  useEffect(() => {
+    if (joinRequest) clearJoinHash()
+    function onHash() {
+      const req = parseJoinHash()
+      if (!req) return
+      clearJoinHash()
+      setJoinRequest(req)
+      setScreen('tournament')
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   useEffect(() => {
     try {
@@ -384,10 +400,15 @@ export default function App() {
     if (supabase) supabase.from('matches').delete().eq('id', id).then(() => {})
   }
 
-  function handleSaveTournaments(list) {
-    setTournaments(list)
-    saveTournaments(list)
-  }
+  // Accepte une liste ou une fonction (liste précédente → suivante), pour les
+  // mises à jour asynchrones de la synchro. Stable : la synchro en dépend.
+  const handleSaveTournaments = useCallback(listOrFn => {
+    setTournaments(prev => {
+      const next = typeof listOrFn === 'function' ? listOrFn(prev) : listOrFn
+      if (next !== prev) saveTournaments(next)
+      return next
+    })
+  }, [])
 
   return (
     <>
@@ -480,6 +501,8 @@ export default function App() {
             tournaments={tournaments}
             onSave={handleSaveTournaments}
             onBack={() => setScreen('setup')}
+            joinRequest={joinRequest}
+            onJoinHandled={() => setJoinRequest(null)}
           />
         )}
       </main>
