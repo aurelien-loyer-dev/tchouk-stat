@@ -14,6 +14,7 @@ import History from './features/history/History'
 import PlayerMatch from './features/playerMatch/PlayerMatch'
 import PlayerResults from './features/playerResults/PlayerResults'
 import Tournament from './features/tournament/Tournament'
+import TeamDraw from './features/teamDraw/TeamDraw'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -402,6 +403,7 @@ export default function App() {
             onViewHistory={() => { setHistoryInitialMatch(null); setScreen('history') }}
             onOpenMatch={m => { setHistoryInitialMatch(m); setScreen('history') }}
             onViewTournament={() => setScreen('tournament')}
+            onViewTeamDraw={() => setScreen('teamdraw')}
             tournamentCount={tournaments.length}
           />
         )}
@@ -464,6 +466,12 @@ export default function App() {
             onDelete={deleteMatch}
             onStartNew={() => setScreen('setup')}
             initialMatch={historyInitialMatch}
+          />
+        )}
+        {screen === 'teamdraw' && (
+          <TeamDraw
+            onBack={() => setScreen('setup')}
+            onStartMatch={payload => startMatch({ ...payload, settings: matchSettings })}
           />
         )}
         {screen === 'tournament' && (

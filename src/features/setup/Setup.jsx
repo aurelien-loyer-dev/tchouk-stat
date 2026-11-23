@@ -20,7 +20,7 @@ function Tile({ label, desc, onClick }) {
   )
 }
 
-export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament, tournamentCount }) {
+export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings, history, onViewHistory, onOpenMatch, onViewTournament, onViewTeamDraw, tournamentCount }) {
   const { t } = useTranslation()
   const [step, setStep]   = useState('home') // 'home' | 'form'
   const [mode, setMode]   = useState('stats') // 'stats' | 'scorer' | 'player'
@@ -164,8 +164,9 @@ export default function Setup({ numTeams, setNumTeams, onStart, defaultSettings,
 
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
-            <div className="tiles tiles-2">
+            <div className="tiles tiles-3">
               <Tile label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} onClick={onViewTournament} />
+              <Tile label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} onClick={onViewTeamDraw} />
               <Tile label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} onClick={onViewHistory} />
             </div>
           </section>
