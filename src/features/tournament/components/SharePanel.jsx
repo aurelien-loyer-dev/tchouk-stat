@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
+import QrCode from './board/QrCode'
 import { editorLink, formatCode, viewerLink } from '../cloud'
 
 function errorKey(r) {
@@ -32,12 +33,41 @@ function LinkRow({ label, hint, url, copied, onCopy }) {
   )
 }
 
-// Partage d'un tournoi : activation, code, liens spectateur / organisateur, état de synchro.
+// QR code plein écran, à montrer au public ou à projeter dans la salle.
+function QrOverlay({ tournament, onClose }) {
+  const { t } = useTranslation()
+  const share = tournament.share
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div className="qro" role="dialog" aria-modal="true" aria-label={t('tournament.share.qrTitle')} onClick={onClose}>
+      <div className="qro-card" onClick={e => e.stopPropagation()}>
+        <button className="icon-btn qro-close" onClick={onClose} aria-label={t('tournament.share.close')} autoFocus>
+          <Icon name="close" size={20} />
+        </button>
+        <p className="qro-kicker">{t('tournament.share.qrKicker')}</p>
+        <h2 className="qro-name">{tournament.name}</h2>
+        <QrCode value={viewerLink(share)} label={t('tournament.share.viewerLink')} className="qro-qr" />
+        <p className="qro-alt">{t('tournament.share.qrAlt')}</p>
+        <p className="qro-code">{formatCode(share.code)}</p>
+      </div>
+    </div>
+  )
+}
+
+// Partage côté organisateur : activation, puis barre compacte (code, état, QR)
+// qui se déplie sur les liens.
 export default function SharePanel({ tournament, syncStatus, onShare, onUnshare }) {
   const { t } = useTranslation()
   const [busy, setBusy]     = useState(false)
   const [error, setError]   = useState(null)
   const [copied, setCopied] = useState(null)
+  const [open, setOpen]     = useState(false)
+  const [qrBig, setQrBig]   = useState(false)
   const share = tournament.share
 
   async function run(action) {
@@ -74,11 +104,10 @@ export default function SharePanel({ tournament, syncStatus, onShare, onUnshare 
   }
 
   const status = syncStatus || 'ok'
-  const editor = !!share.key
 
   return (
-    <section className="shr">
-      <div className="shr-head">
+    <section className={`shr${open ? ' shr-open' : ''}`}>
+      <div className="shr-bar">
         <div className="shr-code-block">
           <span className="shr-code-label">{t('tournament.share.codeLabel')}</span>
           <span className="shr-code">{formatCode(share.code)}</span>
@@ -87,41 +116,52 @@ export default function SharePanel({ tournament, syncStatus, onShare, onUnshare 
           <span className="shr-dot" aria-hidden="true" />
           {t(`tournament.share.status.${status}`)}
         </span>
+        <div className="shr-bar-actions">
+          <button className="btn-mini" onClick={() => setQrBig(true)}>
+            <Icon name="qr" size={16} />{t('tournament.share.showQr')}
+          </button>
+          <button className="btn-mini" onClick={() => setOpen(o => !o)} aria-expanded={open}>
+            {t('tournament.share.links')}
+            <Icon name="down" size={16} className="shr-chev" />
+          </button>
+        </div>
       </div>
 
-      {editor ? (
-        <>
-          <LinkRow
-            label={t('tournament.share.viewerLink')}
-            hint={t('tournament.share.viewerHint')}
-            url={viewerLink(share)}
-            copied={copied === 'viewer'}
-            onCopy={() => copy('viewer', viewerLink(share))}
-          />
-          <LinkRow
-            label={t('tournament.share.editorLink')}
-            hint={t('tournament.share.editorHint')}
-            url={editorLink(share)}
-            copied={copied === 'editor'}
-            onCopy={() => copy('editor', editorLink(share))}
-          />
-          <div className="shr-foot">
-            {error && <p className="shr-error">{t(error)}</p>}
-            <button
-              className="btn-link shr-stop"
-              disabled={busy}
-              onClick={() => window.confirm(t('tournament.share.stopConfirm')) && run(onUnshare)}
-            >
-              {t('tournament.share.stop')}
-            </button>
+      {open && (
+        <div className="shr-body">
+          <button className="shr-qr-btn" onClick={() => setQrBig(true)} aria-label={t('tournament.share.showQr')}>
+            <QrCode value={viewerLink(share)} label={t('tournament.share.viewerLink')} />
+          </button>
+          <div className="shr-links">
+            <LinkRow
+              label={t('tournament.share.viewerLink')}
+              hint={t('tournament.share.viewerHint')}
+              url={viewerLink(share)}
+              copied={copied === 'viewer'}
+              onCopy={() => copy('viewer', viewerLink(share))}
+            />
+            <LinkRow
+              label={t('tournament.share.editorLink')}
+              hint={t('tournament.share.editorHint')}
+              url={editorLink(share)}
+              copied={copied === 'editor'}
+              onCopy={() => copy('editor', editorLink(share))}
+            />
+            <div className="shr-foot">
+              {error && <p className="shr-error">{t(error)}</p>}
+              <button
+                className="btn-link shr-stop"
+                disabled={busy}
+                onClick={() => window.confirm(t('tournament.share.stopConfirm')) && run(onUnshare)}
+              >
+                {t('tournament.share.stop')}
+              </button>
+            </div>
           </div>
-        </>
-      ) : (
-        <p className="shr-viewer">
-          <Icon name="eye" size={18} />
-          {t('tournament.share.viewerMode')}
-        </p>
+        </div>
       )}
+
+      {qrBig && <QrOverlay tournament={tournament} onClose={() => setQrBig(false)} />}
     </section>
   )
 }
