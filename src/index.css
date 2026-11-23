@@ -195,6 +195,12 @@ h2, .h2 {
   font-size: 13px;
 }
 
+.app-footer-version {
+  padding-left: 8px;
+  border-left: 1px solid var(--bdr);
+  font-variant-numeric: tabular-nums;
+}
+
 .app-footer-logo {
   width: 18px;
   height: 18px;
