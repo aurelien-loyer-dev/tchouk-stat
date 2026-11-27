@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Page publique d'un tournoi : alerte « ton équipe joue bientôt ». En suivant une équipe, un bandeau dit quand elle joue ; avec « Me prévenir », notification et vibration au créneau suivant puis au début du match, une seule fois par match, même onglet en arrière-plan.
 - Export Excel (CSV) : un match (résultats et historique, avec toutes les stats et la chronologie), tout l'historique, la saison des joueurs et les matchs d'un joueur. Séparateur et virgule décimale adaptés à la langue.
 - Fiches joueurs sur la saison (`/season`) : cumul des matchs en stats joueurs (matchs joués, points, moyenne, efficacité, défenses, fautes), tri, filtre par équipe et par période, fiche par joueur avec ses points match après match, toutes ses stats et ses matchs.
 - Diffuser un match en direct : depuis la feuille de stats, les stats joueurs ou le scoreur, un lien et un QR code ouvrent un écran de score (télé de la salle, téléphones du public) piloté depuis le téléphone. Score, chrono et mi-temps en direct, même lien pour les matchs suivants (`/m/CODE`, `api/match.js`).

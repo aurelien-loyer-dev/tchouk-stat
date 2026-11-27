@@ -4,6 +4,7 @@ import Icon from '../../../components/Icon'
 import { formatCode } from '../cloud'
 import { estimateSchedule, fmtHour, involves, isPlayed, listFixtures, planCourts, recentResults, standingTables } from '../overview'
 import { useNow } from '../useNow'
+import { useTeamAlert } from '../useTeamAlert'
 import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
@@ -78,6 +79,7 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
   const results  = useMemo(() => recentResults(fixtures), [fixtures])
   const fresh    = useFreshResults(results)
   const ago      = useAgo(updatedAt)
+  const alert    = useTeamAlert(tournament.id, focus, plan, est)
 
   const done  = fixtures.filter(f => isPlayed(f.match)).length
   const total = fixtures.length
@@ -152,6 +154,27 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
       </p>
 
       <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.followTeam')} />
+
+      {focus && (
+        <section className={`sp-alert${alert.status ? ` sp-alert-${alert.status.kind}` : ''}`} aria-live="polite">
+          <div className="sp-alert-text">
+            {alert.message ? (
+              <>
+                <strong>{alert.message.title}</strong>
+                <span>{alert.message.body}</span>
+              </>
+            ) : (
+              <span>{t('tournament.alert.idle', { team: focus })}</span>
+            )}
+          </div>
+          <button className={`btn-mini sp-alert-btn${alert.enabled ? ' on' : ''}`} onClick={alert.toggle} aria-pressed={alert.enabled}>
+            <Icon name="bell" size={16} />
+            {alert.enabled ? t('tournament.alert.on') : t('tournament.alert.enable')}
+          </button>
+          {alert.enabled && alert.permission === 'denied' && <p className="sp-alert-note">{t('tournament.alert.denied')}</p>}
+          {alert.enabled && alert.permission === 'unsupported' && <p className="sp-alert-note">{t('tournament.alert.unsupported')}</p>}
+        </section>
+      )}
 
       {onCourt.length > 0 && (
         <section className="sp-sec" aria-labelledby="sp-oncourt">

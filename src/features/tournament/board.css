@@ -891,3 +891,21 @@
 .dbk-part { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .dbk-title { font-size: 16px; font-weight: 650; }
 .dbk-hint { margin-top: -6px; font-size: 14px; color: var(--dim); }
+
+/* ── Alerte « ton équipe joue bientôt » (page publique) ── */
+.sp-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+}
+.sp-alert-text { flex: 1 1 240px; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 15px; color: var(--dim); }
+.sp-alert-text strong { color: var(--txt); font-size: 16px; }
+.sp-alert-next { border-color: color-mix(in srgb, var(--warn) 50%, var(--bdr)); background: var(--warn-soft); }
+.sp-alert-now { border-color: color-mix(in srgb, var(--ok) 50%, var(--bdr)); background: var(--ok-soft); }
+.sp-alert-btn.on { background: var(--acc); border-color: var(--acc); color: var(--acc-txt); }
+.sp-alert-note { flex-basis: 100%; font-size: 13px; color: var(--dim); }

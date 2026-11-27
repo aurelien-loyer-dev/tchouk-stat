@@ -66,3 +66,14 @@ self.addEventListener('fetch', event => {
   }
   event.respondWith(fromCacheFirst(request))
 })
+
+// Toucher une alerte « ton équipe joue bientôt » ramène sur la page ouverte.
+self.addEventListener('notificationclick', event => {
+  event.notification.close()
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    const page = all.find(c => new URL(c.url).pathname.startsWith('/live/')) || all[0]
+    if (page) return page.focus()
+    return self.clients.openWindow('/')
+  })())
+})

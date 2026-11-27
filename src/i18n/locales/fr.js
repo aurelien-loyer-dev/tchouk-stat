@@ -472,6 +472,18 @@ export default {
     },
   },
   tournament: {
+    alert: {
+      enable: 'Me prévenir',
+      on: 'Alertes activées',
+      idle: 'Aucun match de {{team}} au prochain créneau. Activez les alertes pour être prévenu à temps.',
+      nowTitle: '{{team}} joue maintenant',
+      nextTitle: '{{team}} joue au prochain créneau',
+      vs: 'contre {{team}}',
+      around: 'vers {{time}}',
+      onCourt: 'terrain {{n}}',
+      denied: 'Notifications bloquées par le navigateur : l’alerte s’affiche ici et le téléphone vibre, page ouverte.',
+      unsupported: 'Ce navigateur ne gère pas les notifications : l’alerte s’affiche ici, page ouverte.',
+    },
     double: {
       upper: 'Tableau principal',
       lower: 'Tableau de repêchage',

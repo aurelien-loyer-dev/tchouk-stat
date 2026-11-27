@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { Link } from '../../../lib/router'
 import { fetchShared, formatCode, normalizeCode } from '../cloud'
 import SpectatorBoard from './SpectatorBoard'
+import { alertsEnabled } from '../useTeamAlert'
 import '../tournament.css'
 import '../board.css'
 
 const POLL_MS = 4000
+const HIDDEN_POLL_MS = 15000 // onglet en arrière-plan, alertes actives
 
 // Page publique d'un tournoi partagé (lien spectateur, QR code) : lecture
 // seule, rafraîchie toutes les 4 s. Rien n'est enregistré sur l'appareil et
@@ -20,13 +22,17 @@ export default function PublicBoard({ code: rawCode }) {
     let alive = true
     let timer
     let lastRev = 0
+    let tourId = null
     async function load() {
-      if (document.visibilityState === 'visible') {
+      // En arrière-plan, on ne rafraîchit que si l'utilisateur attend une alerte.
+      const hidden = document.visibilityState !== 'visible'
+      if (!hidden || (tourId && alertsEnabled(tourId))) {
         const r = await fetchShared(code)
         if (!alive) return
         if (r.ok) {
           if (r.rev !== lastRev) {
             lastRev = r.rev
+            tourId = r.data?.id || null
             setState({ status: 'ok', tournament: r.data, updatedAt: r.updatedAt })
           } else {
             setState(s => (s.offline ? { ...s, offline: false } : s))
@@ -38,7 +44,7 @@ export default function PublicBoard({ code: rawCode }) {
           setState(s => (s.status === 'ok' ? { ...s, offline: true } : { status: r.status === 503 ? 'notConfigured' : 'offline' }))
         }
       }
-      timer = setTimeout(load, POLL_MS)
+      timer = setTimeout(load, document.visibilityState === 'visible' ? POLL_MS : HIDDEN_POLL_MS)
     }
     load()
     const onVisible = () => { if (document.visibilityState === 'visible') { clearTimeout(timer); load() } }

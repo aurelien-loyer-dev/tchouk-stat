@@ -472,6 +472,18 @@ export default {
     },
   },
   tournament: {
+    alert: {
+      enable: 'Notify me',
+      on: 'Alerts on',
+      idle: 'No {{team}} match in the next slot. Turn on alerts to be told in time.',
+      nowTitle: '{{team}} is playing now',
+      nextTitle: '{{team}} plays in the next slot',
+      vs: 'vs {{team}}',
+      around: 'around {{time}}',
+      onCourt: 'court {{n}}',
+      denied: 'Notifications are blocked by the browser: the alert shows here and the phone vibrates, with the page open.',
+      unsupported: 'This browser does not support notifications: the alert shows here, with the page open.',
+    },
     double: {
       upper: 'Upper bracket',
       lower: 'Lower bracket',
