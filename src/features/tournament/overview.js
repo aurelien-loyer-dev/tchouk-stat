@@ -6,6 +6,7 @@ import i18n from '../../i18n'
 import { bracketRounds, isRealMatch } from '../../lib/doubleElim'
 import {
   addSwissRound, calcStandings, canStartFullPlacement, canStartKnockout,
+  clearKnockoutScore, clearMatchScore, clearPlacementScore,
   isRoundComplete, setKnockoutScore, setMatchScore, setPlacementScore,
   startFullPlacement, startKnockout,
 } from '../../lib/tournament'
@@ -16,7 +17,8 @@ const isTbd = m => m.team1 === 'TBD' || m.team2 === 'TBD'
 // [{ match, label, stage, order, save(tour, s1, s2) → tour }]
 export function listFixtures(tour) {
   const list = []
-  const push = (match, label, stage, save) => list.push({ match, label, stage, order: list.length, save })
+  // clear(tour) → tour : annule le résultat (voir clearMatchScore…).
+  const push = (match, label, stage, save, clear = t => clearMatchScore(t, match.id)) => list.push({ match, label, stage, order: list.length, save, clear })
 
   const leg = (m, label) => (m.leg === 2 ? [label, i18n.t('tournament.schedule.returnLeg')].filter(Boolean).join(' · ') : label)
   if (tour.format === 'roundrobin') {
@@ -41,9 +43,9 @@ export function listFixtures(tour) {
   }
 
   tour.knockoutRounds?.forEach((r, ri) => r.matches.forEach((m, mi) =>
-    push(m, r.name, 'knockout', (t, a, b) => setKnockoutScore(t, ri, mi, a, b))))
+    push(m, r.name, 'knockout', (t, a, b) => setKnockoutScore(t, ri, mi, a, b), t => clearKnockoutScore(t, ri, mi))))
   tour.placementRounds?.forEach((r, ri) =>
-    push(r.match, r.label, 'placement', (t, a, b) => setPlacementScore(t, ri, a, b)))
+    push(r.match, r.label, 'placement', (t, a, b) => setPlacementScore(t, ri, a, b), t => clearPlacementScore(t, ri)))
 
   return list
 }

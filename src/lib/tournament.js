@@ -1,6 +1,6 @@
 import { newId } from './format'
 import i18n from '../i18n'
-import { allBracketMatches, bracketFinished, bracketRanking, genDoubleElim, isRealMatch, setBracketScore } from './doubleElim'
+import { allBracketMatches, bracketFinished, bracketRanking, genDoubleElim, isRealMatch, propagate, setBracketScore } from './doubleElim'
 
 export function mkMatch(team1, team2) {
   return { id: newId(), team1, team2, score1: null, score2: null }
@@ -288,6 +288,102 @@ export function setKnockoutScore(tournament, roundIdx, matchIdx, score1, score2)
     ri !== roundIdx ? r : { ...r, matches: r.matches.map((m, mi) => mi !== matchIdx ? m : { ...m, score1, score2, playedAt: playedStamp(score1) }) }
   )
   return { ...tournament, knockoutRounds: advanceKnockout(updated, roundIdx, matchIdx) }
+}
+
+// ── Annuler un résultat / remettre le tournoi à zéro ─────────────────────────
+const unplayed = m => ({ ...m, score1: null, score2: null, playedAt: null })
+
+// Phase finale lancée à partir du classement (poules ou championnat) : si on
+// annule un match de cette phase, le classement change, la phase finale tombe.
+export const hasFinalPhase = t => !!(t.knockoutRounds || t.placementRounds)
+
+// Match de poule, de championnat, de ronde suisse ou de double élimination.
+export function clearMatchScore(tournament, matchId) {
+  const t = setMatchScore(tournament, matchId, null, null)
+  return t.format === 'roundrobin' || t.format === 'groups'
+    ? { ...t, knockoutRounds: null, placementRounds: null }
+    : t
+}
+
+// Phase finale : le vainqueur ne monte plus, et les matchs suivants qu'il
+// avait déjà joués sont annulés eux aussi.
+export function clearKnockoutScore(tournament, roundIdx, matchIdx) {
+  const rounds = tournament.knockoutRounds.map(r => ({ ...r, matches: [...r.matches] }))
+  const clear = (ri, mi) => {
+    rounds[ri].matches[mi] = unplayed(rounds[ri].matches[mi])
+    const next = rounds[ri + 1]
+    if (!next) return
+    const nmi = Math.floor(mi / 2)
+    const nm = next.matches[nmi]
+    next.matches[nmi] = { ...nm, [mi % 2 === 0 ? 'team1' : 'team2']: 'TBD' }
+    if (nm.score1 !== null || nm.score2 !== null) clear(ri + 1, nmi)
+  }
+  clear(roundIdx, matchIdx)
+  return { ...tournament, knockoutRounds: rounds }
+}
+
+export function clearPlacementScore(tournament, roundIdx) {
+  return setPlacementScore(tournament, roundIdx, null, null)
+}
+
+// Tous les scores effacés : mêmes équipes, mêmes poules, même calendrier.
+// Phase finale et classement complet retirés ; ronde suisse : 1re ronde seule.
+export function resetTournament(tournament) {
+  const clearAll = ms => ms.map(unplayed)
+  const base = { ...tournament, courts: {}, courtsSince: {}, referees: {} }
+  if (tournament.format === 'roundrobin') return { ...base, matches: clearAll(tournament.matches), knockoutRounds: null }
+  if (tournament.format === 'groups')
+    return { ...base, groups: tournament.groups.map(g => ({ ...g, matches: clearAll(g.matches) })), knockoutRounds: null, placementRounds: null }
+  if (tournament.format === 'swiss')
+    return { ...base, rounds: tournament.rounds.slice(0, 1).map(r => ({ ...r, matches: clearAll(r.matches) })) }
+  if (tournament.format === 'double' && tournament.bracket) {
+    const b = tournament.bracket
+    const rs = rounds => rounds.map(r => ({ ...r, matches: clearAll(r.matches) }))
+    return { ...base, bracket: propagate({ upper: rs(b.upper), lower: rs(b.lower), final: rs(b.final) }) }
+  }
+  return base
+}
+
+// ── Renommer une équipe ──────────────────────────────────────────────────────
+// Le nom sert d'identifiant partout (matchs, poules, tableau, arbitres,
+// compositions) : on le remplace champ par champ, jamais au hasard d'un texte.
+export function teamNameError(tournament, oldName, newName) {
+  const name = newName.trim()
+  if (!name) return 'empty'
+  if (name === 'TBD' || name === 'BYE') return 'reserved'
+  if (name !== oldName && tournament.teams.some(x => x.toLowerCase() === name.toLowerCase() && x !== oldName)) return 'taken'
+  return null
+}
+
+export function renameTeam(tournament, oldName, newName) {
+  const name = newName.trim()
+  if (!name || name === oldName || teamNameError(tournament, oldName, name)) return tournament
+  const sw = v => (v === oldName ? name : v)
+  const walk = v => {
+    if (Array.isArray(v)) return v.map(walk)
+    if (!v || typeof v !== 'object') return v
+    const out = {}
+    for (const [k, val] of Object.entries(v)) {
+      if (k === 'team' || k === 'team1' || k === 'team2') out[k] = sw(val)
+      else if (k === 'teams' && Array.isArray(val)) out[k] = val.map(sw)
+      else out[k] = walk(val)
+    }
+    return out
+  }
+  const { rosters, referees, name: tourName, share, ...rest } = tournament
+  return {
+    ...walk(rest),
+    name: tourName,
+    ...(share ? { share } : {}),
+    ...(rosters ? { rosters: Object.fromEntries(Object.entries(rosters).map(([k, v]) => [sw(k), v])) } : {}),
+    ...(referees ? { referees: Object.fromEntries(Object.entries(referees).map(([k, v]) => [k, sw(v)])) } : {}),
+  }
+}
+
+export function hasResults(tournament) {
+  return getTournamentMatches(tournament).some(m => m.score1 !== null)
+    || !!tournament.knockoutRounds?.some(r => r.matches.some(m => m.score1 !== null))
+    || !!tournament.placementRounds?.some(r => r.match.score1 !== null)
 }
 
 export function canStartKnockout(t) {

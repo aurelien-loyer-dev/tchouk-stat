@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
 import { estimateSchedule, fmtHour, involves, isPlayed, listFixtures, nextStep, planCourts, recentResults, sameCourts, standingTables } from '../overview'
@@ -10,6 +10,9 @@ import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
 import DoubleBracket from '../components/board/DoubleBracket'
 import TeamFilter from '../components/board/TeamFilter'
+import TeamsEditor from '../components/board/TeamsEditor'
+import UndoBar from '../../../components/UndoBar'
+import { hasFinalPhase, hasResults, renameTeam, resetTournament } from '../../../lib/tournament'
 import RosterCard from '../components/board/RosterCard'
 import TournamentClock from '../components/board/TournamentClock'
 import ScheduleBar from '../components/board/ScheduleBar'
@@ -19,23 +22,26 @@ import { downloadMatchSheets } from '../sheetsPdf'
 
 const TABS = ['plan', 'done', 'table', 'rosters']
 
-function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam, court, referee }) {
+function FixtureEditRow({ fixture, onSave, onClear, focusTeam, court, referee }) {
   const { t } = useTranslation()
   const m = fixture.match
   const mine = focusTeam && involves(fixture, focusTeam)
   return (
     <div className={`ob-row${mine ? ' ob-row-mine' : ''}`}>
-      {(fixture.label || court || referee) && (
-        <div className="ob-row-head">
-          {court && <span className="court-tag">{t('tournament.courts.short', { n: court })}</span>}
-          {fixture.label && <span className="fx-label">{fixture.label}</span>}
-          {referee && <span className="fx-ref">{t('tournament.referee.by', { team: referee })}</span>}
-        </div>
-      )}
+      <div className="ob-row-head">
+        {court && <span className="court-tag">{t('tournament.courts.short', { n: court })}</span>}
+        {fixture.label && <span className="fx-label">{fixture.label}</span>}
+        {referee && <span className="fx-ref">{t('tournament.referee.by', { team: referee })}</span>}
+        {onClear && isPlayed(m) && (
+          <button className="ob-clear" onClick={onClear} title={t('tournament.edit.clearHint')}>
+            <Icon name="undo" size={14} />{t('tournament.edit.clear')}
+          </button>
+        )}
+      </div>
       <MatchRow
         key={m.id + m.score1 + m.score2 + m.team1 + m.team2}
         match={m}
-        onScore={(s1, s2) => onUpdate(fixture.save(tournament, s1, s2))}
+        onScore={onSave}
       />
     </div>
   )
@@ -47,6 +53,9 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
   const { t } = useTranslation()
   const [tab, setTab]     = useState('plan')
   const [focus, setFocus] = useState(null)
+  // Annuler : les dernières actions sur les scores, les équipes ou la remise
+  // à zéro (état du tournoi juste avant), le plus récent en dernier.
+  const [history, setHistory] = useState([])
 
   const fixtures = useMemo(() => listFixtures(tournament), [tournament])
   const tables   = useMemo(() => standingTables(tournament), [tournament])
@@ -80,8 +89,35 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
   const canPlayers = f => !!(tournament.rosters?.[f.match.team1]?.length && tournament.rosters?.[f.match.team2]?.length)
   const setCourtCount = n => onUpdate({ ...tournament, courtCount: Math.max(1, Math.min(32, n)) })
 
+  // Change le tournoi en gardant de quoi revenir en arrière.
+  function apply(next, label) {
+    if (next === tournament) return
+    setHistory(h => [...h.slice(-19), { label, before: tournament }])
+    onUpdate(next)
+  }
+  const undo = useCallback(() => {
+    const last = history[history.length - 1]
+    if (!last) return
+    setHistory(h => h.slice(0, -1))
+    // Chrono, horaires et terrains restent tels qu'ils sont maintenant.
+    onUpdate({ ...last.before, clock: tournament.clock, schedule: tournament.schedule, courtCount: tournament.courtCount, share: tournament.share })
+  }, [history, tournament, onUpdate])
+
+  const vs = (f, s1, s2) => `${f.match.team1} ${s1}–${s2} ${f.match.team2}`
+  const saveScore = (f, s1, s2) => apply(f.save(tournament, s1, s2), t('tournament.edit.scoreSaved', { match: vs(f, s1, s2) }))
+  function clearScore(f) {
+    if ((f.stage === 'league' || f.stage === 'group') && hasFinalPhase(tournament) && !window.confirm(t('tournament.edit.clearFinalConfirm'))) return
+    apply(f.clear(tournament), t('tournament.edit.cleared', { match: `${f.match.team1} – ${f.match.team2}` }))
+  }
+  function resetAll() {
+    if (!window.confirm(t('tournament.edit.resetConfirm'))) return
+    apply(resetTournament(tournament), t('tournament.edit.resetDone'))
+    setTab('plan')
+  }
+  const rename = (from, to) => apply(renameTeam(tournament, from, to), t('tournament.edit.renamed', { from, to: to.trim() }))
+
   return (
-    <div className="ob">
+    <div className={`ob${history.length ? ' ob-has-undo' : ''}`}>
       <div className="ob-prog">
         <div className="ob-prog-text">
           <strong>{t('tournament.matchesPlayed', { done: playedCount, total: fixtures.length })}</strong>
@@ -134,7 +170,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
                 ].filter(Boolean).join(' · ')}
                 fixture={f}
                 knockout={f.stage === 'knockout'}
-                onSave={(s1, s2) => onUpdate(f.save(tournament, s1, s2))}
+                onSave={(s1, s2) => saveScore(f, s1, s2)}
                 onPlay={onPlayMatch ? mode => onPlayMatch(tournament, f, mode) : null}
                 canPlayers={canPlayers(f)}
                 compact={plan.count > 1}
@@ -168,7 +204,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
       )}
 
       <div className="ob-tabs" role="tablist">
-        {TABS.filter(id => id !== 'rosters' || hasRosters).map(id => (
+        {TABS.map(id => (
           <button key={id} role="tab" aria-selected={tab === id} className={`ob-tab${tab === id ? ' on' : ''}`} onClick={() => setTab(id)}>
             {id === 'table' && tournament.format === 'double' ? t('tournament.double.tab') : t(`tournament.board.tabs.${id}`)}
             {id in counts && <span className="ob-count">{counts[id]}</span>}
@@ -210,7 +246,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
                   </h3>
                   <div className="ob-list">
                     {rows.map(({ fixture, court }) => (
-                      <FixtureEditRow key={fixture.match.id} fixture={fixture} tournament={tournament} onUpdate={onUpdate}
+                      <FixtureEditRow key={fixture.match.id} fixture={fixture} onSave={(s1, s2) => saveScore(fixture, s1, s2)}
                                       focusTeam={focus} court={plan.count > 1 ? court : null} referee={refs.byMatch[fixture.match.id]} />
                     ))}
                   </div>
@@ -243,11 +279,30 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
           <>
             <p className="ob-hint">{t('tournament.board.editHint')}</p>
             <div className="ob-list">
-              {doneList.map(f => <FixtureEditRow key={f.match.id} fixture={f} tournament={tournament} onUpdate={onUpdate} focusTeam={focus} referee={tournament.referees?.[f.match.id]} />)}
+              {doneList.map(f => (
+                <FixtureEditRow key={f.match.id} fixture={f} focusTeam={focus} referee={tournament.referees?.[f.match.id]}
+                                onSave={(s1, s2) => saveScore(f, s1, s2)} onClear={() => clearScore(f)} />
+              ))}
             </div>
           </>
         )
       )}
+
+      {tab === 'done' && hasResults(tournament) && (
+        <div className="ob-danger">
+          <div>
+            <strong>{t('tournament.edit.resetTitle')}</strong>
+            <p>{t('tournament.edit.resetText')}</p>
+          </div>
+          <button className="btn-danger" onClick={resetAll}>
+            <Icon name="reset" size={18} />{t('tournament.edit.reset')}
+          </button>
+        </div>
+      )}
+
+      <UndoBar label={history[history.length - 1]?.label} onUndo={undo} />
+
+      {tab === 'rosters' && <TeamsEditor tournament={tournament} onRename={rename} />}
 
       {tab === 'rosters' && hasRosters && (
         <div className="rst-grid">

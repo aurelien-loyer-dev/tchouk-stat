@@ -71,6 +71,10 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
     setValidatedIds(ids => (ids.includes(id) ? ids : [id, ...ids]))
   }
 
+  function handleResume(id) {
+    setValidatedIds(ids => ids.filter(vId => vId !== id))
+  }
+
   function handleDelete(id) {
     const tour = tournaments.find(x => x.id === id)
     const msg = tour?.share ? t('tournament.share.deleteSharedConfirm') : t('tournament.deleteConfirm')
@@ -116,6 +120,7 @@ export default function Tournament({ tournaments, onSave, route, onPlayMatch }) 
           onUpdate={handleUpdate}
           onBack={() => navigate('/tournaments')}
           onValidate={handleValidate}
+          onResume={handleResume}
           validated={validatedIds.includes(active.id)}
           syncStatus={cloud.sync[active.id]}
           onShare={() => cloud.share(active)}

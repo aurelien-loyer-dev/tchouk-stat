@@ -7,7 +7,7 @@ import ShareImage from '../../../components/ShareImage'
 import { tournamentShare } from '../../../lib/shareSpecs'
 import { downloadMatchSheets } from '../sheetsPdf'
 
-export default function TournamentEnd({ tournament, onBack }) {
+export default function TournamentEnd({ tournament, onBack, onResume }) {
   const { t } = useTranslation()
   const { finalRanking, winner, allMatches } = getTournamentEndState(tournament)
   const topThree   = finalRanking.slice(0, 3)
@@ -45,6 +45,11 @@ export default function TournamentEnd({ tournament, onBack }) {
         <button className="btn-ghost" onClick={() => downloadTournamentPdf(tournament)}>
           <Icon name="download" size={18} />{t('history.pdfBtn')}
         </button>
+        {onResume && (
+          <button className="btn-ghost" onClick={onResume} title={t('tournament.edit.resumeHint')}>
+            <Icon name="edit" size={18} />{t('tournament.edit.resume')}
+          </button>
+        )}
         <ShareImage getSpec={() => tournamentShare(tournament, t)} />
         <button className="btn-ghost" onClick={() => downloadMatchSheets(tournament, { all: true })} title={t('tournament.sheets.hintAll')}>
           <Icon name="download" size={18} />{t('tournament.sheets.buttonAll')}

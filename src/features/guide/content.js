@@ -234,6 +234,7 @@ const fr = {
           heading: 'Pendant le tournoi',
           items: [
             'Suivez les onglets Planning, Résultats, Classement (Tableau en double élimination) et Équipes.',
+            'Une erreur ? Le bouton Annuler, en bas de l’écran, défait le dernier score enregistré (ou Ctrl+Z). Dans Résultats, corrigez un score ou touchez « Annuler » pour remettre le match à jouer ; « Remettre à zéro » efface tous les scores. Dans Équipes, modifiez le nom d’une équipe : il change partout.',
             'Saisissez un score directement, ou appuyez sur Jouer maintenant pour suivre le match avec la feuille de stats, les stats joueurs ou le scoreur.',
             'À la fin d’un match lancé depuis le tournoi, son score est reporté automatiquement.',
             'Pas de téléphone à chaque table ? « Feuilles de match (PDF) », dans le planning, imprime une feuille pré-remplie par match à jouer (phase, terrain, heure, arbitre), deux par page. « Toutes les feuilles (PDF) » sort une feuille par match du tournoi, matchs joués compris avec leur score : pratique pour tout imprimer d’avance ou archiver.',
@@ -551,6 +552,7 @@ const en = {
           heading: 'During the tournament',
           items: [
             'Use the Schedule, Results, Standings (Bracket in double elimination) and Teams tabs.',
+            'A mistake? The Undo button at the bottom of the screen reverts the last saved score (or Ctrl+Z). In Results, fix a score or tap “Undo” to put the match back to be played; “Reset” clears every score. In Teams, change a team name: it changes everywhere.',
             'Enter a score directly, or press Play now to track the match with the stat sheet, player stats or the scoreboard.',
             'When a match started from the tournament ends, its score is reported automatically.',
             'No phone at every table? “Match sheets (PDF)”, in the schedule, prints one pre-filled sheet per match to play (stage, court, time, referee), two per page. “All sheets (PDF)” gives one sheet per tournament match, played ones included with their score: handy to print everything in advance or to keep a record.',

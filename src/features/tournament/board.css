@@ -492,7 +492,13 @@
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--bdr);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.ob-tabs::-webkit-scrollbar { display: none; }
+.ob-tabs > .ob-tab { flex-shrink: 0; white-space: nowrap; }
+/* Place pour la barre « Annuler » fixée en bas */
+.ob-has-undo { padding-bottom: 96px; }
 .ob-tab {
   display: inline-flex;
   align-items: center;
@@ -921,3 +927,33 @@
 .ref-counts-label { color: var(--dim); font-weight: 600; margin-right: 4px; }
 .ref-count { display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px 2px 10px; border-radius: 999px; background: var(--s2); }
 .ref-count strong { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--s1); text-align: center; }
+
+/* ── Corriger : annuler un résultat, remettre à zéro, renommer ── */
+.ob-clear {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 5px;
+  min-height: 30px; padding: 3px 10px;
+  border: 1px solid var(--bdr-strong); border-radius: 999px;
+  background: var(--s1); color: var(--dim);
+  font-size: 13px; font-weight: 600;
+}
+.ob-clear:hover { color: var(--txt); background: var(--s2); }
+.ob-danger {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  margin-top: 28px; padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--err) 30%, var(--bdr));
+  border-radius: var(--r);
+}
+.ob-danger p { color: var(--dim); font-size: 14px; margin-top: 2px; max-width: 46ch; }
+.te { margin-bottom: 20px; }
+.te-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.te-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+.te-row { display: flex; flex-direction: column; gap: 4px; }
+.te-input {
+  min-height: 44px; padding: 8px 12px;
+  border: 1px solid var(--bdr-strong); border-radius: var(--r);
+  background: var(--s1); color: var(--txt); font-size: 16px; font-weight: 600;
+}
+.te-input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.te-invalid { border-color: var(--err); }
+.te-error { color: var(--err); font-size: 13px; }
