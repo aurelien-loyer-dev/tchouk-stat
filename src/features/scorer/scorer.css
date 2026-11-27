@@ -317,10 +317,8 @@
 .sc-end-total-row .sc-halves-label { color: var(--txt); font-weight: 650; }
 .sc-end-total-row .sc-end-half-val { font-size: 24px; }
 
-.sc-end-cta {
-  width: 100%;
-  max-width: 340px;
-}
+.sc-end-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; max-width: 520px; }
+.sc-end-cta { flex: 1 1 220px; max-width: 340px; }
 
 @media (max-width: 600px) {
   .sc-topbar { padding: 8px 10px; }

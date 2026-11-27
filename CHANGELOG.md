@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Partage en image : bouton Image sur les résultats d'un match (tous modes, et dans l'historique), la fiche joueur de la saison, la fin d'un tournoi et le classement d'un championnat. Image au format story (1080 × 1920) avec aperçu, partagée depuis le téléphone ou téléchargée en PNG.
 - Stats joueurs : temps de jeu et remplacements. Les 7 premiers de chaque équipe démarrent sur le terrain, un bouton Terrain / Banc par joueur gère les entrées et sorties (annulables), au temps du chrono. Temps de jeu dans les résultats, l'historique, la saison (colonne Min) et l'export Excel.
 - Championnat sur plusieurs journées : regrouper des tournois (une journée chacun), barème selon le nombre d'équipes ou fixe (10-8-6-5-4-3-2-1), classement général avec le détail de chaque journée, journées en cours provisoires, export Excel. Section en bas de la liste des tournois.
 - Feuilles de match imprimables : un PDF avec une feuille par match à jouer, dans l'ordre du planning, deux par page A4. Pré-remplies (tournoi, phase, terrain, heure, arbitre), avec grille de points, score par mi-temps, remarques et signatures.

@@ -9,6 +9,8 @@ import Icon from '../../components/Icon'
 import { useUndoShortcut } from '../../components/UndoBar'
 import LiveShareControl from '../live/LiveShareControl'
 import AnimScore from './components/AnimScore'
+import ShareImage from '../../components/ShareImage'
+import { matchShare } from '../../lib/shareSpecs'
 import './scorer.css'
 
 export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, onUndo, undoLabel, settings, logos, live }) {
@@ -147,9 +149,15 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
             </div>
           )}
 
-          <button className="btn-acc sc-end-cta" onClick={onNewMatch}>
-            {t('scorer.newMatch')}
-          </button>
+          <div className="sc-end-ctas">
+            <ShareImage getSpec={() => matchShare({
+              mode: 'scorer', numTeams, settings, playedAt: new Date().toISOString(),
+              teams: [{ name: teams[0]?.name, score: s0 }, ...(two ? [{ name: teams[1]?.name, score: s1 }] : [])],
+            }, t, endRows.map(({ half, t0, t1 }) => ({ label: t('scorer.halfRowLabel', { n: half }), value: two ? `${t0} – ${t1}` : String(t0) })))} />
+            <button className="btn-acc sc-end-cta" onClick={onNewMatch}>
+              {t('scorer.newMatch')}
+            </button>
+          </div>
         </div>
       </div>
     )

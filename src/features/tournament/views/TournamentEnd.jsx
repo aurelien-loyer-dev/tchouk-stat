@@ -3,6 +3,8 @@ import { getTournamentEndState } from '../../../lib/tournament'
 import FinalRankingTable from '../components/FinalRankingTable'
 import { downloadTournamentPdf } from '../pdf'
 import Icon from '../../../components/Icon'
+import ShareImage from '../../../components/ShareImage'
+import { tournamentShare } from '../../../lib/shareSpecs'
 
 export default function TournamentEnd({ tournament, onBack }) {
   const { t } = useTranslation()
@@ -42,6 +44,7 @@ export default function TournamentEnd({ tournament, onBack }) {
         <button className="btn-ghost" onClick={() => downloadTournamentPdf(tournament)}>
           <Icon name="download" size={18} />{t('history.pdfBtn')}
         </button>
+        <ShareImage getSpec={() => tournamentShare(tournament, t)} />
         <button className="btn-acc" onClick={onBack}>{t('tournament.backToList')}</button>
       </div>
     </div>

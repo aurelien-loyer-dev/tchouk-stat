@@ -6,6 +6,8 @@ import { PLAYER_STATS, fmtPlay } from '../../lib/playerStats'
 import { seasonPlayers, seasonStart } from '../../lib/season'
 import { downloadPlayerCsv, downloadSeasonCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
+import ShareImage from '../../components/ShareImage'
+import { playerShare } from '../../lib/shareSpecs'
 import PageHeader from '../../components/PageHeader'
 import TeamFilter from '../tournament/components/board/TeamFilter'
 import '../tournament/board.css'
@@ -83,7 +85,10 @@ function PlayerDetail({ player, onBack }) {
     <div className="ssn">
       <PageHeader title={player.name} subtitle={[player.teams.join(', '), t('season.matchesN', { count: player.played })].filter(Boolean).join(' · ')}
                   onBack={onBack} backLabel={t('season.title')}
-                  actions={<button className="btn-mini" onClick={() => downloadPlayerCsv(player)} title={t('csv.hint')}><Icon name="sheet" size={16} />{t('csv.button')}</button>} />
+                  actions={<>
+                    <ShareImage className="btn-mini" getSpec={() => playerShare(player, t)} />
+                    <button className="btn-mini" onClick={() => downloadPlayerCsv(player)} title={t('csv.hint')}><Icon name="sheet" size={16} />{t('csv.button')}</button>
+                  </>} />
 
       <dl className="ssn-tiles">
         {tiles.map(tile => (

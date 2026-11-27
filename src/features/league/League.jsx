@@ -6,6 +6,8 @@ import { leagueStandings } from '../../lib/league'
 import { downloadCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
+import ShareImage from '../../components/ShareImage'
+import { leagueShare } from '../../lib/shareSpecs'
 import { useLeagues } from './useLeagues'
 import './league.css'
 
@@ -92,6 +94,7 @@ export default function League({ id, tournaments }) {
         backLabel={t('tournament.title')}
         actions={(
           <>
+            {rows.length > 0 && <ShareImage className="btn-mini" getSpec={() => leagueShare(league, standings, t)} />}
             {rows.length > 0 && <button className="btn-mini" onClick={exportCsv}><Icon name="sheet" size={16} />{t('csv.button')}</button>}
             <button className="btn-mini" onClick={() => setEditing(e => !e)} aria-expanded={editing}><Icon name="edit" size={16} />{t('league.settings')}</button>
           </>

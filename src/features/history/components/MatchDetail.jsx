@@ -7,6 +7,8 @@ import Icon from '../../../components/Icon'
 import { downloadMatchPdf } from '../pdf'
 import { downloadMatchCsv } from '../../../lib/csv'
 import MiniTimeline from './MiniTimeline'
+import ShareImage from '../../../components/ShareImage'
+import { matchShare } from '../../../lib/shareSpecs'
 
 export function DetailActions({ match, onDelete }) {
   const { t } = useTranslation()
@@ -18,6 +20,7 @@ export function DetailActions({ match, onDelete }) {
       <button className="btn-mini" onClick={() => downloadMatchCsv(match)} title={t('csv.hint')}>
         <Icon name="sheet" size={16} />{t('csv.button')}
       </button>
+      <ShareImage className="btn-mini" getSpec={() => matchShare(match, t)} />
       <button className="btn-mini btn-mini-danger" onClick={() => onDelete(match)}>
         <Icon name="trash" size={16} />{t('history.delete')}
       </button>

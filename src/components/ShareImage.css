@@ -1,0 +1,28 @@
+.si-dialog {
+  width: min(440px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+  background: var(--s1);
+  color: var(--txt);
+  box-shadow: var(--shadow);
+}
+.si-dialog::backdrop { background: rgb(0 0 0 / 0.5); }
+.si-card { display: flex; flex-direction: column; gap: 14px; padding: 20px 22px 22px; }
+.si-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.si-head h2 { font-size: 20px; font-weight: 700; font-stretch: var(--wide); letter-spacing: -0.02em; }
+.si-preview {
+  display: grid; place-items: center;
+  height: min(58dvh, 560px);
+  aspect-ratio: 9 / 16;
+  margin-inline: auto;
+  border-radius: 12px;
+  background: #14171b;
+  overflow: hidden;
+}
+.si-preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.si-wait { color: rgb(255 255 255 / 0.7); font-size: 15px; padding: 16px; text-align: center; }
+.si-hint { color: var(--dim); font-size: 14px; text-align: center; }
+.si-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }

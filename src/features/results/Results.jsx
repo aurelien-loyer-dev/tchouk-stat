@@ -6,6 +6,8 @@ import { teamSwatchStyle } from '../../lib/teamColor'
 import { downloadMatchCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
 import ScoreHero from '../../components/ScoreHero'
+import ShareImage from '../../components/ShareImage'
+import { matchShare } from '../../lib/shareSpecs'
 import TimelineGraph from './components/TimelineGraph'
 import { N, Pct, Ratio, Row, Card } from './components/StatDisplay'
 import { downloadResultsPdf } from './pdf'
@@ -182,6 +184,7 @@ export default function Results({
             <Icon name="sheet" size={18} />{t('csv.buttonLong')}
           </button>
         )}
+        {summary && <ShareImage getSpec={() => matchShare(summary, t)} />}
         <button className="btn-acc" onClick={onNew}>
           {t('results.ui.newMatch')}
         </button>
