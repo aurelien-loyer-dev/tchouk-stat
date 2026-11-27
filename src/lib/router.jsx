@@ -56,7 +56,12 @@ export function navigate(to, { replace = false } = {}) {
 export function useRoute() {
   const [route, setRoute] = useState(() => ({ ...current(), nav: 0 }))
   useEffect(() => {
-    const update = () => setRoute(r => ({ ...current(), nav: r.nav + 1 }))
+    // Un simple changement d'ancre (#section) n'est pas une navigation :
+    // on ne remonte pas en haut de page et on ne déplace pas le focus.
+    const update = () => setRoute(r => {
+      const next = current()
+      return { ...next, nav: next.pathname === r.pathname ? r.nav : r.nav + 1 }
+    })
     window.addEventListener('popstate', update)
     window.addEventListener(NAV_EVENT, update)
     return () => {

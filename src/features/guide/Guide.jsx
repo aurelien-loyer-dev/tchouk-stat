@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from '../../lib/router'
 import Icon from '../../components/Icon'
@@ -45,9 +46,31 @@ function Block({ block }) {
 
 // Guide d'utilisation : sommaire collant à gauche (en haut sur mobile), une
 // section par partie de l'app, avec un lien pour l'ouvrir.
+// Défilement vers une section du sommaire, sans passer par la navigation de
+// l'app (qui remonterait en haut de page) ; le focus suit pour le clavier.
+function goTo(e, id) {
+  const target = document.getElementById(id)
+  if (!target) return
+  e.preventDefault()
+  const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
+  history.replaceState(history.state, '', `#${id}`)
+  const heading = target.querySelector('h2')
+  if (heading) {
+    heading.setAttribute('tabindex', '-1')
+    heading.focus({ preventScroll: true })
+  }
+}
+
 export default function Guide({ onBack }) {
   const { i18n } = useTranslation()
   const c = content[i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'fr']
+
+  // Arrivée par un lien vers une section (/guide#tournois).
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    if (id) document.getElementById(id)?.scrollIntoView({ block: 'start' })
+  }, [])
 
   return (
     <div className="guide">
@@ -58,7 +81,7 @@ export default function Guide({ onBack }) {
           <p className="gd-toc-title">{c.tocLabel}</p>
           <ol>
             {c.sections.map(s => (
-              <li key={s.id}><a href={`#${s.id}`}>{s.title}</a></li>
+              <li key={s.id}><a href={`#${s.id}`} onClick={e => goTo(e, s.id)}>{s.title}</a></li>
             ))}
           </ol>
         </nav>

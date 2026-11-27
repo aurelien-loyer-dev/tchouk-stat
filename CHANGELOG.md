@@ -17,6 +17,9 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Corrigé
+- Guide : les liens du sommaire ramenaient en haut de page (surtout visible sur téléphone). Un changement d'ancre ne compte plus comme une navigation.
+
 ## [2.3.0] - 2026-11-27
 
 ### Ajouté
