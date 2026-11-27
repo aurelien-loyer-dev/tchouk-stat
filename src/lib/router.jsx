@@ -20,6 +20,7 @@ const ROUTES = [
   ['tournament',       '/tournaments/:id'],
   ['tournamentJoin',   '/t/:code'],
   ['live',             '/live/:code'],
+  ['liveMatch',        '/m/:code'],
   ['teams',            '/teams'],
   ['guide',            '/guide'],
 ]

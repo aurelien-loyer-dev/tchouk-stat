@@ -6,9 +6,10 @@ import { useMatchClock } from '../../hooks/useMatchClock'
 import Icon from '../../components/Icon'
 import Animated from './components/Animated'
 import Panel from './components/Panel'
+import LiveShareControl from '../live/LiveShareControl'
 import './match.css'
 
-export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
+export default function Match({ teams, numTeams, onAdj, onEnd, settings, live }) {
   const { t } = useTranslation()
   const two = numTeams === 2
 
@@ -72,6 +73,7 @@ export default function Match({ teams, numTeams, onAdj, onEnd, settings }) {
             <button className="btn-mini" onClick={handleResetAll} title={t('match.resetAllTitle')}>
               {t('match.resetAllShort')}
             </button>
+            {live && <LiveShareControl live={live} />}
           </div>
         </div>
       </div>

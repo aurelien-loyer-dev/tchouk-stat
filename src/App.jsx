@@ -7,7 +7,7 @@ import { teamBtnTxt } from './lib/teamColor'
 import { parseJoinHash, pushScore } from './features/tournament/cloud'
 import { applyScore } from './features/tournament/overview'
 import { navigate, useRoute } from './lib/router'
-import { clearLive, loadLive, saveLive, saveLiveLogos } from './lib/liveMatch'
+import { clearLive, loadLive, loadScorerState, saveLive, saveLiveLogos } from './lib/liveMatch'
 import AppBar from './components/AppBar'
 import Setup from './features/setup/Setup'
 import Match from './features/match/Match'
@@ -26,6 +26,8 @@ import { normalizeHistory } from './lib/matchRecord'
 import TournamentLink from './components/TournamentLink'
 import PwaBanner from './pwa/PwaBanner'
 import UndoBar from './components/UndoBar'
+import LiveMatchBoard from './features/live/LiveMatchBoard'
+import { useLiveShare } from './features/live/useLiveShare'
 import { CATEGORIES } from './features/match/constants'
 import { PLAYER_STATS } from './lib/playerStats'
 import logoAl from './public/logo_al.png'
@@ -193,6 +195,8 @@ export default function App() {
   // { teams, players, timeline, label } ; vidée à chaque nouveau match.
   const undoRef = useRef([])
   const [undoTop, setUndoTop] = useState(null) // libellé de la dernière action annulable
+  // Scoreur : son écran de fin reste sur /match ; sert à la diffusion (« Terminé »).
+  const [scorerEnded, setScorerEnded] = useState(() => live?.appMode === 'scorer' && !!loadScorerState()?.matchEnded)
   function pushUndo(label) {
     undoRef.current = [...undoRef.current.slice(-(UNDO_LIMIT - 1)), {
       teams: teamsRef.current, players: playersRef.current, timeline: timelineRef.current, label,
@@ -323,6 +327,7 @@ export default function App() {
     setTeamLogos(logos)
     setTimelineNow([])
     clearUndo()
+    setScorerEnded(false)
     setTeams(nextTeams)
 
     if (mode === 'player') {
@@ -443,6 +448,7 @@ export default function App() {
     setTeams(resetTeams)
     setTimelineNow([])
     clearUndo()
+    setScorerEnded(false)
   }
 
   function newMatch() {
@@ -559,6 +565,25 @@ export default function App() {
     document.title = pageTitle ? `${pageTitle} · ${t('setup.appTitle')}` : t('setup.appTitle')
   }, [pageTitle, t])
 
+  // ── Diffusion en direct du match en cours (écran télé, public) ──
+  const livePayload = session && teams.length ? {
+    kind: 'match',
+    mode: appMode,
+    label: origin?.label || null,
+    finished: session === 'results' || (appMode === 'scorer' && scorerEnded),
+    teams: (appMode === 'player' ? teams.slice(0, playerNumTeams) : teams.slice(0, numTeams)).map((tm, i) => ({
+      name: tm.name,
+      color: matchSettings.teamColors?.[i] || null,
+      score: appMode === 'player'
+        ? playerTeamScore(players, i, playerNumTeams)
+        : score(teams, numTeams, i),
+    })),
+  } : null
+  const broadcast = useLiveShare(livePayload)
+
+  // Écran d'un match diffusé : plein écran, sans barre ni pied de page.
+  const kiosk = route.name === 'liveMatch'
+
   const setupMode = { newStats: 'stats', newPlayers: 'player', newScoreboard: 'scorer' }[route.name] || null
   const liveInfo = session && teams.length ? {
     mode: appMode,
@@ -569,8 +594,8 @@ export default function App() {
   return (
     <>
       <a className="skip-link" href="#main">{t('nav.skip')}</a>
-      <AppBar />
-      <main className="app-main" id="main" tabIndex={-1}>
+      {!kiosk && <AppBar />}
+      <main className={`app-main${kiosk ? ' app-main-kiosk' : ''}`} id="main" tabIndex={-1}>
         <ErrorBoundary resetKey={route.pathname}>
         {(route.name === 'home' || setupMode) && (
           <Setup
@@ -599,6 +624,7 @@ export default function App() {
             onAdj={handleAdj}
             onEnd={endMatch}
             settings={matchSettings}
+            live={broadcast}
           />
         )}
         {route.name === 'match' && screen === 'scorer' && (
@@ -606,11 +632,12 @@ export default function App() {
             teams={teams}
             numTeams={numTeams}
             onAdj={handleAdj}
-            onFinish={saveMatchToHistory}
+            onFinish={() => { setScorerEnded(true); saveMatchToHistory() }}
             onNewMatch={newMatch}
             onReset={resetScorer}
             onUndo={undo}
             undoLabel={undoTop}
+            live={broadcast}
             settings={matchSettings}
             logos={teamLogos}
           />
@@ -626,6 +653,7 @@ export default function App() {
             onPlayerAdj={handlePlayerAdj}
             onEnd={endPlayerMatch}
             settings={matchSettings}
+            live={broadcast}
           />
         )}
         {route.name === 'matchResults' && screen === 'results' && (
@@ -673,10 +701,11 @@ export default function App() {
         )}
         {route.name === 'guide' && <Guide onBack={() => navigate('/')} />}
         {route.name === 'live' && <PublicBoard code={route.params.code} />}
+        {route.name === 'liveMatch' && <LiveMatchBoard code={route.params.code} />}
         {route.name === 'notFound' && <NotFound />}
         </ErrorBoundary>
       </main>
-      <AppFooter />
+      {!kiosk && <AppFooter />}
       <PwaBanner />
       <Analytics />
     </>

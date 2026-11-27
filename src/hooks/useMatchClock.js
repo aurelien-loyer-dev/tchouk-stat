@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadClock, saveClock } from '../lib/liveMatch'
+import { publishClock } from '../lib/clockBus'
 
 // Point d'arrêt du chrono : fin du match, ou fin de la mi-temps en cours
 // pour le scoreur (stopAtHalfEnd).
@@ -56,6 +57,11 @@ export function useMatchClock(settings, { stopAtHalfEnd = false } = {}) {
   const elapsedInHalf = elapsedSec >= totalMatchSec ? totalHalfSec : elapsedSec % totalHalfSec
   const remainingHalfSec = Math.max(0, totalHalfSec - elapsedInHalf)
   const remainingMatchSec = Math.max(0, totalMatchSec - elapsedSec)
+
+  // Diffusion en direct : l'état du chrono est publié à chaque changement.
+  useEffect(() => {
+    publishClock({ remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount })
+  }, [remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount])
 
   function handleSkipHalf() {
     if (currentHalf >= halfCount) return

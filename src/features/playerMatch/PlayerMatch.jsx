@@ -6,9 +6,10 @@ import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
 import Icon from '../../components/Icon'
 import TeamColumn from './components/TeamColumn'
+import LiveShareControl from '../live/LiveShareControl'
 import './playerMatch.css'
 
-export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onEnd, settings }) {
+export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onEnd, settings, live }) {
   const { t } = useTranslation()
   const [selectedStat, setSelectedStat] = useState(null)
   const [focusedTeam, setFocusedTeam]   = useState(null) // null = les deux, 0 = équipe 1, 1 = équipe 2
@@ -97,6 +98,7 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
             <button className="btn-mini" onClick={handleResetAll} title={t('match.resetAllTitle')}>
               {t('match.resetAllShort')}
             </button>
+            {live && <LiveShareControl live={live} />}
           </div>
         </div>
       </div>

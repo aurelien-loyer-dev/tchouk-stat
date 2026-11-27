@@ -208,6 +208,8 @@ button:disabled { cursor: not-allowed; }
   .app-main { padding: 16px 16px 40px; gap: 16px; }
 }
 
+.app-main.app-main-kiosk { max-width: none; padding: 0; }
+
 h1 {
   font-size: 1.75rem;
   font-weight: 700;

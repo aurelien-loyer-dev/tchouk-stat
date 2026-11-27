@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Diffuser un match en direct : depuis la feuille de stats, les stats joueurs ou le scoreur, un lien et un QR code ouvrent un écran de score (télé de la salle, téléphones du public) piloté depuis le téléphone. Score, chrono et mi-temps en direct, même lien pour les matchs suivants (`/m/CODE`, `api/match.js`).
 - Annuler la dernière action pendant un match (feuille de stats, stats joueurs, scoreur) : bouton qui rappelle l'action annulée, plusieurs annulations de suite, raccourci Ctrl+Z / ⌘Z.
 - Application installable (PWA) : bouton Installer dans la barre d'app, raccourcis vers la feuille de stats, le scoreur et les tournois, fonctionnement complet hors ligne (indicateur « Hors ligne »), bandeau quand une nouvelle version est prête.
 - Nouveau logo : le cadre de renvoi et le ballon. Il remplace l'ancien pictogramme dans la barre d'app et sert d'icône d'onglet et d'icône d'application.

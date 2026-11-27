@@ -1,15 +1,13 @@
-// Stockage des tournois partagés.
+// Stockage des tournois et des matchs partagés.
 // En production : Upstash Redis (via son API REST, sans dépendance), branché
 // depuis le Marketplace Vercel. En local sans configuration : une Map en mémoire.
 //
-// Clés Redis :
-//   trn:{code}:meta  hash  { editHash, rev, updatedAt }
-//   trn:{code}:data  string  JSON du tournoi
+// Clés Redis (préfixe : `trn` pour les tournois, `live` pour les matchs en direct) :
+//   {préfixe}:{code}:meta  hash  { editHash, rev, updatedAt }
+//   {préfixe}:{code}:data  string  JSON du tournoi ou du match
 // Les scripts Lua rendent chaque écriture atomique (vérif clé + révision).
 
-const TTL_SEC = 60 * 60 * 24 * 180 // 6 mois sans modification → effacé
-
-const keys = code => [`trn:${code}:meta`, `trn:${code}:data`]
+const TTL_SEC = 60 * 60 * 24 * 180 // 6 mois sans modification → effacé (tournois)
 
 function redisConfig() {
   const url   = process.env.KV_REST_API_URL   || process.env.UPSTASH_REDIS_REST_URL
@@ -61,11 +59,12 @@ if h ~= ARGV[1] then return 403 end
 redis.call('DEL', KEYS[1], KEYS[2])
 return 200`
 
-function redisStore(cfg) {
+function redisStore(cfg, prefix, ttl) {
+  const keys = code => [`${prefix}:${code}:meta`, `${prefix}:${code}:data`]
   const run = (script, code, args) => redis(cfg, ['EVAL', script, '2', ...keys(code), ...args.map(String)])
   return {
     async create(code, editHash, data) {
-      return (await run(CREATE, code, [editHash, data, new Date().toISOString(), TTL_SEC])) === 1
+      return (await run(CREATE, code, [editHash, data, new Date().toISOString(), ttl])) === 1
     },
     async get(code) {
       const r = await run(GET, code, [])
@@ -73,7 +72,7 @@ function redisStore(cfg) {
     },
     async update(code, editHash, baseRev, data) {
       const updatedAt = new Date().toISOString()
-      const [status, rev] = await run(UPDATE, code, [editHash, baseRev ?? '', data, updatedAt, TTL_SEC])
+      const [status, rev] = await run(UPDATE, code, [editHash, baseRev ?? '', data, updatedAt, ttl])
       return { status, rev: rev != null ? Number(rev) : undefined, updatedAt }
     },
     async remove(code, editHash) {
@@ -82,40 +81,45 @@ function redisStore(cfg) {
   }
 }
 
-// Même comportement que Redis, pour le serveur de dev.
-const memory = new Map()
-const memoryStore = {
-  async create(code, editHash, data) {
-    if (memory.has(code)) return false
-    memory.set(code, { editHash, rev: 1, updatedAt: new Date().toISOString(), data })
-    return true
-  },
-  async get(code) {
-    const e = memory.get(code)
-    return e ? { rev: e.rev, updatedAt: e.updatedAt, data: e.data } : null
-  },
-  async update(code, editHash, baseRev, data) {
-    const e = memory.get(code)
-    if (!e) return { status: 404 }
-    if (e.editHash !== editHash) return { status: 403 }
-    if (baseRev != null && baseRev !== e.rev) return { status: 409, rev: e.rev }
-    e.rev += 1
-    e.updatedAt = new Date().toISOString()
-    e.data = data
-    return { status: 200, rev: e.rev, updatedAt: e.updatedAt }
-  },
-  async remove(code, editHash) {
-    const e = memory.get(code)
-    if (!e) return 404
-    if (e.editHash !== editHash) return 403
-    memory.delete(code)
-    return 200
-  },
+// Même comportement que Redis, pour le serveur de dev (une Map par préfixe).
+const memories = new Map()
+const memoryStore = prefix => {
+  if (!memories.has(prefix)) memories.set(prefix, new Map())
+  const memory = memories.get(prefix)
+  return {
+    async create(code, editHash, data) {
+      if (memory.has(code)) return false
+      memory.set(code, { editHash, rev: 1, updatedAt: new Date().toISOString(), data })
+      return true
+    },
+    async get(code) {
+      const e = memory.get(code)
+      return e ? { rev: e.rev, updatedAt: e.updatedAt, data: e.data } : null
+    },
+    async update(code, editHash, baseRev, data) {
+      const e = memory.get(code)
+      if (!e) return { status: 404 }
+      if (e.editHash !== editHash) return { status: 403 }
+      if (baseRev != null && baseRev !== e.rev) return { status: 409, rev: e.rev }
+      e.rev += 1
+      e.updatedAt = new Date().toISOString()
+      e.data = data
+      return { status: 200, rev: e.rev, updatedAt: e.updatedAt }
+    },
+    async remove(code, editHash) {
+      const e = memory.get(code)
+      if (!e) return 404
+      if (e.editHash !== editHash) return 403
+      memory.delete(code)
+      return 200
+    },
+  }
 }
 
-export function getStore() {
+// prefix : 'trn' (tournois, gardés 6 mois) ou 'live' (matchs en direct, 2 jours).
+export function getStore(prefix = 'trn', ttl = TTL_SEC) {
   const cfg = redisConfig()
-  if (cfg) return redisStore(cfg)
-  if (process.env.NODE_ENV !== 'production') return memoryStore
+  if (cfg) return redisStore(cfg, prefix, ttl)
+  if (process.env.NODE_ENV !== 'production') return memoryStore(prefix)
   return null
 }

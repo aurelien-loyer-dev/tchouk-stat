@@ -142,6 +142,29 @@ const fr = {
       ],
     },
     {
+      id: 'direct',
+      title: 'Diffuser un match en direct',
+      intro: 'Le score et le chrono s’affichent sur un autre écran, pilotés depuis votre téléphone : la télé de la salle, ou le téléphone des spectateurs.',
+      blocks: [
+        {
+          type: 'steps',
+          items: [
+            'Pendant un match (feuille de stats, stats joueurs ou scoreur), appuyez sur Diffuser, puis Lancer la diffusion.',
+            'Sur la télé ou le vidéoprojecteur, ouvrez le lien affiché (ou scannez le QR code) et passez en plein écran.',
+            'Continuez à saisir sur le téléphone : la télé suit le score, le chrono et la mi-temps en direct.',
+          ],
+        },
+        {
+          type: 'terms',
+          items: [
+            { term: 'Matchs suivants', desc: 'Le lien reste le même : au match suivant, la télé change d’affiche toute seule.' },
+            { term: 'Public', desc: 'Le même lien marche sur téléphone : les absents suivent le match de chez eux.' },
+            { term: 'Arrêter', desc: 'Diffuser, puis Arrêter la diffusion : le lien ne fonctionne plus.' },
+          ],
+        },
+      ],
+    },
+    {
       id: 'historique',
       title: 'Historique',
       to: '/history',
@@ -384,6 +407,29 @@ const en = {
           ],
         },
         { type: 'note', text: 'In scoreboard mode, only the score is saved to the history, not the stats.' },
+      ],
+    },
+    {
+      id: 'direct',
+      title: 'Broadcast a match live',
+      intro: 'The score and clock show on another screen, controlled from your phone: the hall’s TV, or the spectators’ phones.',
+      blocks: [
+        {
+          type: 'steps',
+          items: [
+            'During a match (stat sheet, player stats or scoreboard), press Broadcast, then Start broadcasting.',
+            'On the TV or projector, open the link shown (or scan the QR code) and go full screen.',
+            'Keep entering on the phone: the TV follows the score, clock and half live.',
+          ],
+        },
+        {
+          type: 'terms',
+          items: [
+            { term: 'Next matches', desc: 'The link stays the same: at the next match, the TV switches by itself.' },
+            { term: 'Crowd', desc: 'The same link works on phones: people who could not come follow from home.' },
+            { term: 'Stop', desc: 'Broadcast, then Stop broadcasting: the link stops working.' },
+          ],
+        },
       ],
     },
     {

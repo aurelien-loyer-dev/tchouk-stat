@@ -7,10 +7,11 @@ import { useMatchClock } from '../../hooks/useMatchClock'
 import { loadScorerState, saveScorerState } from '../../lib/liveMatch'
 import Icon from '../../components/Icon'
 import { useUndoShortcut } from '../../components/UndoBar'
+import LiveShareControl from '../live/LiveShareControl'
 import AnimScore from './components/AnimScore'
 import './scorer.css'
 
-export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, onUndo, undoLabel, settings, logos }) {
+export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, onUndo, undoLabel, settings, logos, live }) {
   const { t } = useTranslation()
   const two = numTeams === 2
   const [saved] = useState(loadScorerState)
@@ -233,6 +234,7 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
           <Icon name="reset" size={16} />
           {t('scorer.resetAll')}
         </button>
+        {live && <LiveShareControl live={live} variant="scorer" />}
       </div>
     </div>
   )

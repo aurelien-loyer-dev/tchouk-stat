@@ -67,6 +67,7 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 - **Accueil** : titre « Nouveau match » et sous-titre à gauche, compteurs matchs / tournois à droite (chiffres larges), sans panneau coloré. Les trois modes de saisie forment une seule bande divisée par des filets (`.launch`), pas trois cartes. « Organiser » est une liste à filets (`.rows`) avec le nombre d'éléments à droite.
 - **Carte de match** (`components/MatchCard.jsx`) : pastille de mode, barres de couleur d'équipe, vainqueur en gras, actions PDF / suppression.
 - **Guide** (`features/guide/`) : sommaire collant à gauche (puces en haut sur mobile), une section par partie de l'app avec un bouton Ouvrir. Étapes numérotées seulement pour les vraies séquences ; définitions en lignes à filet (terme | explication), avec la pastille de couleur pour les stats. Textes FR/EN dans `content.js`.
+- **Écran de diffusion** (`features/live/LiveMatchBoard.jsx`, `/m/CODE`) : sans barre d'app ni pied de page, chrono et scores en chasse large au plus grand, pastille En direct / Terminé, plein écran.
 - **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne par équipe coiffée d'un trait de sa couleur, séparées par un filet.
 - **En-tête d'écran** (`components/PageHeader.jsx`) : lien Retour avec chevron, titre, sous-titre, actions.
 - **Icônes** (`components/Icon.jsx`) : un seul jeu, trait 2px, 24×24. Pas de glyphes Unicode comme icônes.
