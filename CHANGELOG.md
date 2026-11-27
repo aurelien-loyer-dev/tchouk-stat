@@ -17,6 +17,8 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+## [2.3.0] - 2026-11-27
+
 ### Ajouté
 - Guide (`/guide`, lien dans la barre d'app et sur l'accueil) : comment fonctionne chaque partie de l'app, la signification de chaque stat avec sa couleur, les formats de tournoi et le partage avec le public. En français et en anglais.
 
