@@ -6,10 +6,11 @@ import { teamTextStyle, teamSwatchStyle } from '../../lib/teamColor'
 import { useMatchClock } from '../../hooks/useMatchClock'
 import { loadScorerState, saveScorerState } from '../../lib/liveMatch'
 import Icon from '../../components/Icon'
+import { useUndoShortcut } from '../../components/UndoBar'
 import AnimScore from './components/AnimScore'
 import './scorer.css'
 
-export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, settings, logos }) {
+export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, onReset, onUndo, undoLabel, settings, logos }) {
   const { t } = useTranslation()
   const two = numTeams === 2
   const [saved] = useState(loadScorerState)
@@ -82,6 +83,8 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
     prevHalfRef.current = 1
     onReset?.()
   }
+
+  useUndoShortcut(onUndo, !!undoLabel && !matchEnded)
 
   const clockPct = totalHalfSec > 0 ? (elapsedInHalf / totalHalfSec) * 100 : 0
   const isLast10 = remainingHalfSec <= 10 && remainingHalfSec > 0 && running
@@ -206,6 +209,12 @@ export default function Scorer({ teams, numTeams, onAdj, onFinish, onNewMatch, o
 
       {/* Clock controls */}
       <div className="sc-ctrl">
+        {onUndo && (
+          <button className="sc-ctrl-btn" onClick={onUndo} disabled={!undoLabel} title={undoLabel ? `${t('undo.button')} : ${undoLabel}` : t('undo.button')}>
+            <Icon name="undo" size={16} />
+            {t('undo.button')}
+          </button>
+        )}
         <button className={`sc-ctrl-btn sc-ctrl-main${running ? ' active' : ''}`} onClick={() => setRunning(v => !v)}>
           <Icon name={running ? 'pause' : 'play'} size={18} />
           {running ? t('scorer.pause') : elapsedSec > 0 ? t('scorer.resume') : t('scorer.start')}

@@ -1,0 +1,45 @@
+/* ── Annuler la dernière action : barre fixe en bas de l'écran de match ──
+   Pleine largeur (comme une barre d'outils) pour ne masquer aucune ligne :
+   le contenu reçoit la même hauteur en marge basse. */
+.undo-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--s1) 90%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  border-top: 1px solid var(--bdr);
+}
+.undo-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  max-width: 100%;
+  margin: 0 auto;
+  width: min(1072px, 100%);
+  padding: 6px 16px 6px 12px;
+  border: 1px solid var(--bdr-strong);
+  border-radius: var(--r);
+  background: var(--s1);
+  color: var(--txt);
+  text-align: left;
+  transition: background 0.15s, transform 0.1s;
+}
+.undo-btn:hover { background: var(--s2); }
+.undo-btn:active { transform: scale(0.99); }
+.undo-text { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; min-width: 0; line-height: 1.25; }
+.undo-action { font-size: 15px; font-weight: 650; }
+.undo-label {
+  font-size: 14px;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.app-main:has(.undo-bar) { padding-bottom: 96px; }

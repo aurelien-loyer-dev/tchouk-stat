@@ -25,6 +25,9 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { normalizeHistory } from './lib/matchRecord'
 import TournamentLink from './components/TournamentLink'
 import PwaBanner from './pwa/PwaBanner'
+import UndoBar from './components/UndoBar'
+import { CATEGORIES } from './features/match/constants'
+import { PLAYER_STATS } from './lib/playerStats'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -105,6 +108,14 @@ function saveTournaments(list) {
   catch {}
 }
 
+// Libellé d'une stat d'équipe, pour « Annuler : Gagné · Équipe ».
+const TEAM_STAT_KEYS = {
+  pos: 'match.stats.balls',
+  padv: 'match.stats.opponentScore',
+  ...Object.fromEntries(CATEGORIES.flatMap(c => c.items).map(it => [it.id, it.labelKey])),
+}
+const UNDO_LIMIT = 100
+
 function buildMatchSummary(teams, numTeams, startedAt, timeline, settings, mode) {
   const now = Date.now()
   return {
@@ -176,6 +187,38 @@ export default function App() {
 
   const teamsRef      = useRef(live?.teams || [])
   const playersRef    = useRef(live?.players || [])
+  const timelineRef   = useRef(live?.timeline || [])
+
+  // ── Annuler : pile des états d'avant chaque action du match en cours ──
+  // { teams, players, timeline, label } ; vidée à chaque nouveau match.
+  const undoRef = useRef([])
+  const [undoTop, setUndoTop] = useState(null) // libellé de la dernière action annulable
+  function pushUndo(label) {
+    undoRef.current = [...undoRef.current.slice(-(UNDO_LIMIT - 1)), {
+      teams: teamsRef.current, players: playersRef.current, timeline: timelineRef.current, label,
+    }]
+    setUndoTop(label)
+  }
+  function clearUndo() {
+    undoRef.current = []
+    setUndoTop(null)
+  }
+  function undo() {
+    const last = undoRef.current[undoRef.current.length - 1]
+    if (!last) return
+    undoRef.current = undoRef.current.slice(0, -1)
+    teamsRef.current = last.teams
+    playersRef.current = last.players
+    timelineRef.current = last.timeline
+    setTeams(last.teams)
+    setPlayers(last.players)
+    setTimeline(last.timeline)
+    setUndoTop(undoRef.current[undoRef.current.length - 1]?.label || null)
+  }
+  function setTimelineNow(next) {
+    timelineRef.current = next
+    setTimeline(next)
+  }
   const matchStartRef = useRef(live?.matchStartedAt || null)
 
   const matchScreen   = appMode === 'player' ? 'playermatch' : appMode === 'scorer' ? 'scorer' : 'match'
@@ -278,7 +321,8 @@ export default function App() {
     setAppMode(mode)
     setMatchSettings(mergedSettings)
     setTeamLogos(logos)
-    setTimeline([])
+    setTimelineNow([])
+    clearUndo()
     setTeams(nextTeams)
 
     if (mode === 'player') {
@@ -299,6 +343,7 @@ export default function App() {
     if (!prev[i]) return
     if (d < 0 && prev[i][id] <= 0) return
 
+    pushUndo(`${t(TEAM_STAT_KEYS[id] || 'match.stats.won')} ${d > 0 ? '+1' : '−1'} · ${prev[i].name}`)
     const next = applyAdj(prev, numTeams, i, id, d)
     teamsRef.current = next
     setTeams(next)
@@ -312,8 +357,8 @@ export default function App() {
       : id.startsWith('f') ? 'fautes'
       : 'autre'
 
-    setTimeline(prev => [
-      ...prev,
+    setTimelineNow([
+      ...timelineRef.current,
       {
         at: now,
         elapsedSec,
@@ -334,6 +379,8 @@ export default function App() {
     if (idx === -1) return
     if (d < 0 && (prev[idx][statId] ?? 0) <= 0) return
 
+    const def = PLAYER_STATS.find(s => s.id === statId)
+    pushUndo(`${def ? t(def.labelKey) : statId} ${d > 0 ? '+1' : '−1'} · ${prev[idx].name}`)
     const next = applyPlayerAdj(prev, playerId, statId, d)
     playersRef.current = next
     setPlayers(next)
@@ -341,7 +388,7 @@ export default function App() {
 
   // ── Fin du match (mode stats / scorer) ────────────────────────────────────
   function saveMatchToHistory() {
-    const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timeline, matchSettings, appMode)
+    const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timelineRef.current, matchSettings, appMode)
     setLastSummary(summary)
     const newHistory = [summary, ...history]
     setHistory(newHistory)
@@ -351,6 +398,7 @@ export default function App() {
   }
 
   function endMatch() {
+    clearUndo()
     saveMatchToHistory()
     setSession('results')
     navigate('/match/results', { replace: true })
@@ -358,6 +406,7 @@ export default function App() {
 
   // ── Fin du match (mode player) ────────────────────────────────────────────
   function endPlayerMatch() {
+    clearUndo()
     const now  = Date.now()
     const pls  = playersRef.current
     const nt   = playerNumTeams
@@ -392,7 +441,8 @@ export default function App() {
     teamsRef.current = resetTeams
     matchStartRef.current = Date.now()
     setTeams(resetTeams)
-    setTimeline([])
+    setTimelineNow([])
+    clearUndo()
   }
 
   function newMatch() {
@@ -401,7 +451,8 @@ export default function App() {
     teamsRef.current    = []
     playersRef.current  = []
     matchStartRef.current = null
-    setTimeline([])
+    setTimelineNow([])
+    clearUndo()
     setLastSummary(null)
     setTeamLogos([null, null])
     setPlayers([])
@@ -558,9 +609,14 @@ export default function App() {
             onFinish={saveMatchToHistory}
             onNewMatch={newMatch}
             onReset={resetScorer}
+            onUndo={undo}
+            undoLabel={undoTop}
             settings={matchSettings}
             logos={teamLogos}
           />
+        )}
+        {route.name === 'match' && (screen === 'match' || screen === 'playermatch') && (
+          <UndoBar label={undoTop} onUndo={undo} />
         )}
         {route.name === 'match' && screen === 'playermatch' && (
           <PlayerMatch

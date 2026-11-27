@@ -1,4 +1,9 @@
 export default {
+  undo: {
+    button: 'Annuler',
+    region: 'Annuler la dernière action',
+    shortcut: 'Ctrl+Z (⌘Z sur Mac)',
+  },
   pwa: {
     updateReady: 'Nouvelle version disponible.',
     reload: 'Recharger',

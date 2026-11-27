@@ -333,3 +333,4 @@
   .sc-ctrl-btn { padding: 8px 12px; font-size: 14px; }
   .sc-end-final { gap: 24px; }
 }
+.sc-ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }

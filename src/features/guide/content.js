@@ -43,7 +43,7 @@ const fr = {
           items: [
             'Donnez un nom et une couleur à chaque équipe, puis réglez le nombre et la durée des mi-temps.',
             'Appuyez sur Démarrer pour lancer le chrono.',
-            'À chaque action, touchez le + de la bonne ligne. Le − corrige une erreur.',
+            'À chaque action, touchez le + de la bonne ligne. Une erreur ? Le bouton Annuler, en bas de l’écran, défait la dernière action (plusieurs fois de suite si besoin, ou Ctrl+Z).',
             'À la fin, appuyez sur Fin du match pour voir les résultats.',
           ],
         },
@@ -132,7 +132,7 @@ const fr = {
         {
           type: 'terms',
           items: [
-            { term: '+1 / −1', desc: 'Les gros boutons sous chaque score.' },
+            { term: '+1 / −1', desc: 'Les gros boutons sous chaque score. Annuler, en bas, défait le dernier point.' },
             { term: 'Chrono', desc: 'Touchez le chrono pour le mettre en pause ou le relancer.' },
             { term: 'Logos', desc: 'Ajoutez le logo de chaque équipe avant le match ; il s’affiche dans son camp.' },
             { term: 'Fin', desc: 'Affiche le score final et le détail par mi-temps.' },
@@ -288,7 +288,7 @@ const en = {
           items: [
             'Give each team a name and a color, then set the number and length of halves.',
             'Press Start to run the clock.',
-            'For each action, tap the + on the right line. The − fixes a mistake.',
+            'For each action, tap the + on the right line. Made a mistake? The Undo button at the bottom of the screen reverts the last action (several times in a row if needed, or Ctrl+Z).',
             'When it ends, press End match to see the results.',
           ],
         },
@@ -377,7 +377,7 @@ const en = {
         {
           type: 'terms',
           items: [
-            { term: '+1 / −1', desc: 'The large buttons under each score.' },
+            { term: '+1 / −1', desc: 'The large buttons under each score. Undo, at the bottom, reverts the last point.' },
             { term: 'Clock', desc: 'Tap the clock to pause or resume it.' },
             { term: 'Logos', desc: 'Add each team’s logo before the match; it shows on their side.' },
             { term: 'End', desc: 'Shows the final score and the score of each half.' },
