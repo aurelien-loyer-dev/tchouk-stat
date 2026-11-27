@@ -17,6 +17,8 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+## [2.5.2] - 2026-11-27
+
 ### Ajouté
 - Partage en image : bouton Image sur les résultats d'un match (tous modes, et dans l'historique), la fiche joueur de la saison, la fin d'un tournoi et le classement d'un championnat. Image au format story (1080 × 1920) avec aperçu, partagée depuis le téléphone ou téléchargée en PNG.
 - Stats joueurs : temps de jeu et remplacements. Les 7 premiers de chaque équipe démarrent sur le terrain, un bouton Terrain / Banc par joueur gère les entrées et sorties (annulables), au temps du chrono. Temps de jeu dans les résultats, l'historique, la saison (colonne Min) et l'export Excel.
