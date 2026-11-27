@@ -472,6 +472,21 @@ export default {
     },
   },
   tournament: {
+    sheets: {
+      button: 'Match sheets (PDF)',
+      hint: 'One pre-filled sheet per match to play, two per A4 page',
+      file: 'match-sheets',
+      sheetN: 'Sheet {{n}} / {{total}}',
+      around: 'around {{time}}',
+      teamA: 'Team A', teamB: 'Team B',
+      tally: 'Points: cross out one box per point scored',
+      byHalf: 'Score by half',
+      winner: 'Winner',
+      referee: 'Referee',
+      notes: 'Fouls, sanctions, remarks',
+      captainA: 'Captain A', captainB: 'Captain B', refereeSign: 'Referee',
+      footer: 'Enter the result in Tchoukball Assistant (tournament Schedule tab).',
+    },
     hall: {
       title: 'Hall screen',
       open: 'Hall screen',

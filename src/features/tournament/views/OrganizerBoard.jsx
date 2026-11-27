@@ -15,6 +15,7 @@ import TournamentClock from '../components/board/TournamentClock'
 import ScheduleBar from '../components/board/ScheduleBar'
 import { useNow } from '../useNow'
 import { assignReferees, refereesToFix } from '../referees'
+import { downloadMatchSheets } from '../sheetsPdf'
 
 const TABS = ['plan', 'done', 'table', 'rosters']
 
@@ -177,6 +178,14 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
 
       {(tab === 'plan' || tab === 'done') && (
         <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.filterTeam')} />
+      )}
+
+      {tab === 'plan' && (onCourtCount + plan.slots.length + plan.waiting.length > 0) && (
+        <div className="ob-plan-tools">
+          <button className="btn-mini" onClick={() => downloadMatchSheets(tournament)} title={t('tournament.sheets.hint')}>
+            <Icon name="download" size={16} />{t('tournament.sheets.button')}
+          </button>
+        </div>
       )}
 
       {tab === 'plan' && (

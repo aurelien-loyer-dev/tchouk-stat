@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Feuilles de match imprimables : un PDF avec une feuille par match à jouer, dans l'ordre du planning, deux par page A4. Pré-remplies (tournoi, phase, terrain, heure, arbitre), avec grille de points, score par mi-temps, remarques et signatures.
 - Écran de salle (`/hall/CODE`) pour un tournoi partagé : plein écran pour la télé de l'accueil, qui alterne terrains (et créneau suivant), prochains matchs, classement ou tableau et derniers résultats, avec QR code et code du tournoi. Lien dans le panneau de partage.
 - Tournois : arbitrage par les équipes au repos, attribué automatiquement et équilibré (jamais une équipe qui joue au même créneau, de préférence pas juste avant ou après). Arbitre affiché sur les terrains, le planning, les résultats et la page publique ; l'équipe suivie est prévenue quand elle doit arbitrer.
 

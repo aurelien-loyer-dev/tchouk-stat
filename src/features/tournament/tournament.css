@@ -635,3 +635,5 @@
   .trn-format-seg { flex-wrap: wrap; }
   .trn-format-seg button { flex: 1 1 calc(50% - 4px); }
 }
+
+.ob-plan-tools { display: flex; justify-content: flex-end; gap: 8px; }

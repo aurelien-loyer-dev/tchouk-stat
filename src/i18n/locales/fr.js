@@ -472,6 +472,21 @@ export default {
     },
   },
   tournament: {
+    sheets: {
+      button: 'Feuilles de match (PDF)',
+      hint: 'Une feuille par match à jouer, pré-remplie, deux par page A4',
+      file: 'feuilles-de-match',
+      sheetN: 'Feuille {{n}} / {{total}}',
+      around: 'vers {{time}}',
+      teamA: 'Équipe A', teamB: 'Équipe B',
+      tally: 'Points : barrez une case par point marqué',
+      byHalf: 'Score par mi-temps',
+      winner: 'Vainqueur',
+      referee: 'Arbitre',
+      notes: 'Fautes, sanctions, remarques',
+      captainA: 'Capitaine A', captainB: 'Capitaine B', refereeSign: 'Arbitre',
+      footer: 'Résultat à saisir dans Tchoukball Assistant (onglet Planning du tournoi).',
+    },
     hall: {
       title: 'Écran de salle',
       open: 'Écran de salle',
