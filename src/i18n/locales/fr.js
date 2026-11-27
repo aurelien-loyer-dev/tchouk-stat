@@ -472,6 +472,16 @@ export default {
     },
   },
   tournament: {
+    hall: {
+      title: 'Écran de salle',
+      open: 'Écran de salle',
+      hint: 'Pour la télé de l’accueil : alterne terrains, prochains matchs, classement et résultats',
+      follow: 'Suivre sur son téléphone',
+      views: 'Vues de l’écran',
+      slides: { courts: 'Sur les terrains', next: 'Prochains matchs', table: 'Classement', bracket: 'Tableau', results: 'Derniers résultats' },
+      pause: 'Mettre en pause le défilement',
+      play: 'Reprendre le défilement',
+    },
     referee: {
       title: 'Arbitrage',
       toggle: 'Arbitrage par les équipes au repos (attribué automatiquement)',

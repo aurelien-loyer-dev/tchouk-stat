@@ -21,6 +21,7 @@ const ROUTES = [
   ['tournamentJoin',   '/t/:code'],
   ['live',             '/live/:code'],
   ['liveMatch',        '/m/:code'],
+  ['hall',             '/hall/:code'],
   ['teams',            '/teams'],
   ['guide',            '/guide'],
   ['season',           '/season'],

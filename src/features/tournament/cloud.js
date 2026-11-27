@@ -42,6 +42,7 @@ export const normalizeCode = raw => String(raw || '').toUpperCase().replace(/[^A
 // Liens : /live/CODE pour suivre (page publique) ; /t/CODE#key=… pour co-organiser : la clé passe dans le fragment
 // (#key=…), qui n'est jamais envoyé au serveur ni gardé dans ses journaux.
 export const viewerLink = share => `${window.location.origin}/live/${share.code}`
+export const hallLink   = share => `${window.location.origin}/hall/${share.code}`
 export const editorLink = share => `${window.location.origin}/t/${share.code}#key=${share.key}`
 
 // Ancien format de lien (#trn=CODE.CLÉ), encore accepté.

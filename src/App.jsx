@@ -28,6 +28,7 @@ import TournamentLink from './components/TournamentLink'
 import PwaBanner from './pwa/PwaBanner'
 import UndoBar from './components/UndoBar'
 import LiveMatchBoard from './features/live/LiveMatchBoard'
+import HallScreen from './features/tournament/views/HallScreen'
 import { useLiveShare } from './features/live/useLiveShare'
 import { CATEGORIES } from './features/match/constants'
 import { PLAYER_STATS } from './lib/playerStats'
@@ -585,7 +586,7 @@ export default function App() {
   const broadcast = useLiveShare(livePayload)
 
   // Écran d'un match diffusé : plein écran, sans barre ni pied de page.
-  const kiosk = route.name === 'liveMatch'
+  const kiosk = route.name === 'liveMatch' || route.name === 'hall'
 
   const setupMode = { newStats: 'stats', newPlayers: 'player', newScoreboard: 'scorer' }[route.name] || null
   const liveInfo = session && teams.length ? {
@@ -708,6 +709,7 @@ export default function App() {
         )}
         {route.name === 'live' && <PublicBoard code={route.params.code} />}
         {route.name === 'liveMatch' && <LiveMatchBoard code={route.params.code} />}
+        {route.name === 'hall' && <HallScreen code={route.params.code} />}
         {route.name === 'notFound' && <NotFound />}
         </ErrorBoundary>
       </main>

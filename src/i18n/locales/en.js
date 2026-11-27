@@ -472,6 +472,16 @@ export default {
     },
   },
   tournament: {
+    hall: {
+      title: 'Hall screen',
+      open: 'Hall screen',
+      hint: 'For the TV at the entrance: cycles through courts, next matches, standings and results',
+      follow: 'Follow on your phone',
+      views: 'Screen views',
+      slides: { courts: 'On the courts', next: 'Next matches', table: 'Standings', bracket: 'Bracket', results: 'Latest results' },
+      pause: 'Pause the rotation',
+      play: 'Resume the rotation',
+    },
     referee: {
       title: 'Refereeing',
       toggle: 'Refereeing by resting teams (assigned automatically)',

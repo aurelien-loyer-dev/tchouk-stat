@@ -1,0 +1,85 @@
+/* ── Écran de salle (/hall/CODE) : télé de l'accueil, lisible à 5 m ──
+   Tout est agrandi par la taille de base : les composants du tableau public
+   (cartes de match, classement) sont réutilisés tels quels. */
+.hall {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.6vw, 24px);
+  padding: clamp(16px, 2.2vw, 36px);
+  background: var(--bg);
+  color: var(--txt);
+  font-size: clamp(16px, 1.25vw, 24px);
+}
+.hall-empty { align-items: center; justify-content: center; gap: 16px; color: var(--dim); }
+
+.hall-head {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: clamp(14px, 1.6vw, 26px) clamp(16px, 2vw, 32px);
+  border-radius: 20px;
+  background: var(--shell);
+  color: var(--shell-txt);
+}
+.hall-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.hall-title h1 { font-size: clamp(28px, 3.4vw, 64px); line-height: 1.05; }
+.hall-title p { color: var(--shell-dim); font-size: 0.95em; }
+.hall-qr { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.8em; color: var(--shell-dim); text-align: center; }
+.hall-qr .qr { width: clamp(90px, 8vw, 150px); }
+.hall-qr strong { display: block; color: var(--shell-txt); font-size: 1.25em; font-stretch: var(--wide); letter-spacing: 0.04em; }
+
+.hall-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hall-tab {
+  position: relative;
+  overflow: hidden;
+  padding: 8px 18px;
+  border: 1px solid var(--bdr);
+  border-radius: 999px;
+  background: var(--s1);
+  color: var(--dim);
+  font-size: 0.85em;
+  font-weight: 650;
+}
+.hall-tab.on { background: var(--acc); border-color: var(--acc); color: var(--acc-txt); }
+.hall-timer { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: currentColor; opacity: 0.5; transform-origin: left; animation: hall-timer linear forwards; }
+@keyframes hall-timer { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.hall-tools { margin-left: auto; display: flex; gap: 4px; }
+
+.hall-body { flex: 1; min-height: 0; animation: hall-in 0.4s var(--ease); }
+@keyframes hall-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.hall-then { margin-top: clamp(16px, 2.5vw, 40px); }
+.hall-then h2 { font-size: 1.1em; margin-bottom: 10px; color: var(--dim); }
+.hall-then h2 span { color: var(--txt); }
+.hall-then-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+
+/* Grand écran : tout le contenu grossit d'un coup (cartes, classement, tableau). */
+@media (min-width: 1500px) { .hall-body { zoom: 1.25; } }
+@media (min-width: 2400px) { .hall-body { zoom: 1.6; } }
+
+.hall-none { color: var(--dim); text-align: center; padding: 10vh 0; }
+
+/* Cartes de match agrandies */
+.hall .fx { font-size: 1.15em; padding: 1em 1.2em; }
+.hall .fx-team { font-size: 1.35em; }
+.hall .fx-score { font-size: 1.6em; }
+.hall-courts { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+.hall-courts .fx { font-size: 1.5em; }
+.hall-slots { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); align-items: start; }
+.hall-slot h2 { font-size: 1.1em; margin-bottom: 10px; color: var(--dim); }
+.hall-slot h2 span { color: var(--txt); }
+.hall-slot-list, .hall-results { display: grid; gap: 12px; }
+.hall-results { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+.hall-tables { display: grid; gap: 20px; }
+.hall-tables-multi { grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); }
+.hall .stb-table { font-size: 1.1em; }
+.hall .bk-slot { font-size: 1.05em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hall-body { animation: none; }
+  .hall-timer { display: none; }
+}
+@media (max-width: 700px) {
+  .hall-head { flex-wrap: wrap; }
+  .hall-qr { display: none; }
+}

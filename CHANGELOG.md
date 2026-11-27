@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Écran de salle (`/hall/CODE`) pour un tournoi partagé : plein écran pour la télé de l'accueil, qui alterne terrains (et créneau suivant), prochains matchs, classement ou tableau et derniers résultats, avec QR code et code du tournoi. Lien dans le panneau de partage.
 - Tournois : arbitrage par les équipes au repos, attribué automatiquement et équilibré (jamais une équipe qui joue au même créneau, de préférence pas juste avant ou après). Arbitre affiché sur les terrains, le planning, les résultats et la page publique ; l'équipe suivie est prévenue quand elle doit arbitrer.
 
 ## [2.5.1] - 2026-11-27

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../components/Icon'
 import QrCode from './board/QrCode'
-import { editorLink, formatCode, viewerLink } from '../cloud'
+import { editorLink, formatCode, hallLink, viewerLink } from '../cloud'
 
 function errorKey(r) {
   if (r?.status === 503) return 'tournament.share.errorNotConfigured'
@@ -120,6 +120,9 @@ export default function SharePanel({ tournament, syncStatus, onShare, onUnshare 
           <button className="btn-mini" onClick={() => setQrBig(true)}>
             <Icon name="qr" size={16} />{t('tournament.share.showQr')}
           </button>
+          <a className="btn-mini" href={hallLink(share)} target="_blank" rel="noopener" title={t('tournament.hall.hint')}>
+            <Icon name="scoreboard" size={16} />{t('tournament.hall.open')}
+          </a>
           <button className="btn-mini" onClick={() => setOpen(o => !o)} aria-expanded={open}>
             {t('tournament.share.links')}
             <Icon name="down" size={16} className="shr-chev" />

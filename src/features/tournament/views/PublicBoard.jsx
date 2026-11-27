@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from '../../../lib/router'
-import { fetchShared, formatCode, normalizeCode } from '../cloud'
+import { formatCode, normalizeCode } from '../cloud'
 import SpectatorBoard from './SpectatorBoard'
-import { alertsEnabled } from '../useTeamAlert'
+import { useSharedTournament } from '../useSharedTournament'
 import '../tournament.css'
 import '../board.css'
-
-const POLL_MS = 4000
-const HIDDEN_POLL_MS = 15000 // onglet en arrière-plan, alertes actives
 
 // Page publique d'un tournoi partagé (lien spectateur, QR code) : lecture
 // seule, rafraîchie toutes les 4 s. Rien n'est enregistré sur l'appareil et
@@ -16,41 +13,7 @@ const HIDDEN_POLL_MS = 15000 // onglet en arrière-plan, alertes actives
 export default function PublicBoard({ code: rawCode }) {
   const { t } = useTranslation()
   const code = normalizeCode(rawCode)
-  const [state, setState] = useState({ status: 'loading' }) // loading | ok | notFound | notConfigured | offline
-
-  useEffect(() => {
-    let alive = true
-    let timer
-    let lastRev = 0
-    let tourId = null
-    async function load() {
-      // En arrière-plan, on ne rafraîchit que si l'utilisateur attend une alerte.
-      const hidden = document.visibilityState !== 'visible'
-      if (!hidden || (tourId && alertsEnabled(tourId))) {
-        const r = await fetchShared(code)
-        if (!alive) return
-        if (r.ok) {
-          if (r.rev !== lastRev) {
-            lastRev = r.rev
-            tourId = r.data?.id || null
-            setState({ status: 'ok', tournament: r.data, updatedAt: r.updatedAt })
-          } else {
-            setState(s => (s.offline ? { ...s, offline: false } : s))
-          }
-        } else if (r.status === 404) {
-          setState({ status: 'notFound' })
-          return
-        } else {
-          setState(s => (s.status === 'ok' ? { ...s, offline: true } : { status: r.status === 503 ? 'notConfigured' : 'offline' }))
-        }
-      }
-      timer = setTimeout(load, document.visibilityState === 'visible' ? POLL_MS : HIDDEN_POLL_MS)
-    }
-    load()
-    const onVisible = () => { if (document.visibilityState === 'visible') { clearTimeout(timer); load() } }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => { alive = false; clearTimeout(timer); document.removeEventListener('visibilitychange', onVisible) }
-  }, [code])
+  const state = useSharedTournament(code)
 
   useEffect(() => {
     if (state.tournament?.name) document.title = `${state.tournament.name} · ${t('tournament.board.live')}`
