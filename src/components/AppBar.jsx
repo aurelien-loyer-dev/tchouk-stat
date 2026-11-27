@@ -14,9 +14,18 @@ export default function AppBar() {
     <header className="app-bar">
       <div className="app-bar-in">
         <Link className="app-bar-brand" to="/" aria-label={t('nav.homeLink')}>
-          <svg className="app-bar-mark" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 18h18" />
-            <path d="M6 18a6 6 0 0 1 12 0" />
+          {/* Logo (public/icons/logo.svg) : tuile à la couleur du texte, dessin à la couleur du fond,
+              pour rester net en thème clair comme sombre. */}
+          <svg className="app-bar-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="15" fill="currentColor" />
+            <g transform="translate(1.2 0)" fill="none" stroke="var(--s1)" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M29 13 H50 L53 41 H26 Z" strokeWidth="3.6" />
+              <path d="M36 13 L35 41 M43 13 L44 41 M27.9 22.3 H51 M27 31.7 H52" strokeWidth="1.6" strokeOpacity=".55" />
+              <path d="M30 41 L28 50 M49 41 L51 50" strokeWidth="3.6" />
+              <path d="M19.6 30.2 Q 21.8 29.6 23.2 27.8" strokeWidth="2.4" strokeOpacity=".7" />
+              <path d="M19.6 36 Q 22 35.8 23.4 34.2" strokeWidth="2.4" strokeOpacity=".45" />
+              <circle cx="12.4" cy="33" r="5.6" fill="var(--s1)" stroke="none" />
+            </g>
           </svg>
           <span aria-hidden="true">{t('setup.appTitle')}</span>
         </Link>

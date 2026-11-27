@@ -39,14 +39,11 @@
 }
 .app-bar-brand:hover { background: var(--s2); }
 
-/* Marque : la zone interdite devant le cadre, en deux traits. */
+/* Logo : cadre de renvoi et ballon, à la couleur du texte. */
 .app-bar-mark {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
 }
 
 .app-bar-actions {

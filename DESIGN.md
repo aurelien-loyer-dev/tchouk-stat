@@ -48,6 +48,11 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 - Rouge / vert / ambre d'état (`--err`, `--ok`, `--warn`) restent réservés aux actions destructrices, aux variations ±1 et aux alertes.
 - Couleurs d'équipe : choisies par l'utilisateur. Le texte coloré passe par `teamTextStyle()` (mélange `color-mix` avec l'encre du thème pour rester lisible), les pastilles par `teamSwatchStyle()` (anneau fin).
 
+## Logo
+
+- Le cadre de renvoi vu de face, filet visible, et le ballon qui en repart (deux traits de mouvement). Blanc sur tuile encre `#14171b`, coins 15/64.
+- Fichiers : `public/icons/logo.svg` (tuile arrondie, favicon), `logo-full.svg` (fond plein, pour les icônes « maskable » et Apple, dessin réduit à 74 % pour rester dans la zone sûre), PNG 32, 180, 192 et 512 générés à partir de ces SVG.
+
 ## Typographie
 
 - **Archivo Variable** (auto-hébergée via `@fontsource-variable/archivo`), chiffres tabulaires partout.
@@ -58,7 +63,7 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 
 ## Composants
 
-- **Barre d'app** (`components/AppBar.jsx`) : surface translucide (`--s1` + flou) et filet bas, marque (la zone interdite en deux traits) en chasse large, langue, thème. Collante.
+- **Barre d'app** (`components/AppBar.jsx`) : surface translucide (`--s1` + flou) et filet bas, logo en tuile (couleur du texte, dessin couleur du fond) et nom en chasse large, langue, thème. Collante.
 - **Accueil** : titre « Nouveau match » et sous-titre à gauche, compteurs matchs / tournois à droite (chiffres larges), sans panneau coloré. Les trois modes de saisie forment une seule bande divisée par des filets (`.launch`), pas trois cartes. « Organiser » est une liste à filets (`.rows`) avec le nombre d'éléments à droite.
 - **Carte de match** (`components/MatchCard.jsx`) : pastille de mode, barres de couleur d'équipe, vainqueur en gras, actions PDF / suppression.
 - **Guide** (`features/guide/`) : sommaire collant à gauche (puces en haut sur mobile), une section par partie de l'app avec un bouton Ouvrir. Étapes numérotées seulement pour les vraies séquences ; définitions en lignes à filet (terme | explication), avec la pastille de couleur pour les stats. Textes FR/EN dans `content.js`.

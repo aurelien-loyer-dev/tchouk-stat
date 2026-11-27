@@ -17,6 +17,9 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Ajouté
+- Nouveau logo : le cadre de renvoi et le ballon. Il remplace l'ancien pictogramme dans la barre d'app et sert d'icône d'onglet et d'icône d'application.
+
 ## [2.4.0] - 2026-11-27
 
 ### Ajouté

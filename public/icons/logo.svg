@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Tchoukball Assistant</title>
+  <rect width="64" height="64" rx="15" fill="#14171b"/>
+  <g transform="translate(1.2 0)">
+    <g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M29 13 H50 L53 41 H26 Z" stroke-width="3.4"/>
+      <path d="M36 13 L35 41 M43 13 L44 41 M27.9 22.3 H51 M27 31.7 H52" stroke-width="1.4" stroke-opacity=".5"/>
+      <path d="M30 41 L28 50 M49 41 L51 50" stroke-width="3.4"/>
+      <path d="M19.6 30.2 Q 21.8 29.6 23.2 27.8" stroke-width="2.2" stroke-opacity=".65"/>
+      <path d="M19.6 36 Q 22 35.8 23.4 34.2" stroke-width="2.2" stroke-opacity=".4"/>
+    </g>
+    <circle cx="12.4" cy="33" r="5.6" fill="#fff"/>
+  </g>
+</svg>
