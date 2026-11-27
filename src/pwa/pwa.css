@@ -1,0 +1,36 @@
+/* ── PWA : bandeau de mise à jour, état hors ligne ── */
+.pwa-banner {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 50;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--r);
+  background: var(--acc);
+  color: var(--acc-txt);
+  box-shadow: var(--shadow);
+  font-size: 15px;
+  font-weight: 550;
+}
+.pwa-banner-btn { background: var(--acc-txt); color: var(--acc); border-color: transparent; }
+.pwa-banner-btn:hover { background: color-mix(in srgb, var(--acc-txt) 85%, var(--acc)); }
+
+.app-bar-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.app-bar-offline::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }

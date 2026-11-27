@@ -1,4 +1,11 @@
 export default {
+  pwa: {
+    updateReady: 'Nouvelle version disponible.',
+    reload: 'Recharger',
+    install: 'Installer',
+    offline: 'Hors ligne',
+    offlineTitle: "Pas de réseau : l'app continue de fonctionner, les données restent sur l'appareil.",
+  },
   crash: {
     title: 'Oups, cet écran a planté',
     text: "Vos données ne sont pas perdues. Revenez à l'accueil ou rechargez la page.",

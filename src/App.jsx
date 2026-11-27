@@ -24,6 +24,7 @@ import NotFound from './components/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
 import { normalizeHistory } from './lib/matchRecord'
 import TournamentLink from './components/TournamentLink'
+import PwaBanner from './pwa/PwaBanner'
 import logoAl from './public/logo_al.png'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -620,6 +621,7 @@ export default function App() {
         </ErrorBoundary>
       </main>
       <AppFooter />
+      <PwaBanner />
       <Analytics />
     </>
   )

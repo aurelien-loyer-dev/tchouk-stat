@@ -404,7 +404,7 @@ h2, .h2 {
   transition: background 0.15s, color 0.15s;
 }
 .icon-btn:hover { background: var(--s2); color: var(--txt); }
-.icon-btn-text { width: auto; padding: 0 10px; font-size: 13px; font-weight: 650; letter-spacing: 0.02em; }
+.icon-btn-text { width: auto; gap: 6px; padding: 0 10px; font-size: 13px; font-weight: 650; letter-spacing: 0.02em; }
 .icon-btn.danger:hover { background: var(--err-soft); color: var(--err); }
 
 .btn-end {

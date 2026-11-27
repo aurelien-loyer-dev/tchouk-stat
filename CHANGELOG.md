@@ -18,6 +18,7 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 ## [Non publié]
 
 ### Ajouté
+- Application installable (PWA) : bouton Installer dans la barre d'app, raccourcis vers la feuille de stats, le scoreur et les tournois, fonctionnement complet hors ligne (indicateur « Hors ligne »), bandeau quand une nouvelle version est prête.
 - Nouveau logo : le cadre de renvoi et le ballon. Il remplace l'ancien pictogramme dans la barre d'app et sert d'icône d'onglet et d'icône d'application.
 
 ## [2.4.0] - 2026-11-27

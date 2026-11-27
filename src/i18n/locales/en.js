@@ -1,4 +1,11 @@
 export default {
+  pwa: {
+    updateReady: 'A new version is available.',
+    reload: 'Reload',
+    install: 'Install',
+    offline: 'Offline',
+    offlineTitle: 'No network: the app keeps working and your data stays on this device.',
+  },
   crash: {
     title: 'Oops, this screen crashed',
     text: 'Your data is not lost. Go back home or reload the page.',

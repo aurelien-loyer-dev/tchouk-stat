@@ -64,4 +64,6 @@
   .app-bar-brand { font-stretch: 100%; gap: 8px; }
   .app-bar-actions { gap: 0; }
   .app-bar .icon-btn-text { padding: 0 8px; }
+  .app-bar-hide-sm { display: none; }
+  .app-bar-offline { padding: 6px; }
 }

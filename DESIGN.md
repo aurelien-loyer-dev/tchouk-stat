@@ -75,6 +75,12 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 - **Signature** : les chiffres larges (scores, chrono). La ligne médiane sépare les deux camps du scoreur, chaque camp coiffé d'une bande de sa couleur (le logo n'apparaît que s'il a été ajouté).
 - Rayons : 12px (panneaux), 8px (contrôles), pilule pour les petites étiquettes. Élévation par filet ; seule une légère ombre au survol des éléments cliquables (tuiles, cartes de match).
 
+## PWA
+
+- `public/manifest.webmanifest` (nom, icônes, raccourcis), `src/sw-template.js` transformé en `dist/sw.js` au build (plugin `pwa` de `vite.config.js`, liste de pré-cache générée).
+- Pages : réseau d'abord (3 s), puis `/index.html` en cache. Fichiers du build : cache d'abord. `/api/…` et autres domaines : jamais en cache.
+- Mise à jour : la nouvelle version attend ; `PwaBanner` propose « Recharger » (message `SKIP_WAITING`). Pastille « Hors ligne » dans la barre d'app.
+
 ## Mouvement
 
 150–250 ms, ease-out. Seuls les compteurs « rebondissent » quand ils changent. `prefers-reduced-motion` coupe tout.

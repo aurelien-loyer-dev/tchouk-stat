@@ -4,6 +4,9 @@ import '@fontsource-variable/archivo/standard.css' // axes wght + wdth (chiffres
 import './index.css'
 import './i18n'
 import App from './App'
+import { initPwa } from './pwa/pwa'
+
+initPwa()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

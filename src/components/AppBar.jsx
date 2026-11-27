@@ -3,12 +3,14 @@ import LanguageToggle from '../i18n/LanguageToggle'
 import { useTheme } from '../theme/useTheme'
 import Icon from './Icon'
 import { Link } from '../lib/router'
+import { promptInstall, usePwa } from '../pwa/pwa'
 import './AppBar.css'
 
 export default function AppBar() {
   const { t } = useTranslation()
   const { theme, toggle } = useTheme()
   const toLabel = theme === 'dark' ? t('common.theme.toLight') : t('common.theme.toDark')
+  const { canInstall, online } = usePwa()
 
   return (
     <header className="app-bar">
@@ -30,6 +32,12 @@ export default function AppBar() {
           <span aria-hidden="true">{t('setup.appTitle')}</span>
         </Link>
         <div className="app-bar-actions">
+          {!online && <span className="app-bar-offline" title={t('pwa.offlineTitle')}><span className="app-bar-hide-sm">{t('pwa.offline')}</span></span>}
+          {canInstall && (
+            <button className="icon-btn icon-btn-text app-bar-install" onClick={promptInstall}>
+              <Icon name="download" size={16} /><span className="app-bar-hide-sm">{t('pwa.install')}</span>
+            </button>
+          )}
           <Link className="icon-btn icon-btn-text app-bar-guide" to="/guide">{t('nav.guide')}</Link>
           <LanguageToggle className="icon-btn icon-btn-text" />
           <button className="icon-btn" onClick={toggle} title={toLabel} aria-label={toLabel}>
