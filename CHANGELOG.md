@@ -17,6 +17,8 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+## [2.5.4] - 2026-11-27
+
 ### Corrigé
 - Tournois : un score où une équipe n'a rien marqué (12-0 par exemple) se valide sans avoir à saisir le 0.
 
