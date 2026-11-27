@@ -3,6 +3,7 @@
 // leur score, les prochains matchs, les derniers résultats, la forme des équipes
 // et l'action qui débloque la suite.
 import i18n from '../../i18n'
+import { bracketRounds, isRealMatch } from '../../lib/doubleElim'
 import {
   addSwissRound, calcStandings, canStartFullPlacement, canStartKnockout,
   isRoundComplete, setKnockoutScore, setMatchScore, setPlacementScore,
@@ -31,6 +32,12 @@ export function listFixtures(tour) {
     }
   } else if (tour.format === 'swiss') {
     tour.rounds.forEach(r => r.matches.forEach(m => push(m, r.name, 'swiss', (t, a, b) => setMatchScore(t, m.id, a, b))))
+  } else if (tour.format === 'double' && tour.bracket) {
+    // Matchs réels seulement (pas d'exempt, pas de finale décisive inutile),
+    // dans l'ordre où leurs équipes peuvent être connues. Pas de nul possible.
+    bracketRounds(tour.bracket).forEach(({ round }) => round.matches.forEach(m => {
+      if (isRealMatch(m)) push(m, round.name, 'knockout', (t, a, b) => setMatchScore(t, m.id, a, b))
+    }))
   }
 
   tour.knockoutRounds?.forEach((r, ri) => r.matches.forEach((m, mi) =>
@@ -68,6 +75,8 @@ export function teamForm(team, fixtures, n = 5) {
 
 // Tableaux de classement à afficher : un par poule, ou un seul.
 export function standingTables(tour) {
+  // Double élimination : le tableau tient lieu de classement.
+  if (tour.format === 'double') return []
   if (tour.format === 'groups') {
     const perGroup = tour.knockoutSize ? Math.ceil(tour.knockoutSize / tour.groups.length) : 0
     return tour.groups.map(g => ({ id: g.id, title: g.name, rows: calcStandings(g.teams, g.matches), qualifyN: perGroup, matches: g.matches, teams: g.teams }))

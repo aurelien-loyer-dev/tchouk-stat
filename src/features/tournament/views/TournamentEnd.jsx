@@ -10,6 +10,7 @@ export default function TournamentEnd({ tournament, onBack }) {
   const topThree   = finalRanking.slice(0, 3)
   const totalPlayed = allMatches.filter(m => m.score1 !== null && m.score2 !== null).length
   const hasKnockout = !!tournament.knockoutRounds
+  const note = tournament.format === 'double' ? t('tournament.double.rankingNote') : hasKnockout ? t('tournament.finalRankingNote') : null
 
   return (
     <div className="trn-end">
@@ -35,7 +36,7 @@ export default function TournamentEnd({ tournament, onBack }) {
       </div>
 
       <div className="trn-section">{t('tournament.finalRanking')}</div>
-      <FinalRankingTable ranking={finalRanking} hasKnockout={hasKnockout} />
+      <FinalRankingTable ranking={finalRanking} note={note} />
 
       <div className="actions-row">
         <button className="btn-ghost" onClick={() => downloadTournamentPdf(tournament)}>

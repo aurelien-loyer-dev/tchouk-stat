@@ -628,3 +628,10 @@
   font-size: 15px;
 }
 .trn-preview strong { font-weight: 700; }
+
+/* Format : quatre choix, sur deux lignes en mobile. Aide sous le choix. */
+.trn-format-hint { margin-top: 8px; font-size: 14px; color: var(--dim); max-width: 62ch; }
+@media (max-width: 640px) {
+  .trn-format-seg { flex-wrap: wrap; }
+  .trn-format-seg button { flex: 1 1 calc(50% - 4px); }
+}

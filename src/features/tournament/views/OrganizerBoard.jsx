@@ -8,6 +8,7 @@ import ValidationBanner from '../components/ValidationBanner'
 import ScoreEntry from '../components/board/ScoreEntry'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
+import DoubleBracket from '../components/board/DoubleBracket'
 import TeamFilter from '../components/board/TeamFilter'
 import RosterCard from '../components/board/RosterCard'
 import TournamentClock from '../components/board/TournamentClock'
@@ -143,7 +144,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
       <div className="ob-tabs" role="tablist">
         {TABS.filter(id => id !== 'rosters' || hasRosters).map(id => (
           <button key={id} role="tab" aria-selected={tab === id} className={`ob-tab${tab === id ? ' on' : ''}`} onClick={() => setTab(id)}>
-            {t(`tournament.board.tabs.${id}`)}
+            {id === 'table' && tournament.format === 'double' ? t('tournament.double.tab') : t(`tournament.board.tabs.${id}`)}
             {id in counts && <span className="ob-count">{counts[id]}</span>}
           </button>
         ))}
@@ -238,6 +239,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
               <BracketBoard rounds={tournament.knockoutRounds} />
             </>
           )}
+          {tournament.format === 'double' && tournament.bracket && <DoubleBracket bracket={tournament.bracket} />}
         </div>
       )}
     </div>

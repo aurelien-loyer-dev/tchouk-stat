@@ -885,3 +885,9 @@
 .plan-time { font-variant-numeric: tabular-nums; color: var(--txt); font-weight: 650; }
 .fx-time { margin-left: auto; font-size: 12px; font-weight: 650; color: var(--dim); font-variant-numeric: tabular-nums; }
 .sp-end { color: var(--shell-txt); font-weight: 650; }
+
+/* ── Double élimination : trois tableaux l'un sous l'autre ── */
+.dbk { display: flex; flex-direction: column; gap: 28px; }
+.dbk-part { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dbk-title { font-size: 16px; font-weight: 650; }
+.dbk-hint { margin-top: -6px; font-size: 14px; color: var(--dim); }

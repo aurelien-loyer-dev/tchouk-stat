@@ -17,6 +17,9 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Ajouté
+- Tournois en double élimination : tableau principal, tableau de repêchage (une deuxième défaite élimine) et grande finale, avec finale décisive facultative si l'équipe du repêchage gagne. Têtes de série selon l'ordre de la liste, exempts gérés automatiquement, corrections de score répercutées sur la suite du tableau. Visible côté organisateur, sur la page publique, dans le classement final et le PDF.
+
 ### Corrigé
 - Guide : les liens du sommaire ramenaient en haut de page (surtout visible sur téléphone). Un changement d'ancre ne compte plus comme une navigation.
 

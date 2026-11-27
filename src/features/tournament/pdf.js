@@ -32,7 +32,7 @@ export function downloadTournamentPdf(tournament) {
 
   drawPdfHeader(doc, { title: t('tournament.pdf.title') })
   doc.text(t('tournament.pdf.exportLabel', { date: fmtDateTime(new Date().toISOString()), name: tournament.name }), left, 19)
-  doc.text(t('tournament.pdf.teamsFormat', { count: tournament.teams.length, format: t(`tournament.formatLabel.${tournament.format === 'groups' ? 'groups' : tournament.format === 'swiss' ? 'swiss' : 'roundrobin'}`) }), left, 25)
+  doc.text(t('tournament.pdf.teamsFormat', { count: tournament.teams.length, format: t(`tournament.formatLabel.${['groups', 'swiss', 'double'].includes(tournament.format) ? tournament.format : 'roundrobin'}`) }), left, 25)
   resetPdfTextColor(doc)
   y = 34
 
@@ -47,7 +47,7 @@ export function downloadTournamentPdf(tournament) {
   doc.setTextColor(15, 23, 42)
   y += 10
 
-  section(finalRanking.length > 0 && (tournament.knockoutRounds || tournament.placementRounds)
+  section(finalRanking.length > 0 && (tournament.knockoutRounds || tournament.placementRounds || tournament.format === 'double')
     ? t('tournament.pdf.finalRanking')
     : t('tournament.pdf.currentRanking'))
 
@@ -89,10 +89,23 @@ export function downloadTournamentPdf(tournament) {
     y += rowH
   })
 
-  if (tournament.knockoutRounds?.length) {
+  // Tableaux à élimination : phase finale classique, ou les trois tableaux
+  // d'une double élimination (sans les exempts).
+  const brackets = tournament.format === 'double' && tournament.bracket
+    ? [
+        [t('tournament.double.upper'), tournament.bracket.upper],
+        [t('tournament.double.lower'), tournament.bracket.lower],
+        [t('tournament.double.final'), tournament.bracket.final],
+      ]
+    : tournament.knockoutRounds?.length ? [[t('tournament.pdf.knockoutStage'), tournament.knockoutRounds]] : []
+  brackets.forEach(([title, bracketRounds]) => {
+    const rounds = bracketRounds
+      .map(r => ({ ...r, matches: r.matches.filter(m => m.team1 !== 'BYE' && m.team2 !== 'BYE') }))
+      .filter(r => r.matches.length)
+    if (!rounds.length) return
     y += 6
-    section(t('tournament.pdf.knockoutStage'))
-    tournament.knockoutRounds.forEach(round => {
+    section(title)
+    rounds.forEach(round => {
       ensurePage(10)
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
@@ -113,7 +126,7 @@ export function downloadTournamentPdf(tournament) {
       })
       y += 2
     })
-  }
+  })
 
   if (tournament.placementRounds?.length) {
     y += 6

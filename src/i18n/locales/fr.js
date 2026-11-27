@@ -386,6 +386,19 @@ export default {
     },
   },
   tournament: {
+    double: {
+      upper: 'Tableau principal',
+      lower: 'Tableau de repêchage',
+      final: 'Grande finale',
+      lowerHint: 'Une défaite dans le tableau principal envoie ici. Une deuxième défaite élimine.',
+      resetHint: "L'équipe venue du repêchage a gagné la grande finale : chaque équipe a une défaite, la finale décisive départage.",
+      tab: 'Tableau',
+      rankingNote: 'Ordre basé sur le tableau (tour d’élimination) · pts/diff = tous les matchs',
+      setupHint: 'Chaque équipe peut perdre une fois : une défaite envoie dans le tableau de repêchage, la deuxième élimine. Les vainqueurs des deux tableaux jouent la grande finale.',
+      resetLabel: 'Rejouer la finale si l’équipe du repêchage la gagne',
+      seedHint: 'L’ordre de la liste sert de têtes de série : la 1re équipe affronte la dernière au premier tour.',
+      minTeams: 'Il faut au moins 3 équipes pour une double élimination.',
+    },
     notFoundTitle: 'Tournoi introuvable',
     notFoundText: "Ce tournoi n'est pas sur cet appareil. Pour suivre le tournoi de quelqu'un d'autre, utilisez son lien ou son code.",
     standings: {
@@ -395,7 +408,7 @@ export default {
       gfTitle: 'Buts pour', gaTitle: 'Buts contre', diffTitle: 'Différence',
     },
     matchesPlayed: '{{done}} / {{total}} matchs joués',
-    formatLabel: { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse' },
+    formatLabel: { roundrobin: 'Tous vs tous', groups: 'Poules', swiss: 'Ronde suisse', double: 'Double élimination' },
     pdf: {
       title: 'Tournoi · tableau final',
       exportLabel: 'Export : {{date}}  ·  Tournoi : {{name}}',
@@ -562,6 +575,7 @@ export default {
       followThis: 'Suivre {{team}}',
       newResult: 'Nouveau résultat : {{team1}} {{s1}}, {{team2}} {{s2}}',
       tbd: 'À déterminer',
+      bye: 'Exempt',
       formTitle: 'Forme',
       form: { W: 'Victoire', D: 'Nul', L: 'Défaite' },
       formShort: { W: 'V', D: 'N', L: 'D' },
@@ -695,5 +709,14 @@ export default {
     semiFinals: 'Demi-finales',
     final: 'Finale',
     placementLabel: '{{pos1}}e / {{pos2}}e place',
+    double: {
+      upperRound: 'Principal · Tour {{n}}',
+      upperSemis: 'Principal · Demi-finales',
+      upperFinal: 'Principal · Finale',
+      lowerRound: 'Repêchage · Tour {{n}}',
+      lowerFinal: 'Repêchage · Finale',
+      grandFinal: 'Grande finale',
+      reset: 'Finale décisive',
+    },
   },
 }

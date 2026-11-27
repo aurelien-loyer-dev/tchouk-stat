@@ -168,6 +168,7 @@ const fr = {
             { term: 'Tous contre tous', desc: 'Chaque équipe rencontre toutes les autres.' },
             { term: 'Poules', desc: 'Les équipes sont réparties en poules ; les premières de chaque poule vont en phase finale.' },
             { term: 'Ronde suisse', desc: 'À chaque ronde, les équipes de classement proche se rencontrent. Idéal avec beaucoup d’équipes et peu de temps.' },
+            { term: 'Double élimination', desc: 'Une défaite envoie dans le tableau de repêchage, la deuxième élimine. Les vainqueurs du tableau principal et du repêchage jouent la grande finale ; si l’équipe du repêchage la gagne, une finale décisive peut être rejouée. L’ordre de la liste sert de têtes de série.' },
             { term: 'Phase finale', desc: 'Facultative : finale seule, ou demi-finales, quarts… Pas de match nul possible.' },
             { term: 'Classement complet', desc: 'Avec des poules, chaque équipe joue ensuite pour sa place.' },
           ],
@@ -185,7 +186,7 @@ const fr = {
           type: 'steps',
           heading: 'Pendant le tournoi',
           items: [
-            'Suivez les onglets Planning, À jouer, Résultats, Classement et Équipes.',
+            'Suivez les onglets Planning, Résultats, Classement (Tableau en double élimination) et Équipes.',
             'Saisissez un score directement, ou appuyez sur Jouer maintenant pour suivre le match avec la feuille de stats, les stats joueurs ou le scoreur.',
             'À la fin d’un match lancé depuis le tournoi, son score est reporté automatiquement.',
             'Quand tous les matchs sont joués, validez le tournoi pour afficher le podium et le classement final, à exporter en PDF.',
@@ -409,6 +410,7 @@ const en = {
             { term: 'Round robin', desc: 'Every team plays every other team.' },
             { term: 'Groups', desc: 'Teams are split into groups; the top teams of each group go to the knockout stage.' },
             { term: 'Swiss rounds', desc: 'Each round, teams with a similar ranking play each other. Ideal with many teams and little time.' },
+            { term: 'Double elimination', desc: 'A loss sends a team to the lower bracket, a second one eliminates it. The upper and lower bracket winners play the grand final; if the lower-bracket team wins it, a deciding final can be replayed. The list order sets the seeds.' },
             { term: 'Knockout stage', desc: 'Optional: final only, or semi-finals, quarter-finals… No draws allowed.' },
             { term: 'Full placement', desc: 'With groups, every team then plays for its final place.' },
           ],
@@ -426,7 +428,7 @@ const en = {
           type: 'steps',
           heading: 'During the tournament',
           items: [
-            'Use the Schedule, To play, Results, Standings and Teams tabs.',
+            'Use the Schedule, Results, Standings (Bracket in double elimination) and Teams tabs.',
             'Enter a score directly, or press Play now to track the match with the stat sheet, player stats or the scoreboard.',
             'When a match started from the tournament ends, its score is reported automatically.',
             'Once every match is played, validate the tournament to show the podium and the final standings, which you can export as a PDF.',

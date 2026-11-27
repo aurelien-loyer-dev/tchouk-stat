@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { formatCode, isViewer, normalizeCode } from '../cloud'
 import { fmtDateTime } from '../../../lib/format'
 import { Link } from '../../../lib/router'
+import { getTournamentMatches } from '../../../lib/tournament'
 import PageHeader from '../../../components/PageHeader'
 import Icon from '../../../components/Icon'
 
@@ -61,11 +62,7 @@ export default function TournamentList({ tournaments, onBack, onCreate, onDelete
       ) : (
         <div className="trn-list">
           {tournaments.map(tour => {
-            const allMatches = tour.format === 'groups'
-              ? tour.groups?.flatMap(g => g.matches) ?? []
-              : tour.format === 'swiss'
-              ? tour.rounds?.flatMap(r => r.matches) ?? []
-              : tour.matches ?? []
+            const allMatches = getTournamentMatches(tour)
             const done = allMatches.filter(m => m.score1 !== null).length
             const formatLabel = t('tournament.formatLabel', { returnObjects: true })
             return (

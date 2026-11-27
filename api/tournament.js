@@ -13,7 +13,7 @@ const KEY_ALPHABET  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234
 const CODE_LEN = 6
 const KEY_LEN  = 24
 const MAX_BYTES = 256 * 1024
-const FORMATS = ['roundrobin', 'groups', 'swiss']
+const FORMATS = ['roundrobin', 'groups', 'swiss', 'double']
 
 const randomString = (alphabet, len) => Array.from({ length: len }, () => alphabet[randomInt(alphabet.length)]).join('')
 const hashKey = key => createHash('sha256').update(String(key)).digest('hex')

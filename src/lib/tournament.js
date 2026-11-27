@@ -1,5 +1,6 @@
 import { newId } from './format'
 import i18n from '../i18n'
+import { allBracketMatches, bracketFinished, bracketRanking, genDoubleElim, isRealMatch, setBracketScore } from './doubleElim'
 
 export function mkMatch(team1, team2) {
   return { id: newId(), team1, team2, score1: null, score2: null }
@@ -245,9 +246,11 @@ export function setPlacementScore(tournament, roundIdx, score1, score2) {
   }
 }
 
-export function mkTournament({ name, format, teams, numGroups, knockoutSize, fullPlacement, numSwissRounds, doubleRound }) {
+export function mkTournament({ name, format, teams, numGroups, knockoutSize, fullPlacement, numSwissRounds, doubleRound, grandFinalReset = true }) {
   const base = { id: newId(), name, format, teams, createdAt: new Date().toISOString() }
-  const dbl = !!doubleRound && format !== 'swiss'
+  const dbl = !!doubleRound && (format === 'roundrobin' || format === 'groups')
+  // Double élimination : l'ordre des équipes sert de têtes de série.
+  if (format === 'double') return { ...base, grandFinalReset: !!grandFinalReset, bracket: genDoubleElim(teams, { reset: !!grandFinalReset }) }
   if (format === 'roundrobin') {
     const first = genRoundRobinMatches(teams)
     return { ...base, doubleRound: dbl, matches: dbl ? withReturnLegs(first) : first, knockoutSize: knockoutSize || null, knockoutRounds: null }
@@ -275,6 +278,8 @@ export function setMatchScore(tournament, matchId, score1, score2) {
     return { ...tournament, groups: tournament.groups.map(g => ({ ...g, matches: g.matches.map(m => m.id === matchId ? { ...m, score1, score2, playedAt: playedStamp(score1) } : m) })) }
   if (tournament.format === 'swiss')
     return { ...tournament, rounds: tournament.rounds.map(r => ({ ...r, matches: r.matches.map(m => m.id === matchId ? { ...m, score1, score2, playedAt: playedStamp(score1) } : m) })) }
+  if (tournament.format === 'double')
+    return { ...tournament, bracket: setBracketScore(tournament.bracket, matchId, score1, score2) }
   return tournament
 }
 
@@ -323,6 +328,8 @@ export function isRoundComplete(round) {
 export function getTournamentMatches(tournament) {
   if (tournament.format === 'groups') return tournament.groups?.flatMap(g => g.matches) || []
   if (tournament.format === 'swiss') return tournament.rounds?.flatMap(r => r.matches) || []
+  // Double élimination : les matchs réels, y compris ceux dont les équipes ne sont pas encore connues.
+  if (tournament.format === 'double') return tournament.bracket ? allBracketMatches(tournament.bracket).filter(isRealMatch) : []
   return tournament.matches || []
 }
 
@@ -332,8 +339,13 @@ export function isAllPlayed(matches) {
 
 export function buildFinalRanking(tournament) {
   const allGroupMatches = getTournamentMatches(tournament)
-  const groupStandings  = calcStandings(tournament.teams, allGroupMatches)
+  const groupStandings  = calcStandings(tournament.teams, allGroupMatches.filter(m => m.team1 !== 'TBD' && m.team2 !== 'TBD'))
   const groupStatsOf    = t => groupStandings.find(s => s.team === t) ?? { pts: 0, gd: 0, gf: 0, ga: 0, played: 0, won: 0, drawn: 0, lost: 0 }
+
+  // ── Double élimination : ordre du tableau, stats de tous les matchs ────────
+  if (tournament.format === 'double') {
+    return bracketRanking(tournament.bracket, tournament.teams, groupStandings).map(team => ({ ...groupStatsOf(team), team }))
+  }
 
   // ── Classement complet (placement rounds) ──────────────────────────────────
   if (tournament.placementRounds?.length) {
@@ -407,7 +419,9 @@ export function getTournamentEndState(tournament) {
     : false
   const placementDone = tournament.placementRounds?.length > 0
     && tournament.placementRounds.every(r => r.match.score1 !== null && r.match.score2 !== null)
-  const finished = tournament.format === 'swiss'
+  const finished = tournament.format === 'double'
+    ? bracketFinished(tournament.bracket)
+    : tournament.format === 'swiss'
     ? isRoundComplete(tournament.rounds?.[tournament.rounds.length - 1]) && tournament.rounds.length >= tournament.numSwissRounds
     : tournament.placementRounds
     ? isAllPlayed(allMatches) && placementDone

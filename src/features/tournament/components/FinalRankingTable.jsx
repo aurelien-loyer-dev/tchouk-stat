@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-export default function FinalRankingTable({ ranking, hasKnockout }) {
+export default function FinalRankingTable({ ranking, note }) {
   const { t } = useTranslation()
   return (
     <div className="trn-table-wrap">
@@ -26,9 +26,7 @@ export default function FinalRankingTable({ ranking, hasKnockout }) {
           ))}
         </tbody>
       </table>
-      {hasKnockout && (
-        <div className="trn-ranking-note">{t('tournament.finalRankingNote')}</div>
-      )}
+      {note && <div className="trn-ranking-note">{note}</div>}
     </div>
   )
 }

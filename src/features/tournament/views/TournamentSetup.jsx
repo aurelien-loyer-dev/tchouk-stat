@@ -37,6 +37,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
   const [rosters, setRosters]         = useState({}) // nom d'équipe → joueurs
   const [courtCount, setCourtCount]   = useState(1)
   const [doubleRound, setDoubleRound] = useState(false)
+  const [gfReset, setGfReset]         = useState(true)
   const [useTimes, setUseTimes]       = useState(true)
   const [startTime, setStartTime]     = useState(nextQuarter)
   const [sched, setSched]             = useState(DEFAULT_SCHEDULE)
@@ -79,7 +80,8 @@ export default function TournamentSetup({ onStart, onCancel }) {
         knockoutSize: fullPlacement ? null : knockoutSize,
         fullPlacement: format === 'groups' ? fullPlacement : false,
         numSwissRounds: Number(swissRounds),
-        doubleRound: format !== 'swiss' && doubleRound,
+        doubleRound: (format === 'roundrobin' || format === 'groups') && doubleRound,
+        grandFinalReset: gfReset,
       }),
       courtCount: Math.max(1, Number(courtCount) || 1),
       schedule,
@@ -87,19 +89,21 @@ export default function TournamentSetup({ onStart, onCancel }) {
     }
   }
 
+  const minTeams = format === 'double' ? 3 : 2
+
   function handleStart() {
-    if (teams.length < 2) return
+    if (teams.length < minTeams) return
     onStart(build())
   }
 
   // Aperçu : nombre de matchs et heure de fin, avec les réglages en cours.
   const preview = useMemo(() => {
-    if (teams.length < 2) return null
+    if (teams.length < minTeams) return null
     const tour = build()
     const fixtures = listFixtures(tour)
     const est = tour.schedule ? estimateSchedule(tour, planCourts(tour, fixtures), Date.parse(tour.schedule.startAt)) : null
     return { matches: fixtures.length, endAt: est?.endAt ?? null }
-  }, [teams, format, numGroups, knockoutSize, fullPlacement, swissRounds, doubleRound, courtCount, useTimes, startTime, sched])
+  }, [teams, format, numGroups, knockoutSize, fullPlacement, swissRounds, doubleRound, gfReset, courtCount, useTimes, startTime, sched])
 
   const showKo = (format === 'roundrobin' || format === 'groups') && !fullPlacement
 
@@ -116,12 +120,22 @@ export default function TournamentSetup({ onStart, onCancel }) {
 
         <div className="trn-field">
           <div className="flabel">{t('tournament.setup.formatLabelField')}</div>
-          <div className="seg">
+          <div className="seg trn-format-seg">
             <button className={format === 'roundrobin' ? 'on' : ''} onClick={() => setFormat('roundrobin')}>{t('tournament.formatLabel.roundrobin')}</button>
             <button className={format === 'groups' ? 'on' : ''} onClick={() => setFormat('groups')}>{t('tournament.formatLabel.groups')}</button>
             <button className={format === 'swiss' ? 'on' : ''} onClick={() => setFormat('swiss')}>{t('tournament.formatLabel.swiss')}</button>
+            <button className={format === 'double' ? 'on' : ''} onClick={() => setFormat('double')}>{t('tournament.formatLabel.double')}</button>
           </div>
+          {format === 'double' && <p className="trn-format-hint">{t('tournament.double.setupHint')}</p>}
         </div>
+
+        {format === 'double' && (
+          <label className="trn-toggle">
+            <input type="checkbox" checked={gfReset} onChange={e => setGfReset(e.target.checked)} />
+            <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
+            <span>{t('tournament.double.resetLabel')}</span>
+          </label>
+        )}
 
         {format === 'groups' && (
           <div className="trn-field">
@@ -169,7 +183,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
           </div>
         </div>
 
-        {format !== 'swiss' && (
+        {(format === 'roundrobin' || format === 'groups') && (
           <label className="trn-toggle">
             <input type="checkbox" checked={doubleRound} onChange={e => setDoubleRound(e.target.checked)} />
             <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
@@ -235,6 +249,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
             ) : null}
             <Link className="btn-link" to="/teams">{t('tournament.setup.goDraw')}<Icon name="chevron" size={16} /></Link>
           </div>
+          {format === 'double' && teams.length > 1 && <p className="trn-format-hint">{t('tournament.double.seedHint')}</p>}
           {teams.length > 0 && (
             <div className="trn-chips">
               {teams.map(tm => (
@@ -256,7 +271,8 @@ export default function TournamentSetup({ onStart, onCancel }) {
           </div>
         )}
 
-        <button className="btn-acc trn-start-btn" onClick={handleStart} disabled={teams.length < 2}>
+        {format === 'double' && teams.length > 0 && teams.length < 3 && <p className="trn-format-hint">{t('tournament.double.minTeams')}</p>}
+        <button className="btn-acc trn-start-btn" onClick={handleStart} disabled={teams.length < minTeams}>
           {t('tournament.setup.start')}
         </button>
       </div>

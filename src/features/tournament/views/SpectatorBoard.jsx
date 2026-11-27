@@ -7,6 +7,7 @@ import { useNow } from '../useNow'
 import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
+import DoubleBracket from '../components/board/DoubleBracket'
 import TeamFilter from '../components/board/TeamFilter'
 import RosterCard from '../components/board/RosterCard'
 import TournamentClock from '../components/board/TournamentClock'
@@ -224,14 +225,21 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
           </section>
         </aside>
 
-        <section className="sp-sec sp-a-table">
+        {tables.length > 0 && <section className="sp-sec sp-a-table">
           <h2 className="sp-sec-title">{t('tournament.standingsTitle')}</h2>
           <div className={`sp-tables${tables.length > 1 ? ' sp-tables-multi' : ''}`}>
             {tables.map(table => (
               <StandingsBoard key={table.id} table={table} fixtures={fixtures} focusTeam={focus} onPickTeam={team => setFocus(focus === team ? null : team)} />
             ))}
           </div>
-        </section>
+        </section>}
+
+        {tournament.format === 'double' && tournament.bracket && (
+          <section className="sp-sec sp-a-bracket">
+            <h2 className="sp-sec-title">{t('tournament.double.tab')}</h2>
+            <DoubleBracket bracket={tournament.bracket} focusTeam={focus} />
+          </section>
+        )}
 
         {tournament.knockoutRounds && (
           <section className="sp-sec sp-a-bracket">

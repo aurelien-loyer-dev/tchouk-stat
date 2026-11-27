@@ -386,6 +386,19 @@ export default {
     },
   },
   tournament: {
+    double: {
+      upper: 'Upper bracket',
+      lower: 'Lower bracket',
+      final: 'Grand final',
+      lowerHint: 'A loss in the upper bracket sends a team here. A second loss eliminates it.',
+      resetHint: 'The team from the lower bracket won the grand final: both teams have one loss, so the deciding final settles it.',
+      tab: 'Bracket',
+      rankingNote: 'Order based on the bracket (round of elimination) · pts/diff = all matches',
+      setupHint: 'Every team can lose once: a loss sends it to the lower bracket, a second one eliminates it. The winners of both brackets play the grand final.',
+      resetLabel: 'Replay the final if the lower-bracket team wins it',
+      seedHint: 'The list order sets the seeds: the 1st team plays the last one in the first round.',
+      minTeams: 'A double elimination needs at least 3 teams.',
+    },
     notFoundTitle: 'Tournament not found',
     notFoundText: "This tournament is not on this device. To follow someone else's tournament, use their link or code.",
     standings: {
@@ -395,7 +408,7 @@ export default {
       gfTitle: 'Goals for', gaTitle: 'Goals against', diffTitle: 'Difference',
     },
     matchesPlayed: '{{done}} / {{total}} matches played',
-    formatLabel: { roundrobin: 'Round robin', groups: 'Groups', swiss: 'Swiss rounds' },
+    formatLabel: { roundrobin: 'Round robin', groups: 'Groups', swiss: 'Swiss rounds', double: 'Double elimination' },
     pdf: {
       title: 'Tournament · final table',
       exportLabel: 'Export: {{date}}  ·  Tournament: {{name}}',
@@ -561,6 +574,7 @@ export default {
       rank: 'Rank',
       followThis: 'Follow {{team}}',
       newResult: 'New result: {{team1}} {{s1}}, {{team2}} {{s2}}',
+      bye: 'Bye',
       tbd: 'To be decided',
       formTitle: 'Form',
       form: { W: 'Win', D: 'Draw', L: 'Loss' },
@@ -694,6 +708,15 @@ export default {
     quarterFinals: 'Quarter-finals',
     semiFinals: 'Semi-finals',
     final: 'Final',
+    double: {
+      upperRound: 'Upper · Round {{n}}',
+      upperSemis: 'Upper · Semi-finals',
+      upperFinal: 'Upper · Final',
+      lowerRound: 'Lower · Round {{n}}',
+      lowerFinal: 'Lower · Final',
+      grandFinal: 'Grand final',
+      reset: 'Deciding final',
+    },
     placementLabel: 'Places {{pos1}}–{{pos2}}',
   },
 }
