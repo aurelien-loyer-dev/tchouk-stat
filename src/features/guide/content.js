@@ -241,6 +241,31 @@ const fr = {
       ],
     },
     {
+      id: 'championnat',
+      title: 'Championnat sur plusieurs journées',
+      to: '/tournaments',
+      intro: 'Chaque journée est un tournoi. Le championnat les regroupe et additionne les points de chaque équipe.',
+      blocks: [
+        {
+          type: 'steps',
+          items: [
+            'Dans Tournois, en bas : donnez un nom au championnat et créez-le.',
+            'Cochez les tournois qui en font partie (une journée chacun) et choisissez le barème.',
+            'Le classement général se met à jour à chaque journée ; une journée en cours compte de façon provisoire.',
+          ],
+        },
+        {
+          type: 'terms',
+          heading: 'Les barèmes',
+          items: [
+            { term: 'Selon le nombre d’équipes', desc: 'Le dernier de la journée marque 1 point, l’avant-dernier 2… le vainqueur autant de points qu’il y avait d’équipes.' },
+            { term: 'Barème fixe', desc: '10 points au vainqueur, puis 8, 6, 5, 4, 3, 2, et 1 point de participation.' },
+            { term: 'Égalité', desc: 'Départagée par le nombre de victoires de journée, puis de 2es places, etc.' },
+          ],
+        },
+      ],
+    },
+    {
       id: 'public',
       title: 'Partager avec le public',
       intro: 'Les spectateurs suivent le tournoi en direct sur leur téléphone, sans rien installer.',
@@ -526,6 +551,31 @@ const en = {
             'When a match started from the tournament ends, its score is reported automatically.',
             'No phone at every table? “Match sheets (PDF)”, in the schedule, prints one pre-filled sheet per match to play (stage, court, time, referee), two per page.',
             'Once every match is played, validate the tournament to show the podium and the final standings, which you can export as a PDF.',
+          ],
+        },
+      ],
+    },
+    {
+      id: 'championnat',
+      title: 'League over several matchdays',
+      to: '/tournaments',
+      intro: 'Each matchday is a tournament. The league groups them and adds up each team’s points.',
+      blocks: [
+        {
+          type: 'steps',
+          items: [
+            'In Tournaments, at the bottom: name the league and create it.',
+            'Tick the tournaments that belong to it (one matchday each) and choose the points scale.',
+            'The overall standings update after each matchday; a matchday in progress counts provisionally.',
+          ],
+        },
+        {
+          type: 'terms',
+          heading: 'Points scales',
+          items: [
+            { term: 'By number of teams', desc: 'Last on the day scores 1 point, second to last 2… the winner as many points as there were teams.' },
+            { term: 'Fixed scale', desc: '10 points for the winner, then 8, 6, 5, 4, 3, 2, and 1 point for taking part.' },
+            { term: 'Ties', desc: 'Broken by the number of matchday wins, then 2nd places, and so on.' },
           ],
         },
       ],

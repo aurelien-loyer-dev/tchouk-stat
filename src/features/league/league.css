@@ -1,0 +1,32 @@
+/* ── Championnat ── */
+.lg { display: flex; flex-direction: column; gap: 24px; }
+.lg-section { margin-top: 12px; }
+.lg-intro, .lg-hint { font-size: 14px; color: var(--dim); max-width: 64ch; }
+.lg-new { display: flex; gap: 8px; max-width: 520px; }
+.lg-new input { flex: 1; }
+
+.lg-settings { display: flex; flex-direction: column; gap: 16px; padding: 16px 20px; border: 1px solid var(--bdr); border-radius: var(--r); background: var(--s1); }
+.lg-settings .seg { max-width: 480px; }
+.lg-hint { margin-top: 6px; }
+.lg-days { display: flex; flex-direction: column; gap: 2px; border: none; }
+.lg-days legend { margin-bottom: 6px; }
+.lg-day { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--bdr); cursor: pointer; }
+.lg-day input { width: 18px; height: 18px; accent-color: var(--acc); }
+.lg-day-name { font-weight: 600; }
+.lg-day-meta { font-size: 13px; color: var(--dim); }
+.lg-delete { align-self: flex-start; color: var(--err); }
+
+.lg-table-wrap { border: 1px solid var(--bdr); border-radius: var(--r); background: var(--s1); padding: 0 16px; }
+.lg-table th a { color: inherit; }
+.lg-table th a:hover { color: var(--txt); text-decoration: underline; }
+.lg-rank { width: 32px; color: var(--dim); font-weight: 650; }
+.lg-table td.lg-team { text-align: left; font-weight: 650; }
+.lg-table th:nth-child(2) { text-align: left; }
+.lg-top-1 .lg-rank { color: var(--txt); }
+.lg-cell { line-height: 1.15; }
+.lg-place { display: block; font-weight: 650; }
+.lg-place sup { font-size: 10px; margin-left: 1px; }
+.lg-pts { display: block; font-size: 12px; color: var(--dim); }
+.lg-none { color: var(--s3); }
+.lg-daynum { display: grid; place-items: center; min-width: 36px; height: 28px; padding: 0 6px; border-radius: 8px; background: var(--s2); font-size: 13px; font-weight: 700; }
+.lg-prov .lg-place, .lg-prov .lg-pts { font-style: italic; color: var(--dim); }

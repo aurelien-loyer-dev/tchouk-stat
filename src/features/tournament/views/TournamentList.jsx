@@ -6,6 +6,7 @@ import { Link } from '../../../lib/router'
 import { getTournamentMatches } from '../../../lib/tournament'
 import PageHeader from '../../../components/PageHeader'
 import Icon from '../../../components/Icon'
+import { LeagueSection } from '../../league/League'
 
 function JoinForm({ onJoin, joinState }) {
   const { t } = useTranslation()
@@ -89,6 +90,8 @@ export default function TournamentList({ tournaments, onBack, onCreate, onDelete
           })}
         </div>
       )}
+
+      <LeagueSection />
     </div>
   )
 }

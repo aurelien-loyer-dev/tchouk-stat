@@ -21,6 +21,7 @@ import PublicBoard from './features/tournament/views/PublicBoard'
 import TeamDraw from './features/teamDraw/TeamDraw'
 import Guide from './features/guide/Guide'
 import Season from './features/season/Season'
+import League from './features/league/League'
 import NotFound from './components/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
 import { normalizeHistory } from './lib/matchRecord'
@@ -562,6 +563,7 @@ export default function App() {
     teams:         t('teamDraw.title'),
     guide:         t('nav.guide'),
     season:        t('season.title'),
+    league:        t('league.title'),
     seasonPlayer:  t('season.title'),
     notFound:      t('nav.notFound.title'),
   }[route.name]
@@ -704,6 +706,7 @@ export default function App() {
           />
         )}
         {route.name === 'guide' && <Guide onBack={() => navigate('/')} />}
+        {route.name === 'league' && <League id={route.params.id} tournaments={tournaments} />}
         {(route.name === 'season' || route.name === 'seasonPlayer') && (
           <Season history={history} playerKey={route.params.key || null} onBack={() => navigate('/')} />
         )}
