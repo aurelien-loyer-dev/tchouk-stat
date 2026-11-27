@@ -17,6 +17,8 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+## [2.5.3] - 2026-11-27
+
 ### Ajouté
 - Tournois : corriger une erreur. Bouton Annuler (et Ctrl+Z) après chaque score, renommage ou remise à zéro ; dans Résultats, « Annuler » remet un match à jouer (en phase finale, les matchs suivants qu'il avait débloqués aussi) ; « Remettre à zéro » efface tous les scores ; « Reprendre le tournoi » depuis l'écran de fin.
 - Tournois : renommer une équipe (onglet Équipes, toujours visible), le nom change partout (matchs, poules, tableau, arbitres, compositions).
