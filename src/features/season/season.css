@@ -1,0 +1,63 @@
+/* ── Saison : joueurs ── */
+.ssn { display: flex; flex-direction: column; gap: 24px; }
+.ssn-tools { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.ssn-period { flex: 0 0 auto; }
+.ssn-period button { padding-inline: 16px; white-space: nowrap; }
+.ssn-search { flex: 1 1 220px; max-width: 360px; }
+
+.ssn-table-wrap { border: 1px solid var(--bdr); border-radius: var(--r); background: var(--s1); padding: 0 16px; }
+.ssn-table th { padding-block: 4px; }
+.ssn-sort {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 8px 0; border: none; background: none;
+  color: var(--dim); font-size: 13px; font-weight: 600;
+}
+.ssn-sort:hover, .ssn-sort.on { color: var(--txt); }
+.ssn-up { transform: rotate(180deg); }
+.ssn-row { cursor: pointer; transition: background 0.15s; }
+.ssn-row:hover td { background: var(--s2); }
+.ssn-name { font-weight: 650; }
+.ssn-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ssn-team { display: block; font-size: 13px; color: var(--dim); }
+
+.ssn-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  background: var(--s1);
+  overflow: hidden;
+}
+.ssn-tile { display: flex; flex-direction: column-reverse; gap: 4px; padding: 16px 18px; border-right: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); margin: 0 -1px -1px 0; }
+.ssn-tile dt { font-size: 13px; color: var(--dim); }
+.ssn-tile dd { font-size: 28px; font-weight: 700; font-stretch: var(--wide); letter-spacing: -0.02em; line-height: 1; }
+
+.ssn-chart { border: 1px solid var(--bdr); border-radius: var(--r); background: var(--s1); padding: 12px 16px; }
+.ssn-chart svg { width: 100%; height: auto; display: block; }
+.ssn-grid { stroke: var(--bdr); }
+.ssn-axis { fill: var(--dim); font-size: 11px; }
+.ssn-bar { fill: var(--st-green); }
+.ssn-mean { stroke: var(--txt); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.ssn-chart figcaption { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--dim); }
+.ssn-leg { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.ssn-leg + * { margin-right: 12px; }
+.ssn-leg-bar { background: var(--st-green); }
+.ssn-leg-mean { height: 0; border-top: 2px dashed var(--txt); margin-left: 12px; }
+
+.ssn-stats td:first-child { text-align: left; }
+.ssn-stat-name { display: inline-flex; align-items: center; gap: 10px; }
+
+.ssn-match { gap: 14px; }
+.ssn-res {
+  display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 8px; font-size: 13px; font-weight: 700;
+}
+.ssn-res-W { background: var(--ok-soft); color: var(--ok); }
+.ssn-res-D { background: var(--s2); color: var(--dim); }
+.ssn-res-L { background: var(--err-soft); color: var(--err); }
+.ssn-match-nums { display: flex; gap: 14px; font-size: 14px; color: var(--dim); white-space: nowrap; }
+.ssn-match-nums strong { color: var(--txt); }
+
+@media (max-width: 600px) {
+  .ssn-match-nums span:not(:first-child) { display: none; }
+}

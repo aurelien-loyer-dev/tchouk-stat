@@ -20,6 +20,7 @@ import Tournament from './features/tournament/Tournament'
 import PublicBoard from './features/tournament/views/PublicBoard'
 import TeamDraw from './features/teamDraw/TeamDraw'
 import Guide from './features/guide/Guide'
+import Season from './features/season/Season'
 import NotFound from './components/NotFound'
 import ErrorBoundary from './components/ErrorBoundary'
 import { normalizeHistory } from './lib/matchRecord'
@@ -559,6 +560,8 @@ export default function App() {
     tournamentJoin: t('tournament.title'),
     teams:         t('teamDraw.title'),
     guide:         t('nav.guide'),
+    season:        t('season.title'),
+    seasonPlayer:  t('season.title'),
     notFound:      t('nav.notFound.title'),
   }[route.name]
   useEffect(() => {
@@ -700,6 +703,9 @@ export default function App() {
           />
         )}
         {route.name === 'guide' && <Guide onBack={() => navigate('/')} />}
+        {(route.name === 'season' || route.name === 'seasonPlayer') && (
+          <Season history={history} playerKey={route.params.key || null} onBack={() => navigate('/')} />
+        )}
         {route.name === 'live' && <PublicBoard code={route.params.code} />}
         {route.name === 'liveMatch' && <LiveMatchBoard code={route.params.code} />}
         {route.name === 'notFound' && <NotFound />}

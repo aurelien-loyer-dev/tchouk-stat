@@ -124,6 +124,23 @@ const fr = {
       ],
     },
     {
+      id: 'saison',
+      title: 'Joueurs et saison',
+      to: '/season',
+      intro: 'Chaque match suivi en stats joueurs alimente la fiche des joueurs : un repère pour le coach sur toute la saison.',
+      blocks: [
+        {
+          type: 'terms',
+          items: [
+            { term: 'Tableau', desc: 'Matchs joués, points, moyenne par match, efficacité, défenses et fautes de chaque joueur. Touchez un en-tête pour trier.' },
+            { term: 'Période', desc: 'Saison en cours (depuis le 1er septembre) ou tout l’historique.' },
+            { term: 'Fiche joueur', desc: 'Ses chiffres clés, ses points match après match, toutes ses stats (total et par match) et la liste de ses matchs.' },
+            { term: 'Même joueur', desc: 'Un joueur est reconnu par son nom : gardez la même orthographe d’un match à l’autre (les compos sauvegardées aident).' },
+          ],
+        },
+      ],
+    },
+    {
       id: 'scoreur',
       title: 'Scoreur',
       to: '/scoreboard',
@@ -387,6 +404,23 @@ const en = {
             { term: 'BOPM', desc: 'Best attacker: points scored, efficiency and points given.' },
             { term: 'BDPM', desc: 'Best defender: solo defenses and defensive participations.' },
             { term: 'MVP', desc: 'Most complete player, counting attack, defense and fouls.' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'saison',
+      title: 'Players and season',
+      to: '/season',
+      intro: 'Every match tracked with player stats feeds the player cards: a reference for the coach across the season.',
+      blocks: [
+        {
+          type: 'terms',
+          items: [
+            { term: 'Table', desc: 'Games played, points, average per match, efficiency, defense and fouls for each player. Tap a header to sort.' },
+            { term: 'Period', desc: 'This season (since September 1st) or the whole history.' },
+            { term: 'Player card', desc: 'Key numbers, points match after match, every stat (total and per match) and the list of their matches.' },
+            { term: 'Same player', desc: 'Players are matched by name: keep the same spelling from one match to the next (saved lineups help).' },
           ],
         },
       ],

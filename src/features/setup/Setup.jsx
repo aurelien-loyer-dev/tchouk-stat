@@ -200,6 +200,7 @@ export default function Setup({ mode: routeMode, numTeams, setNumTeams, onStart,
               <Row label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} to="/tournaments" count={tournamentCount || 0} />
               <Row label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} to="/teams" />
               <Row label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} to="/history" count={(history || []).length} />
+              <Row label={t('setup.home.seasonLabel')} desc={t('setup.home.seasonDesc')} to="/season" />
               <Row label={t('setup.home.guideLabel')} desc={t('setup.home.guideDesc')} to="/guide" />
             </div>
           </section>

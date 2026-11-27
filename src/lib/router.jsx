@@ -23,6 +23,8 @@ const ROUTES = [
   ['liveMatch',        '/m/:code'],
   ['teams',            '/teams'],
   ['guide',            '/guide'],
+  ['season',           '/season'],
+  ['seasonPlayer',     '/season/:key'],
 ]
 
 const compiled = ROUTES.map(([name, pattern]) => {
