@@ -37,13 +37,15 @@ export default function ScoreEntry({ fixture, onSave, knockout, onPlay, canPlaye
   // Mise à jour fonctionnelle : plusieurs appuis rapides comptent tous.
   const step = set => d => set(v => String(Math.max(0, (v === '' ? 0 : Number(v)) + d)))
 
-  const ready = s1 !== '' && s2 !== ''
-  const drawInKnockout = knockout && ready && Number(s1) === Number(s2)
+  // Un côté non touché compte 0 : 12 d'un côté suffit pour valider un 12-0.
+  const ready = s1 !== '' || s2 !== ''
+  const n1 = Number(s1 || 0), n2 = Number(s2 || 0)
+  const drawInKnockout = knockout && ready && n1 === n2
 
   function submit(e) {
     e.preventDefault()
     if (!ready || drawInKnockout) return
-    onSave(Number(s1), Number(s2))
+    onSave(n1, n2)
   }
 
   return (

@@ -13,7 +13,9 @@ export default function MatchRow({ match, onScore, compact }) {
     setS2(match.score2 !== null ? String(match.score2) : '')
   }, [match.score1, match.score2])
 
-  function save(v1, v2) {
+  // `fill` (Entrée) : une case vide compte 0, pour valider un 12-0 d'un coup.
+  function save(v1, v2, fill = false) {
+    if (fill && (v1 !== '' || v2 !== '')) { v1 = v1 === '' ? '0' : v1; v2 = v2 === '' ? '0' : v2 }
     const n1 = parseInt(v1), n2 = parseInt(v2)
     if (!isNaN(n1) && !isNaN(n2) && n1 >= 0 && n2 >= 0) onScore(n1, n2)
   }
@@ -29,14 +31,14 @@ export default function MatchRow({ match, onScore, compact }) {
           aria-label={t('tournament.board.scoreOf', { team: match.team1 })}
           onChange={e => setS1(e.target.value)}
           onBlur={e => save(e.target.value, s2)}
-          onKeyDown={e => e.key === 'Enter' && save(s1, s2)}
+          onKeyDown={e => e.key === 'Enter' && save(s1, s2, true)}
         />
         <span className="trn-dash">–</span>
         <input className="trn-si" type="number" min="0" inputMode="numeric" value={s2}
           aria-label={t('tournament.board.scoreOf', { team: match.team2 })}
           onChange={e => setS2(e.target.value)}
           onBlur={e => save(s1, e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && save(s1, s2)}
+          onKeyDown={e => e.key === 'Enter' && save(s1, s2, true)}
         />
       </div>
       <div className={`trn-mt trn-mt-r${winner2 ? ' trn-mt-win' : ''}`}>{match.team2}</div>
