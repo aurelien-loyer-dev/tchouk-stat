@@ -1,11 +1,12 @@
-// Feuilles de match à imprimer : une par match du tournoi encore à jouer,
-// deux par page A4 (format A5 paysage une fois coupée). Pré-remplies avec le
+// Feuilles de match à imprimer : une par match encore à jouer, ou une par
+// match du tournoi (joués compris, score reporté ; équipes encore inconnues
+// laissées en blanc), deux par page A4 (format A5 paysage une fois coupée). Pré-remplies avec le
 // tournoi, la phase, le terrain, l'heure estimée et l'arbitre, avec la grille
 // de points, le score par mi-temps et les signatures.
 import { jsPDF } from 'jspdf'
 import i18n from '../../i18n'
 import { fileSafeName } from '../../lib/format'
-import { estimateSchedule, fmtHour, listFixtures, planCourts } from './overview'
+import { estimateSchedule, fmtHour, isPlayed, listFixtures, planCourts } from './overview'
 import { assignReferees } from './referees'
 
 const INK = [20, 23, 27]
@@ -26,12 +27,22 @@ export function sheetFixtures(tour) {
   return out
 }
 
+// Tous les matchs du tournoi dans l'ordre du calendrier ; ceux à jouer gardent
+// leur terrain, leur heure et leur arbitre.
+export function allSheetFixtures(tour) {
+  const planned = new Map(sheetFixtures(tour).map(it => [it.fixture.match.id, it]))
+  return listFixtures(tour)
+    .filter(f => f.match.team1 !== 'BYE' && f.match.team2 !== 'BYE')
+    .map(f => planned.get(f.match.id) || { fixture: f, court: null, time: null, referee: null })
+}
+
 function drawSheet(doc, { tour, item, top, height, halves, index, total }) {
   const t = i18n.t
   const W = doc.internal.pageSize.getWidth()
   const L = 12, R = W - 12, w = R - L
   const m = item.fixture.match
   const name = team => (team === 'TBD' ? '' : team)
+  const played = isPlayed(m)
   let y = top + 10
 
   // En-tête : tournoi, phase, n° de feuille
@@ -98,11 +109,20 @@ function drawSheet(doc, { tour, item, top, height, halves, index, total }) {
       doc.rect(L + labelW + sw * k, ry, sw, 9)
     }
     doc.setLineWidth(0.2)
+    if (played) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...INK)
+      doc.text(String(i === 0 ? m.score1 : m.score2), L + labelW + sw * (cols - 1) + sw / 2, ry + 6.2, { align: 'center' })
+      doc.setFont('helvetica', 'normal')
+    }
   })
   const sideX = L + labelW + sw * cols + 8
   doc.setFontSize(8); doc.setTextColor(...DIM)
   doc.text(t('tournament.sheets.winner'), sideX, y + 9)
   doc.setDrawColor(...LINE); doc.line(sideX, y + 17, R, y + 17)
+  if (played) {
+    const win = m.score1 === m.score2 ? t('tournament.sheets.draw') : (m.score1 > m.score2 ? m.team1 : m.team2)
+    doc.setTextColor(...INK); doc.setFontSize(10); doc.text(win, sideX, y + 15.5, { maxWidth: R - sideX }); doc.setFontSize(8); doc.setTextColor(...DIM)
+  }
   if (item.referee) { doc.text(t('tournament.sheets.referee'), sideX, y + 22); doc.setTextColor(...INK); doc.setFontSize(10); doc.text(item.referee, sideX, y + 27) }
   else { doc.text(t('tournament.sheets.referee'), sideX, y + 22); doc.line(sideX, y + 28, R, y + 28) }
   y += 6 + 18 + 5
@@ -124,8 +144,8 @@ function drawSheet(doc, { tour, item, top, height, halves, index, total }) {
   doc.text(t('tournament.sheets.footer'), L, top + height - 5)
 }
 
-export function downloadMatchSheets(tour) {
-  const items = sheetFixtures(tour)
+export function downloadMatchSheets(tour, { all = false } = {}) {
+  const items = all ? allSheetFixtures(tour) : sheetFixtures(tour)
   if (!items.length) return false
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const H = doc.internal.pageSize.getHeight()
@@ -141,6 +161,6 @@ export function downloadMatchSheets(tour) {
       doc.setDrawColor(...LINE); doc.setLineDashPattern([1.5, 1.5], 0); doc.line(6, half, W - 6, half); doc.setLineDashPattern([], 0)
     }
   })
-  doc.save(`${fileSafeName(tour.name) || 'tournoi'}_${i18n.t('tournament.sheets.file')}.pdf`)
+  doc.save(`${fileSafeName(tour.name) || 'tournoi'}_${i18n.t(all ? 'tournament.sheets.fileAll' : 'tournament.sheets.file')}.pdf`)
   return true
 }

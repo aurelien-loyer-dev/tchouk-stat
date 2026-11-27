@@ -17,6 +17,9 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Ajouté
+- Feuilles de match : nouveau bouton « Toutes les feuilles (PDF) » (planning et fin de tournoi), une feuille par match du tournoi, matchs joués compris avec leur score.
+
 ## [2.5.2] - 2026-11-27
 
 ### Ajouté

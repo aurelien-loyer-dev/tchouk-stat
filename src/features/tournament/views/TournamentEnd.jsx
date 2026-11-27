@@ -5,6 +5,7 @@ import { downloadTournamentPdf } from '../pdf'
 import Icon from '../../../components/Icon'
 import ShareImage from '../../../components/ShareImage'
 import { tournamentShare } from '../../../lib/shareSpecs'
+import { downloadMatchSheets } from '../sheetsPdf'
 
 export default function TournamentEnd({ tournament, onBack }) {
   const { t } = useTranslation()
@@ -45,6 +46,9 @@ export default function TournamentEnd({ tournament, onBack }) {
           <Icon name="download" size={18} />{t('history.pdfBtn')}
         </button>
         <ShareImage getSpec={() => tournamentShare(tournament, t)} />
+        <button className="btn-ghost" onClick={() => downloadMatchSheets(tournament, { all: true })} title={t('tournament.sheets.hintAll')}>
+          <Icon name="download" size={18} />{t('tournament.sheets.buttonAll')}
+        </button>
         <button className="btn-acc" onClick={onBack}>{t('tournament.backToList')}</button>
       </div>
     </div>

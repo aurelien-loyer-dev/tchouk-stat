@@ -180,10 +180,15 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
         <TeamFilter teams={tournament.teams} value={focus} onChange={setFocus} label={t('tournament.board.filterTeam')} />
       )}
 
-      {tab === 'plan' && (onCourtCount + plan.slots.length + plan.waiting.length > 0) && (
+      {tab === 'plan' && (
         <div className="ob-plan-tools">
-          <button className="btn-mini" onClick={() => downloadMatchSheets(tournament)} title={t('tournament.sheets.hint')}>
-            <Icon name="download" size={16} />{t('tournament.sheets.button')}
+          {onCourtCount + plan.slots.length + plan.waiting.length > 0 && (
+            <button className="btn-mini" onClick={() => downloadMatchSheets(tournament)} title={t('tournament.sheets.hint')}>
+              <Icon name="download" size={16} />{t('tournament.sheets.button')}
+            </button>
+          )}
+          <button className="btn-mini" onClick={() => downloadMatchSheets(tournament, { all: true })} title={t('tournament.sheets.hintAll')}>
+            <Icon name="download" size={16} />{t('tournament.sheets.buttonAll')}
           </button>
         </div>
       )}

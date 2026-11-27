@@ -542,9 +542,13 @@ export default {
   },
   tournament: {
     sheets: {
-      button: 'Feuilles de match (PDF)',
+      button: 'Feuilles à jouer (PDF)',
       hint: 'Une feuille par match à jouer, pré-remplie, deux par page A4',
       file: 'feuilles-de-match',
+      buttonAll: 'Toutes les feuilles (PDF)',
+      hintAll: 'Une feuille par match du tournoi, joués compris (score reporté). Les équipes pas encore connues restent en blanc.',
+      fileAll: 'toutes-les-feuilles',
+      draw: 'Match nul',
       sheetN: 'Feuille {{n}} / {{total}}',
       around: 'vers {{time}}',
       teamA: 'Équipe A', teamB: 'Équipe B',
