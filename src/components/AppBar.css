@@ -1,10 +1,13 @@
-/* Bandeau « couleur terrain » : la seule surface franchement colorée. */
+/* Barre d'app : surface neutre et filet, comme le reste de l'outil. */
 .app-bar {
   position: sticky;
   top: 0;
   z-index: 15;
-  background: var(--shell);
-  color: var(--shell-txt);
+  background: color-mix(in srgb, var(--s1) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid var(--bdr);
+  color: var(--txt);
 }
 
 .app-bar-in {
@@ -22,8 +25,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
+  font-stretch: var(--wide);
   letter-spacing: -0.01em;
   white-space: nowrap;
   color: inherit;
@@ -33,7 +37,7 @@
   border-radius: var(--r-sm);
   transition: background 0.15s;
 }
-.app-bar-brand:hover { background: rgb(255 255 255 / 0.1); }
+.app-bar-brand:hover { background: var(--s2); }
 
 /* Marque : la zone interdite devant le cadre, en deux traits. */
 .app-bar-mark {
@@ -51,10 +55,16 @@
   gap: 4px;
 }
 
-.app-bar .icon-btn { color: var(--shell-dim); }
-.app-bar .icon-btn:hover { color: var(--shell-txt); background: rgb(255 255 255 / 0.1); }
-.app-bar :focus-visible { outline-color: var(--shell-txt); }
+.app-bar .icon-btn { color: var(--dim); }
+.app-bar .icon-btn:hover { color: var(--txt); background: var(--s2); }
 
 @media (max-width: 600px) {
   .app-bar-in { padding: 0 8px 0 16px; }
+}
+
+/* Petit écran : la marque reprend sa chasse normale pour laisser la place aux boutons. */
+@media (max-width: 440px) {
+  .app-bar-brand { font-stretch: 100%; gap: 8px; }
+  .app-bar-actions { gap: 0; }
+  .app-bar .icon-btn-text { padding: 0 8px; }
 }

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { mkPlayer } from '../../lib/playerStats'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
-import Court from '../../components/Court'
 import MatchCard from '../../components/MatchCard'
 import { loadComposFromStorage, saveComposToStorage } from './compoStorage'
 import LogoUpload from './components/LogoUpload'
@@ -13,12 +12,16 @@ import './setup.css'
 
 const MODE_PATHS = { stats: '/stats', player: '/players', scorer: '/scoreboard' }
 
-function Tile({ label, desc, to }) {
+// Ligne de liste (Organiser) : libellé, description, nombre d'éléments s'il y en a.
+function Row({ label, desc, to, count }) {
   return (
-    <Link className="tile" to={to}>
-      <span className="tile-label">{label}</span>
-      <span className="tile-desc">{desc}</span>
-      <Icon name="chevron" size={20} className="tile-chev" />
+    <Link className="row-link" to={to}>
+      <span className="row-text">
+        <span className="row-label">{label}</span>
+        <span className="row-desc">{desc}</span>
+      </span>
+      {count > 0 && <span className="row-count">{count}</span>}
+      <Icon name="chevron" size={18} className="row-chev" />
     </Link>
   )
 }
@@ -158,43 +161,46 @@ export default function Setup({ mode: routeMode, numTeams, setNumTeams, onStart,
       {/* ── Accueil : choix directs ── */}
       {step === 'home' && (
         <div className="home">
-          <section className="hero">
-            <div className="hero-main">
+          <header className="home-head">
+            <div>
               <h1>{t('setup.home.heroTitle')}</h1>
-              <p>{t('setup.home.heroSub')}</p>
-              <dl className="hero-stats">
-                <div>
-                  <dt>{(history || []).length}</dt>
-                  <dd>{t('setup.home.statMatches')}</dd>
-                </div>
-                <div>
-                  <dt>{tournamentCount || 0}</dt>
-                  <dd>{t('setup.home.statTournaments')}</dd>
-                </div>
-              </dl>
+              <p className="home-sub">{t('setup.home.heroSub')}</p>
             </div>
-            <div className="hero-art" aria-hidden="true">
-              <Court className="hero-court" />
-            </div>
-          </section>
+            <dl className="home-count">
+              <div>
+                <dt>{t('setup.home.statMatches')}</dt>
+                <dd>{(history || []).length}</dd>
+              </div>
+              <div>
+                <dt>{t('setup.home.statTournaments')}</dt>
+                <dd>{tournamentCount || 0}</dd>
+              </div>
+            </dl>
+          </header>
 
           {liveMatch && <ResumeCard live={liveMatch} onDiscard={onDiscardLive} />}
 
-          <section className="sec">
-            <h2 className="sec-title">{t('setup.home.startTitle')}</h2>
-            <div className="tiles tiles-3">
-              {startChoices.map(c => (
-                <Tile key={c.mode} label={c.label} desc={c.desc} to={MODE_PATHS[c.mode]} />
-              ))}
-            </div>
-          </section>
+          {/* Modes de saisie : une seule bande divisée par des filets, pas trois cartes */}
+          <nav className="launch" aria-label={t('setup.home.startTitle')}>
+            {startChoices.map(c => (
+              <Link key={c.mode} className="launch-item" to={MODE_PATHS[c.mode]}>
+                <span className="launch-label">{c.label}</span>
+                <span className="launch-desc">{c.desc}</span>
+                <span className="launch-go">
+                  {t('setup.home.open')}
+                  <Icon name="chevron" size={16} />
+                </span>
+              </Link>
+            ))}
+          </nav>
 
           <section className="sec">
             <h2 className="sec-title">{t('setup.home.competitionTitle')}</h2>
-            <div className="tiles tiles-3">
-              <Tile label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} to="/tournaments" />
-              <Tile label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} to="/teams" />
-              <Tile label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} to="/history" />
+            <div className="rows">
+              <Row label={t('setup.home.tournamentLabel')} desc={t('setup.home.tournamentDesc')} to="/tournaments" count={tournamentCount || 0} />
+              <Row label={t('setup.home.teamDrawLabel')} desc={t('setup.home.teamDrawDesc')} to="/teams" />
+              <Row label={t('setup.home.historyLabel')} desc={t('setup.home.historyDesc')} to="/history" count={(history || []).length} />
+              <Row label={t('setup.home.guideLabel')} desc={t('setup.home.guideDesc')} to="/guide" />
             </div>
           </section>
 

@@ -1,0 +1,137 @@
+/* ── Guide ── */
+.guide { display: flex; flex-direction: column; gap: 28px; }
+
+.gd-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+
+/* Sommaire : collant sous la barre d'app. */
+.gd-toc {
+  position: sticky;
+  top: 80px;
+  font-size: 14px;
+}
+.gd-toc-title {
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--bdr);
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--dim);
+}
+.gd-toc ol { list-style: none; display: flex; flex-direction: column; }
+.gd-toc a {
+  display: block;
+  padding: 6px 8px;
+  margin-left: -8px;
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  font-weight: 550;
+  transition: background 0.15s, color 0.15s;
+}
+.gd-toc a:hover { background: var(--s2); color: var(--txt); }
+
+.gd-body { display: flex; flex-direction: column; max-width: 720px; }
+
+.gd-sec {
+  scroll-margin-top: 80px;
+  padding: 32px 0;
+  border-top: 1px solid var(--bdr);
+}
+.gd-sec:first-child { padding-top: 0; border-top: none; }
+
+.gd-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.gd-sec h2 {
+  font-size: 22px;
+  font-weight: 700;
+  font-stretch: var(--wide);
+  letter-spacing: -0.02em;
+}
+.gd-intro { margin-top: 8px; font-size: 17px; color: var(--dim); max-width: 62ch; }
+
+.gd-h3 {
+  margin-top: 28px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+/* Étapes : vraie séquence, donc numérotées. */
+.gd-steps {
+  list-style: none;
+  counter-reset: gd;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gd-steps li {
+  counter-increment: gd;
+  position: relative;
+  padding-left: 40px;
+  max-width: 62ch;
+}
+.gd-steps li::before {
+  content: counter(gd);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--bdr-strong);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dim);
+}
+
+/* Définitions : terme à gauche, explication à droite, filet entre les lignes. */
+.gd-terms {
+  margin-top: 12px;
+  border-top: 1px solid var(--bdr);
+}
+.gd-term {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  gap: 4px 24px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bdr);
+}
+.gd-term dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+}
+.gd-term dd { color: var(--dim); }
+
+.gd-note {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--bdr-strong);
+  background: var(--s2);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 15px;
+  max-width: 62ch;
+}
+
+@media (max-width: 860px) {
+  .gd-layout { grid-template-columns: 1fr; gap: 24px; }
+  .gd-toc { position: static; }
+  .gd-toc ol { flex-direction: row; flex-wrap: wrap; gap: 4px 8px; }
+  .gd-toc a { margin-left: 0; padding: 6px 10px; border: 1px solid var(--bdr); background: var(--s1); }
+}
+
+@media (max-width: 600px) {
+  .gd-term { grid-template-columns: 1fr; }
+  .gd-sec { padding: 24px 0; }
+}

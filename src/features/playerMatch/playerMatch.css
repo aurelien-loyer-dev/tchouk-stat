@@ -59,13 +59,13 @@
   text-align: left;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.pm-stat-btn:hover { background: color-mix(in srgb, var(--stat) 8%, var(--s1)); }
+.pm-stat-btn:hover { background: color-mix(in srgb, var(--stat) 6%, var(--s1)); }
 .pm-stat-btn:active { transform: scale(0.98); }
 
 /* Stat choisie : sa couleur encadre le bouton et teinte le fond. */
 .pm-stat-sel,
 .pm-stat-sel:hover {
-  background: color-mix(in srgb, var(--stat) 18%, var(--s1));
+  background: color-mix(in srgb, var(--stat) 10%, var(--s1));
   border-color: var(--stat);
   box-shadow: inset 0 0 0 1px var(--stat);
 }
@@ -248,11 +248,11 @@
 .pm-adj-btn:active:not(:disabled) { transform: scale(0.95); }
 
 .pm-adj-p {
-  background: color-mix(in srgb, var(--stat, var(--acc)) 18%, var(--s1));
-  color: color-mix(in oklab, var(--stat, var(--acc)) 75%, var(--txt));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stat, var(--acc)) 45%, transparent);
+  background: color-mix(in srgb, var(--stat, var(--acc)) 12%, var(--s1));
+  color: color-mix(in oklab, var(--stat, var(--acc)) 80%, var(--txt));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--stat, var(--acc)) 40%, transparent);
 }
-.pm-adj-p:hover { background: color-mix(in srgb, var(--stat, var(--acc)) 28%, var(--s1)); }
+.pm-adj-p:hover { background: color-mix(in srgb, var(--stat, var(--acc)) 20%, var(--s1)); }
 
 .pm-adj-m { background: var(--s2); color: var(--txt); }
 .pm-adj-m:hover:not(:disabled) { background: var(--bdr); }

@@ -13,21 +13,7 @@
 }
 .sh-board.sh-single { grid-template-columns: 1fr; }
 
-/* Zone interdite au centre, posée sur la ligne de fond. */
-.sh-board:not(.sh-single)::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  width: 120px;
-  height: 60px;
-  transform: translateX(-50%);
-  border: 1px solid var(--bdr-strong);
-  border-bottom: none;
-  border-radius: 120px 120px 0 0;
-  background: var(--s1);
-}
-
+.sh-side + .sh-side { border-left: 1px solid var(--bdr); }
 .sh-side {
   display: flex;
   flex-direction: column;
@@ -35,8 +21,8 @@
   gap: 4px;
   min-width: 0;
   padding: 18px 16px 22px;
-  border-top: 4px solid var(--tc);
-  background: color-mix(in srgb, var(--tc) 6%, var(--s1));
+  border-top: 3px solid var(--tc);
+  background: var(--s1);
 }
 
 .sh-name {
@@ -61,8 +47,10 @@
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
+  bottom: 50%;
+  transform: translate(-50%, 50%);
+  padding: 0 6px;
+  background: var(--s1);
   font-size: 24px;
   font-weight: 300;
   color: var(--dim);
@@ -84,6 +72,5 @@
 
 @media (max-width: 600px) {
   .sh-score { font-size: 56px; }
-  .sh-board:not(.sh-single)::after { width: 88px; height: 44px; border-radius: 88px 88px 0 0; }
-  .sh-sep { bottom: 8px; font-size: 20px; }
+  .sh-sep { font-size: 20px; }
 }

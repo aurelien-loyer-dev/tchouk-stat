@@ -1,6 +1,6 @@
 # Design — Tchoukball Assistant
 
-Direction : **lignes du gymnase**. Une interface d'outil sobre qui emprunte la salle de sport, pas le tableau de bord générique : sol clair (érable) ou sombre (parquet laqué), filets fins comme les lignes du terrain, un seul accent bleu-vert.
+Direction : **table de marque**. Un outil de mesure sobre, pas une affiche : gris neutres (graphite), filets fins, actions en encre. Aucune couleur décorative : la couleur ne sert qu'à distinguer (équipes, états, une couleur par stat). Un seul élément expressif : les chiffres larges des scores et du chrono, comme sur un panneau d'affichage.
 
 ## Thème
 
@@ -12,16 +12,16 @@ Direction : **lignes du gymnase**. Une interface d'outil sobre qui emprunte la s
 
 | Rôle | Clair | Sombre |
 |---|---|---|
-| `--bg` fond | `#f4efe6` | `#14120f` |
-| `--s1` surface | `#fcfaf6` | `#1d1a16` |
-| `--s2` surface enfoncée / survol | `#ede6da` | `#27231e` |
-| `--bdr` filet | `#dcd2c1` | `#332e27` |
-| `--bdr-strong` filet fort / contour de champ | `#c3b6a1` | `#4a4339` |
-| `--txt` encre | `#1d1915` | `#eee8de` |
-| `--dim` texte secondaire | `#5f5548` | `#a99d8c` |
-| `--acc` accent (actions, focus, sélection) | `#0d6a70` | `#5fb8b9` |
-| `--shell` bandeau couleur terrain (barre d'app, hero) | `#0f4f53` | `#102e2e` |
-| `--ok` / `--err` / `--warn` | `#2c7a35` / `#b3261e` / `#94570a` | `#6cc475` / `#f08277` / `#e3a646` |
+| `--bg` fond | `#f3f4f6` | `#0e1012` |
+| `--s1` surface | `#ffffff` | `#16191c` |
+| `--s2` surface enfoncée / survol | `#eceef1` | `#1e2226` |
+| `--bdr` filet | `#dfe2e6` | `#2a2f35` |
+| `--bdr-strong` filet fort / contour de champ | `#c4c9d0` | `#3b424a` |
+| `--txt` encre | `#14171b` | `#eceef1` |
+| `--dim` texte secondaire | `#59616b` | `#9aa3ad` |
+| `--acc` actions principales, focus, sélection (= encre) | `#14171b` | `#eceef1` |
+| `--shell` panneau plein (en-têtes des pages publiques de tournoi) | `#14171b` | `#1e2226` |
+| `--ok` / `--err` / `--warn` | `#1d7a3a` / `#bf2a2a` / `#8f5600` | `#4cc27a` / `#f2777a` / `#e3a646` |
 
 Pastilles de mode : stats = `--acc`, joueurs = `--mode-player`, scoreur = `--warn`.
 
@@ -29,7 +29,7 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 
 ### Règles de couleur
 - L'accent sert uniquement aux actions principales, au focus et à la sélection.
-- **Une couleur par stat**, pour repérer une ligne sans lire (pastille carrée devant le libellé, bouton + teinté). Palette catégorielle validée (contraste + daltonisme) avec le script du skill dataviz ; le libellé reste toujours visible, la couleur n'est jamais seule.
+- **Une couleur par stat**, pour repérer une ligne de mémoire sans lire : pastille carrée devant le libellé, bouton + au fond légèrement teinté (10 %) et au signe coloré. Palette catégorielle validée (contraste + daltonisme) ; le libellé reste toujours visible, la couleur n'est jamais seule.
 
 | Stat (feuille / joueurs) | Couleur | Clair | Sombre |
 |---|---|---|---|
@@ -51,22 +51,23 @@ Chaque état a sa version douce (`--ok-soft`, `--err-soft`, `--warn-soft`, `--ac
 ## Typographie
 
 - **Archivo Variable** (auto-hébergée via `@fontsource-variable/archivo`), chiffres tabulaires partout.
-- Échelle fixe : 13 (libellés de section) · 14–15 (secondaire) · 16 (corps) · 17–18 (titres de bloc) · 28 (h1) · 40 (chrono) · 56–72 (scores), jusqu'à ~320px sur le tableau de score plein écran.
+- Chargée avec ses deux axes (`@fontsource-variable/archivo/standard.css` : graisse et chasse). Chasse large `--wide` (125 %) pour les titres h1, la marque, les scores, le chrono et les compteurs d'accueil ; chasse normale pour tout le reste.
+- Échelle fixe : 13 (libellés de section) · 14–15 (secondaire) · 16 (corps) · 17–20 (titres de bloc) · 28–44 (h1) · 40 (chrono) · 56–72 (scores), jusqu'à ~320px sur le tableau de score plein écran.
 - Graisses : 500–550 texte, 600–650 libellés/titres, 700–750 chiffres.
 - Pas de capitales espacées : les titres de section sont en casse normale, soulignés d'un filet.
 
 ## Composants
 
-- **Barre d'app** (`components/AppBar.jsx`) : bandeau `--shell`, marque (la zone interdite en deux traits), langue, thème. Collante.
-- **Hero d'accueil** : même couleur `--shell` ; titre, sous-titre et compteurs matchs/tournois à gauche, terrain dessiné en filets (`components/Court.jsx`) dans sa propre colonne à droite — jamais derrière le texte. Le terrain est masqué sous 860px.
-- **Tuiles** (accueil) : texte seul (libellé, description) et chevron, sans picto ; bordure d'accent au survol.
+- **Barre d'app** (`components/AppBar.jsx`) : surface translucide (`--s1` + flou) et filet bas, marque (la zone interdite en deux traits) en chasse large, langue, thème. Collante.
+- **Accueil** : titre « Nouveau match » et sous-titre à gauche, compteurs matchs / tournois à droite (chiffres larges), sans panneau coloré. Les trois modes de saisie forment une seule bande divisée par des filets (`.launch`), pas trois cartes. « Organiser » est une liste à filets (`.rows`) avec le nombre d'éléments à droite.
 - **Carte de match** (`components/MatchCard.jsx`) : pastille de mode, barres de couleur d'équipe, vainqueur en gras, actions PDF / suppression.
-- **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne teintée par équipe, zone interdite au centre.
+- **Guide** (`features/guide/`) : sommaire collant à gauche (puces en haut sur mobile), une section par partie de l'app avec un bouton Ouvrir. Étapes numérotées seulement pour les vraies séquences ; définitions en lignes à filet (terme | explication), avec la pastille de couleur pour les stats. Textes FR/EN dans `content.js`.
+- **ScoreHero** (`components/ScoreHero.jsx`) : score final des écrans Résultats et Historique, une colonne par équipe coiffée d'un trait de sa couleur, séparées par un filet.
 - **En-tête d'écran** (`components/PageHeader.jsx`) : lien Retour avec chevron, titre, sous-titre, actions.
 - **Icônes** (`components/Icon.jsx`) : un seul jeu, trait 2px, 24×24. Pas de glyphes Unicode comme icônes.
 - **Boutons** : `.btn-acc` (principal), `.btn-ghost` (secondaire), `.btn-danger`, `.btn-mini`, `.btn-link`, `.icon-btn`. Hauteur 48px (36–44 pour les petits).
 - **Compteurs de stats** : pastille de couleur · libellé · − · valeur · +, cibles de 56–64px, le + porte la couleur de la stat.
-- **Signature** : le demi-cercle de la zone interdite tracé en filet sous le séparateur du tableau de score (`.sb-scores::after`) ; la ligne médiane sépare les deux camps du scoreur, chaque camp coiffé d'une bande de sa couleur (le logo n'apparaît que s'il a été ajouté).
+- **Signature** : les chiffres larges (scores, chrono). La ligne médiane sépare les deux camps du scoreur, chaque camp coiffé d'une bande de sa couleur (le logo n'apparaît que s'il a été ajouté).
 - Rayons : 12px (panneaux), 8px (contrôles), pilule pour les petites étiquettes. Élévation par filet ; seule une légère ombre au survol des éléments cliquables (tuiles, cartes de match).
 
 ## Mouvement

@@ -1,39 +1,42 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Jetons — « lignes du gymnase » : sol de salle clair (érable) ou sombre
-   (parquet laqué), filets fins comme les lignes du terrain, un seul accent
-   (bleu-vert des lignes de jeu). Couleurs d'équipe = équipes, rouge/ambre/vert
-   = états, rien d'autre.
+   Jetons — « table de marque » : un outil de mesure, pas une affiche.
+   Gris neutres (graphite), actions en encre, aucune couleur décorative.
+   La couleur n'apparaît que pour distinguer : équipes (choisies par
+   l'utilisateur), états (vert/rouge/ambre) et une couleur par stat (repère
+   de mémoire pendant la saisie).
+   Seul élément expressif : les chiffres larges (Archivo, wdth 125) des scores
+   et du chrono, comme sur un panneau d'affichage.
 ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --bg:         #f4efe6;
-  --s1:         #fcfaf6;
-  --s2:         #ede6da;
-  --s3:         #b5a68f;
-  --bdr:        #dcd2c1;
-  --bdr-strong: #c3b6a1;
-  --txt:        #1d1915;
-  --dim:        #5f5548;
-  --acc:        #0d6a70;
-  --acc-hover:  #0a575c;
+  --bg:         #f3f4f6;
+  --s1:         #ffffff;
+  --s2:         #eceef1;
+  --s3:         #a3aab3;
+  --bdr:        #dfe2e6;
+  --bdr-strong: #c4c9d0;
+  --txt:        #14171b;
+  --dim:        #59616b;
+  --acc:        #14171b;
+  --acc-hover:  #2c3238;
   --acc-txt:    #ffffff;
-  --acc-soft:   #d9eae9;
-  --ok:         #2c7a35;
-  --err:        #b3261e;
-  --warn:       #94570a;
-  --ok-soft:    #e1efdf;
-  --err-soft:   #f6e0dc;
-  --warn-soft:  #f3e6cf;
-  --shadow:     0 1px 2px rgb(60 45 25 / 0.06), 0 6px 16px -6px rgb(60 45 25 / 0.12);
+  --acc-soft:   #e6e8ec;
+  --ok:         #1d7a3a;
+  --err:        #bf2a2a;
+  --warn:       #8f5600;
+  --ok-soft:    #e3f1e7;
+  --err-soft:   #f8e3e2;
+  --warn-soft:  #f5ead8;
+  --shadow:     0 1px 2px rgb(20 23 27 / 0.05), 0 8px 20px -10px rgb(20 23 27 / 0.14);
   --c1:         #0000b6;
   --c2:         #ae0000;
   --c1-btn-txt: #ffffff;
   --c2-btn-txt: #ffffff;
-  --shell:      #0f4f53;
-  --shell-txt:  #f3f8f7;
-  --shell-dim:  #b7d2cf;
-  --mode-player: #7048d4;
+  --shell:      #14171b;
+  --shell-txt:  #f3f4f6;
+  --shell-dim:  #a3aab3;
+  --mode-player: #5b4fc7;
   --st-green:   #008300;
   --st-red:     #e34948;
   --st-blue:    #2a78d6;
@@ -46,34 +49,35 @@
   --r:          12px;
   --r-sm:       8px;
   --ease:       cubic-bezier(0.22, 1, 0.36, 1);
+  --wide:       125%;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:         #14120f;
-    --s1:         #1d1a16;
-    --s2:         #27231e;
-    --s3:         #5a5145;
-    --bdr:        #332e27;
-    --bdr-strong: #4a4339;
-    --txt:        #eee8de;
-    --dim:        #a99d8c;
-    --acc:        #5fb8b9;
-    --acc-hover:  #7cc8c9;
-    --acc-txt:    #0b1d1e;
-    --acc-soft:   #1b3233;
-    --ok:         #6cc475;
-    --err:        #f08277;
+    --bg:         #0e1012;
+    --s1:         #16191c;
+    --s2:         #1e2226;
+    --s3:         #4a525b;
+    --bdr:        #2a2f35;
+    --bdr-strong: #3b424a;
+    --txt:        #eceef1;
+    --dim:        #9aa3ad;
+    --acc:        #eceef1;
+    --acc-hover:  #ffffff;
+    --acc-txt:    #0e1012;
+    --acc-soft:   #262b30;
+    --ok:         #4cc27a;
+    --err:        #f2777a;
     --warn:       #e3a646;
-    --ok-soft:    #1e2e1f;
-    --err-soft:   #3a201d;
-    --warn-soft:  #352915;
-    --shadow:     0 1px 2px rgb(0 0 0 / 0.3), 0 8px 20px -8px rgb(0 0 0 / 0.5);
-    --shell:      #102e2e;
-    --shell-txt:  #eef6f5;
-    --shell-dim:  #9fbebb;
-    --mode-player: #a78bfa;
+    --ok-soft:    #15281c;
+    --err-soft:   #33191b;
+    --warn-soft:  #2e2414;
+    --shadow:     0 1px 2px rgb(0 0 0 / 0.35), 0 10px 24px -12px rgb(0 0 0 / 0.6);
+    --shell:      #1e2226;
+    --shell-txt:  #eceef1;
+    --shell-dim:  #9aa3ad;
+    --mode-player: #a39af0;
     --st-green:   #008300;
     --st-red:     #e66767;
     --st-blue:    #3987e5;
@@ -88,29 +92,29 @@
 }
 
 :root[data-theme="dark"] {
-  --bg:         #14120f;
-  --s1:         #1d1a16;
-  --s2:         #27231e;
-  --s3:         #5a5145;
-  --bdr:        #332e27;
-  --bdr-strong: #4a4339;
-  --txt:        #eee8de;
-  --dim:        #a99d8c;
-  --acc:        #5fb8b9;
-  --acc-hover:  #7cc8c9;
-  --acc-txt:    #0b1d1e;
-  --acc-soft:   #1b3233;
-  --ok:         #6cc475;
-  --err:        #f08277;
-  --warn:       #e3a646;
-  --ok-soft:    #1e2e1f;
-  --err-soft:   #3a201d;
-  --warn-soft:  #352915;
-  --shadow:     0 1px 2px rgb(0 0 0 / 0.3), 0 8px 20px -8px rgb(0 0 0 / 0.5);
-  --shell:      #102e2e;
-  --shell-txt:  #eef6f5;
-  --shell-dim:  #9fbebb;
-  --mode-player: #a78bfa;
+  --bg:     #0e1012;
+  --s1:     #16191c;
+  --s2:     #1e2226;
+  --s3:     #4a525b;
+  --bdr:    #2a2f35;
+  --bdr-strong: #3b424a;
+  --txt:    #eceef1;
+  --dim:    #9aa3ad;
+  --acc:    #eceef1;
+  --acc-hover:  #ffffff;
+  --acc-txt:  #0e1012;
+  --acc-soft:   #262b30;
+  --ok:     #4cc27a;
+  --err:    #f2777a;
+  --warn:     #e3a646;
+  --ok-soft:  #15281c;
+  --err-soft:   #33191b;
+  --warn-soft:  #2e2414;
+  --shadow:   0 1px 2px rgb(0 0 0 / 0.35), 0 10px 24px -12px rgb(0 0 0 / 0.6);
+  --shell:      #1e2226;
+  --shell-txt:  #eceef1;
+  --shell-dim:  #9aa3ad;
+  --mode-player: #a39af0;
   --st-green:   #008300;
   --st-red:     #e66767;
   --st-blue:    #3987e5;
@@ -207,7 +211,8 @@ button:disabled { cursor: not-allowed; }
 h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  font-stretch: var(--wide);
+  letter-spacing: -0.025em;
   line-height: 1.15;
   text-wrap: balance;
 }
@@ -516,8 +521,7 @@ input[type=number]:focus,
 }
 
 /* ── Tableau de score (Match / PlayerMatch) ──
-   Signature : la zone interdite en demi-cercle, tracée en filet sous le
-   séparateur, comme devant le cadre sur le terrain. */
+   Deux scores larges séparés par un tiret, chrono dessous. */
 .sb {
   background: var(--s1);
   border: 1px solid var(--bdr);
@@ -535,20 +539,6 @@ input[type=number]:focus,
   border-bottom: 1px solid var(--bdr-strong);
 }
 .sb-scores:has(> .sb-t:only-child) { grid-template-columns: 1fr; }
-
-.sb-scores::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  width: 132px;
-  height: 66px;
-  transform: translateX(-50%);
-  border: 1px solid var(--bdr-strong);
-  border-bottom: none;
-  border-radius: 132px 132px 0 0;
-  pointer-events: none;
-}
 
 .sb-t {
   display: flex;
@@ -575,6 +565,7 @@ input[type=number]:focus,
 .sb-score {
   font-size: 72px;
   font-weight: 750;
+  font-stretch: var(--wide);
   line-height: 1;
   letter-spacing: -0.03em;
   user-select: none;
@@ -585,7 +576,7 @@ input[type=number]:focus,
   z-index: 1;
   align-self: end;
   padding-bottom: 6px;
-  width: 132px;
+  width: 96px;
   text-align: center;
   font-size: 28px;
   font-weight: 300;
@@ -604,6 +595,7 @@ input[type=number]:focus,
 .clock-main {
   font-size: 40px;
   font-weight: 700;
+  font-stretch: var(--wide);
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -631,12 +623,15 @@ input[type=number]:focus,
 @media (max-width: 600px) {
   .sb { padding: 14px 14px 12px; }
   .sb-score { font-size: 56px; }
-  .sb-sep, .sb-scores::after { width: 96px; }
-  .sb-scores::after { height: 48px; border-radius: 96px 96px 0 0; }
+  .sb-sep { width: 64px; }
   .sb-name { font-size: 14px; }
   .clock-wrap { flex-direction: column; align-items: stretch; text-align: center; }
   .clock-ctrl { justify-content: center; }
 }
+
+/* Chiffres d'affichage : la même chasse large partout où l'on lit un score
+   ou un chrono de loin (scoreur plein écran, score final, tournois). */
+.sc-clock, .sc-score, .sc-end-score, .sh-score, .tc-time { font-stretch: var(--wide); }
 
 /* ── Score final (Results, History, PlayerResults) ── */
 .rf {
@@ -644,6 +639,7 @@ input[type=number]:focus,
   text-align: center;
   font-size: 56px;
   font-weight: 750;
+  font-stretch: var(--wide);
   letter-spacing: -0.03em;
   line-height: 1;
   padding: 8px 0 16px;
@@ -680,6 +676,7 @@ input[type=number]:focus,
 .stat-aqua    { --stat: var(--st-aqua); }
 .stat-slate   { --stat: var(--st-slate); }
 .stat-ink     { --stat: var(--txt); }
+
 
 .stat-chip {
   display: inline-block;
@@ -847,8 +844,8 @@ input[type=number]:focus,
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--acc-soft);
-  color: var(--acc);
+  background: var(--s2);
+  color: var(--dim);
 }
 .empty-title { font-size: 17px; font-weight: 650; color: var(--txt); }
 .empty-text { margin-top: 4px; max-width: 42ch; }

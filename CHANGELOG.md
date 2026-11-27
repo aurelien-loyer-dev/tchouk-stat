@@ -17,6 +17,15 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+### Ajouté
+- Guide (`/guide`, lien dans la barre d'app et sur l'accueil) : comment fonctionne chaque partie de l'app, la signification de chaque stat avec sa couleur, les formats de tournoi et le partage avec le public. En français et en anglais.
+
+### Modifié
+- Nouveau design, plus sobre : gris neutres au lieu du crème et du bleu-vert, actions en encre, barre d'app claire. Chiffres larges pour les scores, le chrono et les titres.
+- Accueil refait : « Nouveau match » au lieu de « Prêt pour le match ? », les trois modes de saisie dans une seule bande, « Organiser » en liste avec le nombre de tournois et de matchs.
+- Boutons + des stats plus discrets : fond légèrement teinté et signe coloré (chaque stat garde sa couleur).
+- Le demi-cercle sous les scores est retiré.
+
 ## [2.2.0] - 2026-11-23
 
 ### Ajouté

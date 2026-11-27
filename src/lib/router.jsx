@@ -21,6 +21,7 @@ const ROUTES = [
   ['tournamentJoin',   '/t/:code'],
   ['live',             '/live/:code'],
   ['teams',            '/teams'],
+  ['guide',            '/guide'],
 ]
 
 const compiled = ROUTES.map(([name, pattern]) => {

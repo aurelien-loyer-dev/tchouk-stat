@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@fontsource-variable/archivo'
+import '@fontsource-variable/archivo/standard.css' // axes wght + wdth (chiffres larges)
 import './index.css'
 import './i18n'
 import App from './App'

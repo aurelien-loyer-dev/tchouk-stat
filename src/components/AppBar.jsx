@@ -21,6 +21,7 @@ export default function AppBar() {
           <span aria-hidden="true">{t('setup.appTitle')}</span>
         </Link>
         <div className="app-bar-actions">
+          <Link className="icon-btn icon-btn-text app-bar-guide" to="/guide">{t('nav.guide')}</Link>
           <LanguageToggle className="icon-btn icon-btn-text" />
           <button className="icon-btn" onClick={toggle} title={toLabel} aria-label={toLabel}>
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={18} />
