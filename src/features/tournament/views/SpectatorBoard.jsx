@@ -5,6 +5,7 @@ import { formatCode } from '../cloud'
 import { estimateSchedule, fmtHour, involves, isPlayed, listFixtures, planCourts, recentResults, standingTables } from '../overview'
 import { useNow } from '../useNow'
 import { useTeamAlert } from '../useTeamAlert'
+import { assignReferees } from '../referees'
 import FixtureCard from '../components/board/FixtureCard'
 import StandingsBoard from '../components/board/StandingsBoard'
 import BracketBoard from '../components/board/BracketBoard'
@@ -79,14 +80,15 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
   const results  = useMemo(() => recentResults(fixtures), [fixtures])
   const fresh    = useFreshResults(results)
   const ago      = useAgo(updatedAt)
-  const alert    = useTeamAlert(tournament.id, focus, plan, est)
+  const refs     = useMemo(() => assignReferees(tournament, plan), [tournament, plan])
+  const alert    = useTeamAlert(tournament.id, focus, plan, est, refs.byMatch)
 
   const done  = fixtures.filter(f => isPlayed(f.match)).length
   const total = fixtures.length
   const pct   = total ? Math.round((done / total) * 100) : 0
   const formatLabel = t('tournament.formatLabel', { returnObjects: true })
 
-  const keep = f => !focus || involves(f, focus)
+  const keep = f => !focus || involves(f, focus) || refs.byMatch[f.match.id] === focus
   const onCourt = plan.onCourt.map((f, i) => f && { fixture: f, court: i + 1 }).filter(Boolean)
   const slots = plan.slots.map(sl => sl.filter(x => keep(x.fixture))).map((sl, i) => ({ sl, i })).filter(x => x.sl.length)
   const teamResults = focus ? results.filter(f => involves(f, focus)) : results
@@ -181,7 +183,7 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
           <h2 id="sp-oncourt" className="sp-sec-title">{plan.count > 1 ? t('tournament.courts.onCourts') : t('tournament.courts.nowPlaying')}</h2>
           <div className={`sp-courts${onCourt.length > 1 ? ' sp-courts-multi' : ''}`}>
             {onCourt.map(({ fixture, court }) => (
-              <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} live
+              <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} live referee={refs.byMatch[fixture.match.id]}
                            court={plan.count > 1 ? court : null} dim={focus && !involves(fixture, focus)}
                            time={est?.courtEnds[court - 1] ? t('tournament.schedule.untilTime', { time: fmtHour(est.courtEnds[court - 1]) }) : null} />
             ))}
@@ -207,7 +209,7 @@ export default function SpectatorBoard({ tournament, syncStatus, updatedAt, code
                   </h3>
                   <div className="sp-list">
                     {sl.map(({ fixture, court }) => (
-                      <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} court={plan.count > 1 ? court : null} />
+                      <FixtureCard key={fixture.match.id} fixture={fixture} focusTeam={focus} court={plan.count > 1 ? court : null} referee={refs.byMatch[fixture.match.id]} />
                     ))}
                   </div>
                 </li>

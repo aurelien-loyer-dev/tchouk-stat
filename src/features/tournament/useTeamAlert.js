@@ -13,13 +13,19 @@ export const notifySupported = () => typeof window !== 'undefined' && 'Notificat
 
 const involves = (f, team) => f && (f.match.team1 === team || f.match.team2 === team)
 
-// Où en est l'équipe suivie : { kind: 'now' | 'next', fixture, court, time } ou null.
-export function teamStatus(team, plan, est) {
+// Où en est l'équipe suivie : elle joue (maintenant, au prochain créneau), ou
+// elle arbitre (idem). { kind: 'now' | 'next' | 'refNow' | 'refNext', fixture, court, time } ou null.
+export function teamStatus(team, plan, est, referees = {}) {
   if (!team || !plan) return null
+  // Priorité : joue maintenant, arbitre maintenant, joue ensuite, arbitre ensuite.
   const ci = plan.onCourt.findIndex(f => involves(f, team))
   if (ci !== -1) return { kind: 'now', fixture: plan.onCourt[ci], court: plan.count > 1 ? ci + 1 : null, time: est?.courtEnds?.[ci] ?? null }
+  const ri = plan.onCourt.findIndex(f => f && referees[f.match.id] === team)
+  if (ri !== -1) return { kind: 'refNow', fixture: plan.onCourt[ri], court: plan.count > 1 ? ri + 1 : null, time: est?.courtEnds?.[ri] ?? null }
   const next = plan.slots[0]?.find(s => involves(s.fixture, team))
   if (next) return { kind: 'next', fixture: next.fixture, court: plan.count > 1 ? next.court : null, time: est?.slotStarts?.[0] ?? null }
+  const refNext = plan.slots[0]?.find(s => referees[s.fixture.match.id] === team)
+  if (refNext) return { kind: 'refNext', fixture: refNext.fixture, court: plan.count > 1 ? refNext.court : null, time: est?.slotStarts?.[0] ?? null }
   return null
 }
 
@@ -27,6 +33,13 @@ function message(team, status) {
   const f = status.fixture.match
   const opponent = f.team1 === team ? f.team2 : f.team1
   const where = status.court ? i18n.t('tournament.alert.onCourt', { n: status.court }) : ''
+  if (status.kind === 'refNow' || status.kind === 'refNext') {
+    const when = status.kind === 'refNext' && status.time ? i18n.t('tournament.alert.around', { time: fmtHour(status.time) }) : ''
+    return {
+      title: i18n.t(status.kind === 'refNow' ? 'tournament.alert.refNowTitle' : 'tournament.alert.refNextTitle', { team }),
+      body: [`${f.team1} – ${f.team2}`, when, where].filter(Boolean).join(' · '),
+    }
+  }
   if (status.kind === 'now') {
     return { title: i18n.t('tournament.alert.nowTitle', { team }), body: [i18n.t('tournament.alert.vs', { team: opponent }), where].filter(Boolean).join(' · ') }
   }
@@ -47,11 +60,12 @@ async function notify({ title, body }, tag) {
 
 // Alerte « ton équipe joue bientôt » sur la page publique : une notification
 // (si autorisée) et une vibration quand le match de l'équipe suivie passe au
-// créneau suivant, puis quand il commence. Une seule fois par match et par état.
-export function useTeamAlert(tournamentId, team, plan, est) {
+// créneau suivant, puis quand il commence ; de même quand elle doit arbitrer.
+// Une seule fois par match et par état.
+export function useTeamAlert(tournamentId, team, plan, est, referees) {
   const [enabled, setEnabled] = useState(() => alertsEnabled(tournamentId))
   const [permission, setPermission] = useState(() => (notifySupported() ? Notification.permission : 'unsupported'))
-  const status = teamStatus(team, plan, est)
+  const status = teamStatus(team, plan, est, referees)
 
   async function toggle() {
     const next = !enabled

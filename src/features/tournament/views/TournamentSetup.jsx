@@ -38,6 +38,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
   const [courtCount, setCourtCount]   = useState(1)
   const [doubleRound, setDoubleRound] = useState(false)
   const [gfReset, setGfReset]         = useState(true)
+  const [refereeing, setRefereeing]   = useState(false)
   const [useTimes, setUseTimes]       = useState(true)
   const [startTime, setStartTime]     = useState(nextQuarter)
   const [sched, setSched]             = useState(DEFAULT_SCHEDULE)
@@ -84,6 +85,7 @@ export default function TournamentSetup({ onStart, onCancel }) {
         grandFinalReset: gfReset,
       }),
       courtCount: Math.max(1, Number(courtCount) || 1),
+      refereeing: refereeing && teams.length >= 3,
       schedule,
       rosters: Object.fromEntries(teams.filter(tm => rosters[tm]?.length).map(tm => [tm, rosters[tm]])),
     }
@@ -182,6 +184,12 @@ export default function TournamentSetup({ onStart, onCancel }) {
             <span className="trn-courts-hint">{t('tournament.courts.setupHint')}</span>
           </div>
         </div>
+
+        <label className="trn-toggle">
+          <input type="checkbox" checked={refereeing} onChange={e => setRefereeing(e.target.checked)} />
+          <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
+          <span>{t('tournament.referee.toggle')}</span>
+        </label>
 
         {(format === 'roundrobin' || format === 'groups') && (
           <label className="trn-toggle">

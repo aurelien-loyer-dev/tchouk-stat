@@ -472,6 +472,12 @@ export default {
     },
   },
   tournament: {
+    referee: {
+      title: 'Refereeing',
+      toggle: 'Refereeing by resting teams (assigned automatically)',
+      by: 'Referee: {{team}}',
+      counts: 'Planned refereeing:',
+    },
     alert: {
       enable: 'Notify me',
       on: 'Alerts on',
@@ -481,6 +487,8 @@ export default {
       vs: 'vs {{team}}',
       around: 'around {{time}}',
       onCourt: 'court {{n}}',
+      refNowTitle: '{{team}} is refereeing now',
+      refNextTitle: '{{team}} referees in the next slot',
       denied: 'Notifications are blocked by the browser: the alert shows here and the phone vibrates, with the page open.',
       unsupported: 'This browser does not support notifications: the alert shows here, with the page open.',
     },

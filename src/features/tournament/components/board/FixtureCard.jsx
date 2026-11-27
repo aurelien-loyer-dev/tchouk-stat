@@ -2,13 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { isPlayed } from '../../overview'
 
 // Un match en lecture seule : contexte, équipes, score (ou « contre »).
-export default function FixtureCard({ fixture, focusTeam, isNew, featured, live, court, dim, time }) {
+export default function FixtureCard({ fixture, focusTeam, isNew, featured, live, court, dim, time, referee }) {
   const { t } = useTranslation()
   const m = fixture.match
   const played = isPlayed(m)
   const win1 = played && m.score1 > m.score2
   const win2 = played && m.score2 > m.score1
   const mine = focusTeam && (m.team1 === focusTeam || m.team2 === focusTeam)
+  const refMine = focusTeam && referee === focusTeam
 
   const cls = [
     'fx',
@@ -16,13 +17,13 @@ export default function FixtureCard({ fixture, focusTeam, isNew, featured, live,
     featured && 'fx-featured',
     live && 'fx-live',
     dim && 'fx-dim',
-    mine && 'fx-mine',
+    (mine || refMine) && 'fx-mine',
     isNew && 'fx-new',
   ].filter(Boolean).join(' ')
 
   return (
     <article className={cls}>
-      {(fixture.label || isNew || featured || live || court) && (
+      {(fixture.label || isNew || featured || live || court || referee) && (
         <header className="fx-meta">
           {court && <span className="court-tag">{t('tournament.courts.court', { n: court })}</span>}
           {live && <span className="fx-live-tag"><span className="fx-live-dot" aria-hidden="true" />{t('tournament.courts.inProgress')}</span>}
@@ -30,6 +31,7 @@ export default function FixtureCard({ fixture, focusTeam, isNew, featured, live,
           {featured && <span className="fx-next">{t('tournament.board.nextMatch')}</span>}
           {fixture.label && <span className="fx-label">{fixture.label}</span>}
           {isNew && <span className="fx-new-tag">{t('tournament.board.justIn')}</span>}
+          {referee && <span className={`fx-ref${refMine ? ' fx-ref-mine' : ''}`}>{t('tournament.referee.by', { team: referee })}</span>}
         </header>
       )}
       <div className="fx-line">

@@ -472,6 +472,12 @@ export default {
     },
   },
   tournament: {
+    referee: {
+      title: 'Arbitrage',
+      toggle: 'Arbitrage par les équipes au repos (attribué automatiquement)',
+      by: 'Arbitre : {{team}}',
+      counts: 'Arbitrages prévus :',
+    },
     alert: {
       enable: 'Me prévenir',
       on: 'Alertes activées',
@@ -481,6 +487,8 @@ export default {
       vs: 'contre {{team}}',
       around: 'vers {{time}}',
       onCourt: 'terrain {{n}}',
+      refNowTitle: '{{team}} arbitre maintenant',
+      refNextTitle: '{{team}} arbitre au prochain créneau',
       denied: 'Notifications bloquées par le navigateur : l’alerte s’affiche ici et le téléphone vibre, page ouverte.',
       unsupported: 'Ce navigateur ne gère pas les notifications : l’alerte s’affiche ici, page ouverte.',
     },

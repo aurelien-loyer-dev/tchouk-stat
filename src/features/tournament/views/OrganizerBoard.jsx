@@ -14,19 +14,21 @@ import RosterCard from '../components/board/RosterCard'
 import TournamentClock from '../components/board/TournamentClock'
 import ScheduleBar from '../components/board/ScheduleBar'
 import { useNow } from '../useNow'
+import { assignReferees, refereesToFix } from '../referees'
 
 const TABS = ['plan', 'done', 'table', 'rosters']
 
-function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam, court }) {
+function FixtureEditRow({ fixture, tournament, onUpdate, focusTeam, court, referee }) {
   const { t } = useTranslation()
   const m = fixture.match
   const mine = focusTeam && involves(fixture, focusTeam)
   return (
     <div className={`ob-row${mine ? ' ob-row-mine' : ''}`}>
-      {(fixture.label || court) && (
+      {(fixture.label || court || referee) && (
         <div className="ob-row-head">
           {court && <span className="court-tag">{t('tournament.courts.short', { n: court })}</span>}
           {fixture.label && <span className="fx-label">{fixture.label}</span>}
+          {referee && <span className="fx-ref">{t('tournament.referee.by', { team: referee })}</span>}
         </div>
       )}
       <MatchRow
@@ -52,16 +54,20 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
   const step     = nextStep(tournament)
   const now      = useNow(30000)
   const est      = estimateSchedule(tournament, plan, now)
+  const refs     = useMemo(() => assignReferees(tournament, plan), [tournament, plan])
 
   // Les terrains attribués sont enregistrés dans le tournoi : les numéros
   // restent stables et les spectateurs voient la même chose.
+  // Les arbitres des matchs sur un terrain sont figés de la même façon.
   useEffect(() => {
-    if (sameCourts(plan.courts, tournament.courts || {})) return
+    const fixRefs = refereesToFix(tournament, plan, refs.byMatch)
+    const courtsSame = sameCourts(plan.courts, tournament.courts || {})
+    if (courtsSame && !fixRefs) return
     // Heure de mise sur le terrain : sert à estimer la fin de chaque match.
     const stamp = new Date().toISOString()
     const courtsSince = Object.fromEntries(Object.keys(plan.courts).map(id => [id, tournament.courtsSince?.[id] || stamp]))
-    onUpdate({ ...tournament, courts: plan.courts, courtsSince })
-  }, [plan.courts])
+    onUpdate({ ...tournament, courts: plan.courts, courtsSince, ...(fixRefs ? { referees: fixRefs } : {}) })
+  }, [plan.courts, refs])
 
   const playedCount = fixtures.filter(f => isPlayed(f.match)).length
   const pct = fixtures.length ? Math.round((playedCount / fixtures.length) * 100) : 0
@@ -123,6 +129,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
                 kicker={[
                   plan.count > 1 ? t('tournament.courts.court', { n: i + 1 }) : t('tournament.board.nextMatch'),
                   est?.courtEnds[i] && t('tournament.schedule.untilTime', { time: fmtHour(est.courtEnds[i]) }),
+                  refs.byMatch[f.match.id] && t('tournament.referee.by', { team: refs.byMatch[f.match.id] }),
                 ].filter(Boolean).join(' · ')}
                 fixture={f}
                 knockout={f.stage === 'knockout'}
@@ -138,6 +145,24 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
               </div>
             ))}
           </div>
+        </section>
+      )}
+
+      {tournament.teams.length >= 3 && (
+        <section className="ref-bar" aria-label={t('tournament.referee.title')}>
+          <label className="trn-toggle ref-toggle">
+            <input type="checkbox" checked={!!tournament.refereeing} onChange={e => onUpdate({ ...tournament, refereeing: e.target.checked })} />
+            <span className="trn-toggle-track"><span className="trn-toggle-thumb" /></span>
+            <span>{t('tournament.referee.toggle')}</span>
+          </label>
+          {tournament.refereeing && (
+            <p className="ref-counts">
+              <span className="ref-counts-label">{t('tournament.referee.counts')}</span>
+              {tournament.teams.map(tm => (
+                <span key={tm} className="ref-count"><span>{tm}</span><strong>{refs.counts[tm] || 0}</strong></span>
+              ))}
+            </p>
+          )}
         </section>
       )}
 
@@ -172,7 +197,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
                   <div className="ob-list">
                     {rows.map(({ fixture, court }) => (
                       <FixtureEditRow key={fixture.match.id} fixture={fixture} tournament={tournament} onUpdate={onUpdate}
-                                      focusTeam={focus} court={plan.count > 1 ? court : null} />
+                                      focusTeam={focus} court={plan.count > 1 ? court : null} referee={refs.byMatch[fixture.match.id]} />
                     ))}
                   </div>
                 </section>
@@ -204,7 +229,7 @@ export default function OrganizerBoard({ tournament, onUpdate, finished, onValid
           <>
             <p className="ob-hint">{t('tournament.board.editHint')}</p>
             <div className="ob-list">
-              {doneList.map(f => <FixtureEditRow key={f.match.id} fixture={f} tournament={tournament} onUpdate={onUpdate} focusTeam={focus} />)}
+              {doneList.map(f => <FixtureEditRow key={f.match.id} fixture={f} tournament={tournament} onUpdate={onUpdate} focusTeam={focus} referee={tournament.referees?.[f.match.id]} />)}
             </div>
           </>
         )

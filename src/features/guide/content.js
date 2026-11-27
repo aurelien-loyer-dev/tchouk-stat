@@ -223,6 +223,7 @@ const fr = {
           items: [
             { term: 'Terrains', desc: 'Les matchs sont répartis sur les terrains disponibles. Une équipe ne joue jamais deux matchs en même temps.' },
             { term: 'Aller-retour', desc: 'Chaque affiche est jouée deux fois.' },
+            { term: 'Arbitrage', desc: 'Chaque match est arbitré par une équipe au repos, choisie automatiquement : jamais une équipe qui joue au même moment, de préférence pas juste avant ou après, et le même nombre d’arbitrages pour tous. Visible sur le planning et sur la page publique.' },
             { term: 'Horaires', desc: 'Heure de début, mi-temps, pauses et changements : l’app estime l’heure de chaque match et l’heure de fin, et les recalcule selon l’avancement.' },
           ],
         },
@@ -268,7 +269,7 @@ const fr = {
             { term: 'Rejoindre', desc: 'Scannez le QR code avec l’appareil photo, ouvrez le lien, ou entrez le code dans Tournois.' },
             { term: 'En direct', desc: 'La page se met à jour seule, avec l’heure de la dernière mise à jour.' },
             { term: 'Suivre une équipe', desc: 'Affiche uniquement ses prochains matchs et ses résultats.' },
-            { term: 'Me prévenir', desc: 'Après avoir choisi une équipe : une notification (et une vibration) quand elle passe au prochain créneau, puis quand son match commence. La page doit rester ouverte, même en arrière-plan.' },
+            { term: 'Me prévenir', desc: 'Après avoir choisi une équipe : une notification (et une vibration) quand elle passe au prochain créneau, puis quand son match commence, et de même quand elle doit arbitrer. La page doit rester ouverte, même en arrière-plan.' },
             { term: 'Plein écran', desc: 'Pour afficher le tournoi sur une télé ou un vidéoprojecteur.' },
           ],
         },
@@ -510,6 +511,7 @@ const en = {
           items: [
             { term: 'Courts', desc: 'Matches are spread over the available courts. A team never plays two matches at once.' },
             { term: 'Home and away', desc: 'Every fixture is played twice.' },
+            { term: 'Refereeing', desc: 'Each match is refereed by a resting team, picked automatically: never a team playing at the same time, preferably not right before or after, and the same number of duties for everyone. Shown on the schedule and the public page.' },
             { term: 'Schedule', desc: 'Start time, halves, breaks and changeovers: the app estimates when each match starts and when the day ends, and updates it as play goes on.' },
           ],
         },
@@ -555,7 +557,7 @@ const en = {
             { term: 'Join', desc: 'Scan the QR code with the camera, open the link, or enter the code in Tournaments.' },
             { term: 'Live', desc: 'The page updates by itself and shows when it was last updated.' },
             { term: 'Follow a team', desc: 'Shows only that team’s next matches and results.' },
-            { term: 'Notify me', desc: 'Once a team is chosen: a notification (and a vibration) when it moves to the next slot, then when its match starts. The page must stay open, even in the background.' },
+            { term: 'Notify me', desc: 'Once a team is chosen: a notification (and a vibration) when it moves to the next slot, then when its match starts, and likewise when it has to referee. The page must stay open, even in the background.' },
             { term: 'Full screen', desc: 'To show the tournament on a TV or a projector.' },
           ],
         },

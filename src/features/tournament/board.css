@@ -907,5 +907,17 @@
 .sp-alert-text strong { color: var(--txt); font-size: 16px; }
 .sp-alert-next { border-color: color-mix(in srgb, var(--warn) 50%, var(--bdr)); background: var(--warn-soft); }
 .sp-alert-now { border-color: color-mix(in srgb, var(--ok) 50%, var(--bdr)); background: var(--ok-soft); }
+.sp-alert-refNow, .sp-alert-refNext { border-color: var(--bdr-strong); background: var(--s2); }
 .sp-alert-btn.on { background: var(--acc); border-color: var(--acc); color: var(--acc-txt); }
 .sp-alert-note { flex-basis: 100%; font-size: 13px; color: var(--dim); }
+
+/* ── Arbitrage par les équipes ── */
+.fx-ref { font-size: 12px; font-weight: 600; color: var(--dim); }
+.fx-ref::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 1px; background: currentColor; vertical-align: 1px; }
+.fx-ref-mine { color: var(--txt); }
+.ref-bar { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; border: 1px solid var(--bdr); border-radius: var(--r); background: var(--s1); }
+.ref-toggle { margin: 0; }
+.ref-counts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.ref-counts-label { color: var(--dim); font-weight: 600; margin-right: 4px; }
+.ref-count { display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px 2px 10px; border-radius: 999px; background: var(--s2); }
+.ref-count strong { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--s1); text-align: center; }
