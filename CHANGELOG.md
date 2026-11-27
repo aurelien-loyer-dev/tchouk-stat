@@ -17,6 +17,8 @@ Le script incrémente `package.json`, transforme « [Non publié] » en section 
 
 ## [Non publié]
 
+## [2.5.1] - 2026-11-27
+
 ### Ajouté
 - Page publique d'un tournoi : alerte « ton équipe joue bientôt ». En suivant une équipe, un bandeau dit quand elle joue ; avec « Me prévenir », notification et vibration au créneau suivant puis au début du match, une seule fois par match, même onglet en arrière-plan.
 - Export Excel (CSV) : un match (résultats et historique, avec toutes les stats et la chronologie), tout l'historique, la saison des joueurs et les matchs d'un joueur. Séparateur et virgule décimale adaptés à la langue.
