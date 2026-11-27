@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playerTeamScore } from '../../lib/playerStats'
 import { pct } from '../../lib/format'
+import { downloadMatchCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
 import ScoreHero from '../../components/ScoreHero'
 import { offScore, defScore, mvpScore, topPlayers, AWARDS } from './awards'
@@ -93,6 +94,11 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
         <button className="btn-ghost" onClick={handleGenerateFullPdf}>
           <Icon name="download" size={18} />{t('playerResults.downloadFullPdf')}
         </button>
+        {summary && (
+          <button className="btn-ghost" onClick={() => downloadMatchCsv(summary)} title={t('csv.hint')}>
+            <Icon name="sheet" size={18} />{t('csv.buttonLong')}
+          </button>
+        )}
         <button className="btn-acc" onClick={onNew}>
           {t('playerResults.newMatch')}
         </button>

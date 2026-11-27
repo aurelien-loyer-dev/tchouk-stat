@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { score, tirs, pointAdv, tirAdvMarques, tirsAdv, catchsNous, fautesTotal } from '../../lib/stats'
 import { fmtClock, fmtDateTime } from '../../lib/format'
 import { teamSwatchStyle } from '../../lib/teamColor'
+import { downloadMatchCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
 import ScoreHero from '../../components/ScoreHero'
 import TimelineGraph from './components/TimelineGraph'
@@ -176,6 +177,11 @@ export default function Results({
         <button className="btn-ghost" onClick={handleDownloadSheet}>
           <Icon name="download" size={18} />{t('results.ui.downloadPdf')}
         </button>
+        {summary && (
+          <button className="btn-ghost" onClick={() => downloadMatchCsv(summary)} title={t('csv.hint')}>
+            <Icon name="sheet" size={18} />{t('csv.buttonLong')}
+          </button>
+        )}
         <button className="btn-acc" onClick={onNew}>
           {t('results.ui.newMatch')}
         </button>

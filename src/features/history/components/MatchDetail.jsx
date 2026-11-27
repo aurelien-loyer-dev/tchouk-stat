@@ -5,6 +5,7 @@ import PageHeader from '../../../components/PageHeader'
 import ScoreHero from '../../../components/ScoreHero'
 import Icon from '../../../components/Icon'
 import { downloadMatchPdf } from '../pdf'
+import { downloadMatchCsv } from '../../../lib/csv'
 import MiniTimeline from './MiniTimeline'
 
 export function DetailActions({ match, onDelete }) {
@@ -13,6 +14,9 @@ export function DetailActions({ match, onDelete }) {
     <>
       <button className="btn-mini" onClick={() => downloadMatchPdf(match)}>
         <Icon name="download" size={16} />{t('history.pdfBtn')}
+      </button>
+      <button className="btn-mini" onClick={() => downloadMatchCsv(match)} title={t('csv.hint')}>
+        <Icon name="sheet" size={16} />{t('csv.button')}
       </button>
       <button className="btn-mini btn-mini-danger" onClick={() => onDelete(match)}>
         <Icon name="trash" size={16} />{t('history.delete')}

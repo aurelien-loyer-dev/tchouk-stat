@@ -4,6 +4,7 @@ import { Link, navigate } from '../../lib/router'
 import { fmtWhen } from '../../lib/format'
 import { PLAYER_STATS } from '../../lib/playerStats'
 import { seasonPlayers, seasonStart } from '../../lib/season'
+import { downloadPlayerCsv, downloadSeasonCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
 import PageHeader from '../../components/PageHeader'
 import TeamFilter from '../tournament/components/board/TeamFilter'
@@ -79,7 +80,8 @@ function PlayerDetail({ player, onBack }) {
   return (
     <div className="ssn">
       <PageHeader title={player.name} subtitle={[player.teams.join(', '), t('season.matchesN', { count: player.played })].filter(Boolean).join(' · ')}
-                  onBack={onBack} backLabel={t('season.title')} />
+                  onBack={onBack} backLabel={t('season.title')}
+                  actions={<button className="btn-mini" onClick={() => downloadPlayerCsv(player)} title={t('csv.hint')}><Icon name="sheet" size={16} />{t('csv.button')}</button>} />
 
       <dl className="ssn-tiles">
         {tiles.map(tile => (
@@ -185,7 +187,12 @@ export default function Season({ history, playerKey: selected, onBack }) {
 
   return (
     <div className="ssn">
-      <PageHeader title={t('season.title')} subtitle={t('season.subtitle')} onBack={onBack} />
+      <PageHeader title={t('season.title')} subtitle={t('season.subtitle')} onBack={onBack}
+                  actions={players.length > 0 && (
+                    <button className="btn-mini" onClick={() => downloadSeasonCsv(rows.length ? rows : players, period === 'season' ? seasonStart().slice(0, 4) : '')} title={t('csv.hint')}>
+                      <Icon name="sheet" size={16} />{t('csv.button')}
+                    </button>
+                  )} />
 
       {allPlayers.length === 0 ? (
         <div className="empty-state">

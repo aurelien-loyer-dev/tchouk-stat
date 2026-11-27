@@ -6,6 +6,7 @@ import { Link, navigate } from '../../lib/router'
 import Icon from '../../components/Icon'
 import { dayKey, fmtDayLabel } from '../../lib/format'
 import { downloadMatchPdf } from './pdf'
+import { downloadHistoryCsv } from '../../lib/csv'
 import MatchDetail from './components/MatchDetail'
 import PlayerMatchDetail from './components/PlayerMatchDetail'
 import './history.css'
@@ -73,12 +74,17 @@ export default function History({ history, selectedId, onBack, onClear, onDelete
         subtitle={history.length > 0 ? t('history.count', { count: history.length }) : null}
         onBack={onBack}
         actions={history.length > 0 && (
-          <button
-            className="btn-mini btn-mini-danger"
-            onClick={() => { if (window.confirm(t('history.clearConfirm'))) onClear() }}
-          >
-            <Icon name="trash" size={16} />{t('history.clearButton')}
-          </button>
+          <>
+            <button className="btn-mini" onClick={() => downloadHistoryCsv(history)} title={t('csv.hint')}>
+              <Icon name="sheet" size={16} />{t('csv.button')}
+            </button>
+            <button
+              className="btn-mini btn-mini-danger"
+              onClick={() => { if (window.confirm(t('history.clearConfirm'))) onClear() }}
+            >
+              <Icon name="trash" size={16} />{t('history.clearButton')}
+            </button>
+          </>
         )}
       />
 

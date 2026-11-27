@@ -1,4 +1,15 @@
 export default {
+  csv: {
+    button: 'Excel',
+    buttonLong: 'Export for Excel (CSV)',
+    hint: 'CSV file, opens in Excel, Numbers or Google Sheets',
+    match: 'Match', date: 'Date', mode: 'Type', score: 'Score', stat: 'Stat',
+    player: 'Player', team: 'Team', opponent: 'Opponent', result: 'Result',
+    shots: 'Shots', effPct: 'Efficiency (%)', defTotal: 'Defenses', ptsPerMatch: 'Points per match',
+    time: 'Time', action: 'Action', change: 'Change',
+    team1: 'Team 1', score1: 'Score 1', score2: 'Score 2', team2: 'Team 2', duration: 'Duration',
+    historyFile: 'match_history', seasonFile: 'season_players',
+  },
   season: {
     title: 'Players',
     subtitle: 'Totals from every match tracked with player stats.',
