@@ -1,7 +1,7 @@
 // Saison : cumul des stats de chaque joueur sur tous les matchs joués en mode
 // « stats joueurs » de l'historique. Un joueur est reconnu par son nom (sans
 // tenir compte des majuscules ni des espaces en trop).
-import { PLAYER_STATS, playerDerivedStats } from './playerStats'
+import { PLAYER_STATS, playSeconds, playerDerivedStats } from './playerStats'
 
 export const STAT_IDS = PLAYER_STATS.map(s => s.id)
 export const playerKey = name => String(name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('fr')
@@ -30,7 +30,9 @@ export function seasonPlayers(history, { since = null } = {}) {
       const entry = byKey.get(key)
       entry.name = p.name.trim() // casse du match le plus récent
       if (team?.name) entry.teams = [team.name, ...entry.teams.filter(n => n !== team.name)]
-      entry.matches.push({ id: m.id, playedAt: m.playedAt, team: team?.name || '', opponent: opp?.name || null, result, stats })
+      const playSec = playSeconds(p)
+      entry.matches.push({ id: m.id, playedAt: m.playedAt, team: team?.name || '', opponent: opp?.name || null, result, stats, playSec })
+      if (playSec != null) { entry.playSec = (entry.playSec || 0) + playSec; entry.timedMatches = (entry.timedMatches || 0) + 1 }
       STAT_IDS.forEach(id => { entry.totals[id] += stats[id] })
     }
   }

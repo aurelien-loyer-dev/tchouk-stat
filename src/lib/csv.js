@@ -2,7 +2,7 @@
 // En français : séparateur « ; » et virgule décimale (réglages d'Excel FR) ;
 // en anglais : « , » et point. BOM UTF-8 pour que les accents s'affichent.
 import i18n from '../i18n'
-import { PLAYER_STATS, playerDerivedStats } from './playerStats'
+import { PLAYER_STATS, playSeconds, playerDerivedStats } from './playerStats'
 import { CATEGORIES } from '../features/match/constants'
 
 const fr = () => !i18n.language?.startsWith('en')
@@ -56,10 +56,11 @@ export function matchRows(match) {
   ]
 
   if (match.mode === 'player') {
-    rows.push([t('csv.player'), t('csv.team'), ...PLAYER_STATS.map(s => t(s.labelKey)), t('csv.shots'), t('csv.effPct'), t('csv.defTotal')])
+    rows.push([t('csv.player'), t('csv.team'), ...PLAYER_STATS.map(s => t(s.labelKey)), t('csv.shots'), t('csv.effPct'), t('csv.defTotal'), t('csv.playTime')])
     for (const p of match.players || []) {
       const d = playerDerivedStats(p)
-      rows.push([p.name, teams[p.teamIdx]?.name || '', ...PLAYER_STATS.map(s => Number(p[s.id]) || 0), d.tirsTotal, pct(p.pointsMarques, d.tirsTotal), d.defTotal])
+      const sec = playSeconds(p)
+      rows.push([p.name, teams[p.teamIdx]?.name || '', ...PLAYER_STATS.map(s => Number(p[s.id]) || 0), d.tirsTotal, pct(p.pointsMarques, d.tirsTotal), d.defTotal, sec == null ? '' : mmss(Math.round(sec))])
     }
     return rows
   }
@@ -95,10 +96,10 @@ export function downloadHistoryCsv(history) {
 
 // ── Saison : un joueur par ligne ─────────────────────────────────────────
 export function downloadSeasonCsv(players, suffix = '') {
-  const rows = [[t('csv.player'), t('csv.team'), t('season.cols.played'), ...PLAYER_STATS.map(s => t(s.labelKey)), t('csv.shots'), t('csv.effPct'), t('csv.defTotal'), t('csv.ptsPerMatch')]]
+  const rows = [[t('csv.player'), t('csv.team'), t('season.cols.played'), ...PLAYER_STATS.map(s => t(s.labelKey)), t('csv.shots'), t('csv.effPct'), t('csv.defTotal'), t('csv.ptsPerMatch'), t('csv.minutes')]]
   for (const p of players) {
     rows.push([p.name, p.teams[0] || '', p.played, ...PLAYER_STATS.map(s => p.totals[s.id]), p.derived.tirsTotal,
-      pct(p.totals.pointsMarques, p.derived.tirsTotal), p.derived.defTotal, Math.round(p.perMatch * 10) / 10])
+      pct(p.totals.pointsMarques, p.derived.tirsTotal), p.derived.defTotal, Math.round(p.perMatch * 10) / 10, p.playSec != null ? Math.round(p.playSec / 60) : ''])
   }
   downloadCsv(`${t('csv.seasonFile')}${suffix ? `-${suffix}` : ''}`, rows)
 }

@@ -261,3 +261,19 @@
 @media (max-width: 720px) {
   .pm-players-wrap { grid-template-columns: 1fr; }
 }
+
+/* ── Remplacements : terrain / banc, temps de jeu ── */
+.pm-court-count { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--dim); }
+.pm-team-hd { display: flex; align-items: center; }
+.pm-player-court { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.pm-court-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 32px; padding: 4px 10px;
+  border: 1px solid var(--bdr-strong); border-radius: 999px;
+  background: var(--s1); color: var(--dim);
+  font-size: 13px; font-weight: 650;
+}
+.pm-court-btn.on { background: var(--acc); border-color: var(--acc); color: var(--acc-txt); }
+.pm-play-time { font-size: 13px; font-weight: 600; color: var(--dim); font-variant-numeric: tabular-nums; }
+.pm-bench { opacity: 0.6; }
+.pm-bench:hover, .pm-bench:focus-within { opacity: 1; }

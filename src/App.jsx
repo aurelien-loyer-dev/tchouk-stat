@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { applyAdj, fautesTotal, mkTeam, score, tirs } from './lib/stats'
-import { applyPlayerAdj, mkPlayer, playerTeamScore } from './lib/playerStats'
+import { applyPlayerAdj, closeStints, mkPlayer, playerTeamScore, toggleCourt, withStarters } from './lib/playerStats'
+import { lastClock } from './lib/clockBus'
 import { supabase } from './lib/supabase'
 import { teamBtnTxt } from './lib/teamColor'
 import { parseJoinHash, pushScore } from './features/tournament/cloud'
@@ -334,7 +335,7 @@ export default function App() {
     setTeams(nextTeams)
 
     if (mode === 'player') {
-      const playerList = payload.players || []
+      const playerList = withStarters(payload.players || [])
       const pnt = payload.playerNumTeams ?? 2
       playersRef.current = playerList
       setPlayers(playerList)
@@ -394,6 +395,17 @@ export default function App() {
     setPlayers(next)
   }
 
+  // ── Remplacement (mode player) : entrée ou sortie, au temps du chrono ─────
+  function handlePlayerSub(playerId) {
+    const prev = playersRef.current
+    const p = prev.find(x => x.id === playerId)
+    if (!p) return
+    pushUndo(`${p.onCourt ? t('subs.out') : t('subs.in')} · ${p.name}`)
+    const next = toggleCourt(prev, playerId, lastClock()?.elapsedSec ?? 0)
+    playersRef.current = next
+    setPlayers(next)
+  }
+
   // ── Fin du match (mode stats / scorer) ────────────────────────────────────
   function saveMatchToHistory() {
     const summary = buildMatchSummary(teamsRef.current, numTeams, matchStartRef.current, timelineRef.current, matchSettings, appMode)
@@ -416,7 +428,9 @@ export default function App() {
   function endPlayerMatch() {
     clearUndo()
     const now  = Date.now()
-    const pls  = playersRef.current
+    const pls  = closeStints(playersRef.current, lastClock()?.elapsedSec ?? 0)
+    playersRef.current = pls
+    setPlayers(pls)
     const nt   = playerNumTeams
     const s0   = playerTeamScore(pls, 0, nt)
     const s1   = nt === 2 ? playerTeamScore(pls, 1, nt) : null
@@ -657,6 +671,7 @@ export default function App() {
             players={players}
             numTeams={playerNumTeams}
             onPlayerAdj={handlePlayerAdj}
+            onPlayerSub={handlePlayerSub}
             onEnd={endPlayerMatch}
             settings={matchSettings}
             live={broadcast}

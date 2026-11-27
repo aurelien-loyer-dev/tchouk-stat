@@ -94,6 +94,7 @@ const fr = {
             'Choisissez une ou deux équipes, puis entrez les noms des joueurs. Le bouton Compos sauvegarde une équipe pour la recharger la prochaine fois.',
             'Pendant le match, touchez d’abord une stat, puis le joueur concerné.',
             'La stat reste sélectionnée : vous pouvez toucher plusieurs joueurs à la suite.',
+            'Remplacements : les 7 premiers joueurs de chaque équipe commencent sur le terrain. Touchez Terrain / Banc sur une carte pour faire sortir ou entrer un joueur ; son temps de jeu suit le chrono et apparaît dans les résultats, l’historique, la saison et l’export Excel.',
           ],
         },
         {
@@ -132,7 +133,7 @@ const fr = {
         {
           type: 'terms',
           items: [
-            { term: 'Tableau', desc: 'Matchs joués, points, moyenne par match, efficacité, défenses et fautes de chaque joueur. Touchez un en-tête pour trier.' },
+            { term: 'Tableau', desc: 'Matchs joués, points, moyenne par match, efficacité, défenses, fautes et minutes jouées de chaque joueur. Touchez un en-tête pour trier.' },
             { term: 'Période', desc: 'Saison en cours (depuis le 1er septembre) ou tout l’historique.' },
             { term: 'Fiche joueur', desc: 'Ses chiffres clés, ses points match après match, toutes ses stats (total et par match) et la liste de ses matchs.' },
             { term: 'Même joueur', desc: 'Un joueur est reconnu par son nom : gardez la même orthographe d’un match à l’autre (les compos sauvegardées aident).' },
@@ -409,6 +410,7 @@ const en = {
             'Choose one or two teams, then enter the player names. The Lineups button saves a team so you can load it next time.',
             'During the match, tap a stat first, then the player.',
             'The stat stays selected: you can tap several players in a row.',
+            'Substitutions: the first 7 players of each team start on court. Tap On court / Bench on a card to take a player off or bring them on; their playing time follows the clock and shows in the results, history, season and Excel export.',
           ],
         },
         {
@@ -447,7 +449,7 @@ const en = {
         {
           type: 'terms',
           items: [
-            { term: 'Table', desc: 'Games played, points, average per match, efficiency, defense and fouls for each player. Tap a header to sort.' },
+            { term: 'Table', desc: 'Games played, points, average per match, efficiency, defense, fouls and minutes played for each player. Tap a header to sort.' },
             { term: 'Period', desc: 'This season (since September 1st) or the whole history.' },
             { term: 'Player card', desc: 'Key numbers, points match after match, every stat (total and per match) and the list of their matches.' },
             { term: 'Same player', desc: 'Players are matched by name: keep the same spelling from one match to the next (saved lineups help).' },

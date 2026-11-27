@@ -9,7 +9,7 @@ import TeamColumn from './components/TeamColumn'
 import LiveShareControl from '../live/LiveShareControl'
 import './playerMatch.css'
 
-export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onEnd, settings, live }) {
+export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onPlayerSub, onEnd, settings, live }) {
   const { t } = useTranslation()
   const [selectedStat, setSelectedStat] = useState(null)
   const [focusedTeam, setFocusedTeam]   = useState(null) // null = les deux, 0 = équipe 1, 1 = équipe 2
@@ -174,6 +174,8 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
           selectedStat={selectedStat}
           dimmed={selectedStat && n === 2 && focusedTeam === 1}
           onAdj={handlePlayerAdj}
+          onSub={onPlayerSub}
+          elapsedSec={elapsedSec}
         />
         {n === 2 && (
           <TeamColumn
@@ -183,6 +185,8 @@ export default function PlayerMatch({ teams, players, numTeams, onPlayerAdj, onE
             selectedStat={selectedStat}
             dimmed={selectedStat && focusedTeam === 0}
             onAdj={handlePlayerAdj}
+            onSub={onPlayerSub}
+            elapsedSec={elapsedSec}
           />
         )}
       </div>

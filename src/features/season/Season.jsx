@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, navigate } from '../../lib/router'
 import { fmtWhen } from '../../lib/format'
-import { PLAYER_STATS } from '../../lib/playerStats'
+import { PLAYER_STATS, fmtPlay } from '../../lib/playerStats'
 import { seasonPlayers, seasonStart } from '../../lib/season'
 import { downloadPlayerCsv, downloadSeasonCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
@@ -22,6 +22,7 @@ const COLUMNS = [
   { id: 'eff',    get: p => p.derived.effOff ?? -1 },
   { id: 'def',    get: p => p.derived.defTotal },
   { id: 'fouls',  get: p => p.derived.fautesTotal },
+  { id: 'min',    get: p => p.playSec ?? -1 },
 ]
 
 // Points par match, du plus ancien au plus récent, avec la moyenne.
@@ -75,6 +76,7 @@ function PlayerDetail({ player, onBack }) {
     { label: t('season.cols.eff'), value: pctLabel(player.derived.effOff) },
     { label: t('season.cols.def'), value: player.derived.defTotal },
     { label: t('season.record'), value: `${wins}-${draws}-${losses}`, hint: t('season.recordHint') },
+    ...(player.playSec != null ? [{ label: t('season.cols.min'), value: Math.round(player.playSec / 60), hint: t('season.minHint', { count: player.timedMatches }) }] : []),
   ]
   const recent = [...player.matches].reverse()
   return (
@@ -131,6 +133,7 @@ function PlayerDetail({ player, onBack }) {
                 </span>
                 <span className="ssn-match-nums">
                   <span><strong>{m.stats.pointsMarques}</strong> {t('playerMatch.ptsShort')}</span>
+                  {m.playSec != null && <span>{fmtPlay(m.playSec)}</span>}
                   <span>{shots ? `${Math.round(m.stats.pointsMarques / shots * 100)} %` : '—'}</span>
                   <span>{m.stats.defenseSolo + m.stats.participationDef} {t('season.defShort')}</span>
                 </span>
@@ -165,6 +168,7 @@ export default function Season({ history, playerKey: selected, onBack }) {
   }
 
   const teams = [...new Set(players.map(p => p.teams[0]).filter(Boolean))].sort((a, b) => a.localeCompare(b))
+  const hasTime = players.some(p => p.playSec != null)
   const col = COLUMNS.find(c => c.id === sort.id) || COLUMNS[2]
   const q = query.trim().toLocaleLowerCase('fr')
   const rows = players
@@ -225,6 +229,7 @@ export default function Season({ history, playerKey: selected, onBack }) {
                     {head('eff')}
                     {head('def')}
                     {head('fouls')}
+                    {hasTime && head('min')}
                   </tr>
                 </thead>
                 <tbody>
@@ -240,6 +245,7 @@ export default function Season({ history, playerKey: selected, onBack }) {
                       <td>{pctLabel(p.derived.effOff)}</td>
                       <td>{p.derived.defTotal}</td>
                       <td>{p.derived.fautesTotal}</td>
+                      {hasTime && <td>{p.playSec != null ? Math.round(p.playSec / 60) : '—'}</td>}
                     </tr>
                   ))}
                 </tbody>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { playerTeamScore } from '../../lib/playerStats'
+import { fmtPlay, playSeconds, playerTeamScore } from '../../lib/playerStats'
 import { pct } from '../../lib/format'
 import { downloadMatchCsv } from '../../lib/csv'
 import Icon from '../../components/Icon'
@@ -51,6 +51,31 @@ export default function PlayerResults({ teams, players, numTeams, settings, summ
           color: i === 0 ? c1 : c2,
         }))}
       />
+
+      {/* ── Temps de jeu (si les remplacements ont été suivis) ── */}
+      {players.some(p => playSeconds(p) != null) && (
+        <div className="card">
+          <div className="ctitle">{t('subs.title')}</div>
+          <div className={`pt-grid${n === 2 ? ' pt-two' : ''}`}>
+            {[team1Players, team2Players].slice(0, n).map((grp, gi) => (
+              <div key={gi} className="pt-team">
+                <div className="pt-team-name">{gi === 0 ? teams[0]?.name : teams[1]?.name}</div>
+                {[...grp].sort((a, b) => (playSeconds(b) ?? 0) - (playSeconds(a) ?? 0)).map(p => {
+                  const sec = playSeconds(p) ?? 0
+                  const max = Math.max(1, ...grp.map(x => playSeconds(x) ?? 0))
+                  return (
+                    <div key={p.id} className="pt-row">
+                      <span className="pt-name">{p.name}</span>
+                      <span className="pt-bar"><span style={{ width: `${(sec / max) * 100}%` }} /></span>
+                      <span className="pt-time">{fmtPlay(sec)}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Distinctions automatiques ── */}
       {players.length > 0 && (

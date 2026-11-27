@@ -1,4 +1,17 @@
 export default {
+  subs: {
+    onCourt: 'Terrain',
+    bench: 'Banc',
+    in: 'Entrée',
+    out: 'Sortie',
+    takeOut: 'Faire sortir {{name}}',
+    bringIn: 'Faire entrer {{name}}',
+    playTime: 'Temps de jeu',
+    onCourtN_one: '{{count}} sur le terrain',
+    onCourtN_other: '{{count}} sur le terrain',
+    title: 'Temps de jeu',
+    minutes: 'min',
+  },
   league: {
     title: 'Championnats',
     intro: 'Regroupez plusieurs tournois (une journée chacun) : chaque journée rapporte des points selon le classement final, le championnat les additionne.',
@@ -36,6 +49,7 @@ export default {
     shots: 'Tirs', effPct: 'Efficacité (%)', defTotal: 'Défenses', ptsPerMatch: 'Points par match',
     time: 'Temps', action: 'Action', change: 'Variation',
     team1: 'Équipe 1', score1: 'Score 1', score2: 'Score 2', team2: 'Équipe 2', duration: 'Durée',
+    playTime: 'Temps de jeu', minutes: 'Minutes jouées',
     historyFile: 'historique_matchs', seasonFile: 'saison_joueurs',
   },
   season: {
@@ -46,7 +60,9 @@ export default {
     allTime: 'Tout',
     search: 'Rechercher un joueur…',
     team: 'Équipe',
-    cols: { name: 'Joueur', played: 'MJ', pts: 'Pts', avg: 'Pts/m', eff: 'Eff.', def: 'Déf.', fouls: 'Fautes' },
+    cols: { name: 'Joueur', played: 'MJ', pts: 'Pts', avg: 'Pts/m', eff: 'Eff.', def: 'Déf.', fouls: 'Fautes', min: 'Min' },
+    minHint_one: 'Minutes jouées, sur {{count}} match suivi',
+    minHint_other: 'Minutes jouées, sur {{count}} matchs suivis',
     record: 'Bilan',
     recordHint: 'Victoires-nuls-défaites',
     matchesN_one: '{{count}} match',

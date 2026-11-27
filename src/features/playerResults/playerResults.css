@@ -152,3 +152,13 @@
 }
 
 .player-pdf-ico { color: var(--dim); }
+
+/* ── Temps de jeu ── */
+.pt-grid { display: grid; gap: 20px; margin-top: 8px; }
+.pt-two { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.pt-team-name { font-size: 14px; font-weight: 650; color: var(--dim); margin-bottom: 6px; }
+.pt-row { display: grid; grid-template-columns: minmax(0, 9rem) 1fr auto; align-items: center; gap: 10px; padding: 5px 0; }
+.pt-name { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-bar { height: 8px; border-radius: 4px; background: var(--s2); overflow: hidden; }
+.pt-bar span { display: block; height: 100%; background: var(--txt); opacity: 0.7; border-radius: inherit; }
+.pt-time { font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; }

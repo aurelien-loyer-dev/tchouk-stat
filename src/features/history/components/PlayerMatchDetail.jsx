@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { playerTeamScore, playerDerivedStats } from '../../../lib/playerStats'
+import { playerTeamScore, playerDerivedStats, fmtPlay, playSeconds } from '../../../lib/playerStats'
 import { fmtClock, fmtDayLabel, fmtTime } from '../../../lib/format'
 import { teamSwatchStyle } from '../../../lib/teamColor'
 import PageHeader from '../../../components/PageHeader'
@@ -17,6 +17,8 @@ export default function PlayerMatchDetail({ match, onClose, onDelete }) {
     { name: teams[0]?.name || t('playerResults.defaultTeam1'), color: settings?.teamColors?.[0], grp: players.filter(p => p.teamIdx === 0) },
     ...(n === 2 ? [{ name: teams[1]?.name || t('playerResults.defaultTeam2'), color: settings?.teamColors?.[1], grp: players.filter(p => p.teamIdx === 1) }] : []),
   ]
+
+  const hasTime = (players || []).some(p => playSeconds(p) != null)
 
   return (
     <div className="hist-detail">
@@ -51,6 +53,7 @@ export default function PlayerMatchDetail({ match, onClose, onDelete }) {
                       <th>{t('history.playerTableCols.eff')}</th>
                       <th>{t('history.playerTableCols.def')}</th>
                       <th>{t('history.playerTableCols.fouls')}</th>
+                      {hasTime && <th>{t('subs.title')}</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -64,6 +67,7 @@ export default function PlayerMatchDetail({ match, onClose, onDelete }) {
                           <td>{d.tirsTotal > 0 ? `${Math.round(p.pointsMarques / d.tirsTotal * 100)}%` : '—'}</td>
                           <td>{d.defTotal}</td>
                           <td>{d.fautesTotal}</td>
+                          {hasTime && <td>{fmtPlay(playSeconds(p))}</td>}
                         </tr>
                       )
                     })}

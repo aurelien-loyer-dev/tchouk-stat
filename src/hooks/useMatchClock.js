@@ -60,8 +60,8 @@ export function useMatchClock(settings, { stopAtHalfEnd = false } = {}) {
 
   // Diffusion en direct : l'état du chrono est publié à chaque changement.
   useEffect(() => {
-    publishClock({ remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount })
-  }, [remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount])
+    publishClock({ elapsedSec, remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount })
+  }, [elapsedSec, remainingHalfSec, remainingMatchSec, running, currentHalf, halfCount])
 
   function handleSkipHalf() {
     if (currentHalf >= halfCount) return

@@ -75,3 +75,49 @@ export function applyPlayerAdj(players, playerId, statId, d) {
     return { ...p, [statId]: d > 0 ? val + 1 : val - 1 }
   })
 }
+
+// ── Temps de jeu et remplacements ─────────────────────────────────────────
+// Chaque joueur garde ses passages sur le terrain : stints = [[entrée, sortie|null]]
+// en secondes de match (chrono, pas l'heure). onCourt : sur le terrain maintenant.
+export const COURT_SIZE = 7
+
+// Au coup d'envoi : les 7 premiers de chaque équipe sont sur le terrain.
+export function withStarters(players, size = COURT_SIZE) {
+  const seen = [0, 0]
+  return players.map(p => {
+    const starter = seen[p.teamIdx]++ < size
+    return { ...p, onCourt: starter, stints: starter ? [[0, null]] : [] }
+  })
+}
+
+// Entrée ou sortie d'un joueur à `atSec` (secondes de match écoulées).
+export function toggleCourt(players, playerId, atSec) {
+  return players.map(p => {
+    if (p.id !== playerId) return p
+    const stints = Array.isArray(p.stints) ? p.stints.map(s => [...s]) : []
+    if (p.onCourt) {
+      const open = stints[stints.length - 1]
+      if (open && open[1] === null) open[1] = Math.max(open[0], atSec)
+      return { ...p, onCourt: false, stints }
+    }
+    return { ...p, onCourt: true, stints: [...stints, [atSec, null]] }
+  })
+}
+
+// Temps de jeu en secondes (null si le match n'a pas suivi les remplacements).
+export function playSeconds(p, nowSec = 0) {
+  if (typeof p.playSec === 'number') return p.playSec
+  if (!Array.isArray(p.stints)) return null
+  return p.stints.reduce((sum, [a, b]) => sum + Math.max(0, (b ?? nowSec) - a), 0)
+}
+
+// Fin du match : passages fermés et temps de jeu figé.
+export function closeStints(players, atSec) {
+  return players.map(p => {
+    if (!Array.isArray(p.stints)) return p
+    const stints = p.stints.map(([a, b]) => [a, b ?? Math.max(a, atSec)])
+    return { ...p, onCourt: false, stints, playSec: stints.reduce((s, [a, b]) => s + (b - a), 0) }
+  })
+}
+
+export const fmtPlay = sec => (sec == null ? '—' : `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`)

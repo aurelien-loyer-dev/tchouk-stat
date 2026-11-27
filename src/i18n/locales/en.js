@@ -1,4 +1,17 @@
 export default {
+  subs: {
+    onCourt: 'On court',
+    bench: 'Bench',
+    in: 'In',
+    out: 'Out',
+    takeOut: 'Take {{name}} off',
+    bringIn: 'Bring {{name}} on',
+    playTime: 'Playing time',
+    onCourtN_one: '{{count}} on court',
+    onCourtN_other: '{{count}} on court',
+    title: 'Playing time',
+    minutes: 'min',
+  },
   league: {
     title: 'Leagues',
     intro: 'Group several tournaments (one matchday each): each matchday gives points from the final standings, the league adds them up.',
@@ -36,6 +49,7 @@ export default {
     shots: 'Shots', effPct: 'Efficiency (%)', defTotal: 'Defenses', ptsPerMatch: 'Points per match',
     time: 'Time', action: 'Action', change: 'Change',
     team1: 'Team 1', score1: 'Score 1', score2: 'Score 2', team2: 'Team 2', duration: 'Duration',
+    playTime: 'Playing time', minutes: 'Minutes played',
     historyFile: 'match_history', seasonFile: 'season_players',
   },
   season: {
@@ -46,7 +60,9 @@ export default {
     allTime: 'All time',
     search: 'Search a player…',
     team: 'Team',
-    cols: { name: 'Player', played: 'GP', pts: 'Pts', avg: 'Pts/g', eff: 'Eff.', def: 'Def.', fouls: 'Fouls' },
+    cols: { name: 'Player', played: 'GP', pts: 'Pts', avg: 'Pts/g', eff: 'Eff.', def: 'Def.', fouls: 'Fouls', min: 'Min' },
+    minHint_one: 'Minutes played, over {{count}} tracked match',
+    minHint_other: 'Minutes played, over {{count}} tracked matches',
     record: 'Record',
     recordHint: 'Wins-draws-losses',
     matchesN_one: '{{count}} match',
